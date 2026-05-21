@@ -41,8 +41,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   const loading = document.getElementById('__bundler_loading');
   function setStatus(msg) { if (loading) loading.textContent = msg; }
 
-  // Error sink persists across replaceWith since it's on window, not the DOM.
+  // Error sink — only active during unpack. After the document is swapped in,
+  // injected third-party scripts (e.g. Cloudflare's analytics beacon) can throw
+  // and we don't want to surface those.
+  var __bundlerUnpacking = true;
   window.addEventListener('error', function(e) {
+    if (!__bundlerUnpacking) return;
     var p = document.body || document.documentElement;
     var d = document.getElementById('__bundler_err') || p.appendChild(document.createElement('div'));
     d.id = '__bundler_err';
@@ -164,6 +168,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
       window.Babel.transformScriptTags();
     }
+    __bundlerUnpacking = false;
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
