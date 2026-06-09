@@ -1,0 +1,14 @@
+{
+  "id": "session-1780987895024",
+  "startedAt": "2026-06-09T06:51:35.025Z",
+  "cwd": "/Users/adityaharish/Documents/Meridiona/meridiona-website",
+  "context": {},
+  "metrics": {
+    "edits": 1,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-06-09T07:19:08.169Z",
+  "duration": 1653144
+}
