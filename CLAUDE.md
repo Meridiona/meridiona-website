@@ -117,6 +117,8 @@ Deploys `index.html` to Cloudflare Pages via the Cloudflare Workers CLI. The `wr
 
 ## Git & Deployment Notes
 
+> **HARD RULE: Never push directly to `main` or any other default/protected branch. Always create a feature branch, commit there, and open a pull request. No exceptions.**
+
 - `.wrangler` and `.dev.vars*` are ignored (Cloudflare build artifacts)
 - `.env*` files are ignored (never commit secrets)
 - Use `.env.example` for documenting required environment variables
