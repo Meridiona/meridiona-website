@@ -1,6 +1,39 @@
+const WRITING_META = {
+  '/writing/eval-loop': {
+    title: 'More context made my classifier worse, not better — Meridiona',
+    description: 'A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.',
+    canonical: 'https://meridiona.com/writing/eval-loop',
+  },
+  '/writing': {
+    title: 'Writing — Meridiona',
+    description: 'Technical essays and field notes on AI, engineering, and building intelligent organisations.',
+    canonical: 'https://meridiona.com/writing',
+  },
+};
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    const meta = WRITING_META[url.pathname] || WRITING_META[url.pathname.replace(/\/$/, '')];
+    if (meta && env.ASSETS) {
+      try {
+        const base = await env.ASSETS.fetch(new Request(`${url.origin}/`));
+        let html = await base.text();
+        html = html
+          .replace(/<title>[^<]*<\/title>/, `<title>${meta.title}</title>`)
+          .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${meta.description}">`)
+          .replace('</head>', `<link rel="canonical" href="${meta.canonical}"></head>`);
+        return new Response(html, {
+          headers: {
+            'Content-Type': 'text/html;charset=UTF-8',
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      } catch {
+        // fall through to default asset serving
+      }
+    }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
       let email;
