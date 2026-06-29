@@ -3,11 +3,13 @@ const WRITING_META = {
     title: 'More context made my classifier worse, not better — Meridiona',
     description: 'A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.',
     canonical: 'https://meridiona.com/writing/eval-loop',
+    hash: '#writing-eval-loop',
   },
   '/writing': {
     title: 'Writing — Meridiona',
     description: 'Technical essays and field notes on AI, engineering, and building intelligent organisations.',
     canonical: 'https://meridiona.com/writing',
+    hash: '#writing',
   },
 };
 
@@ -16,23 +18,25 @@ export default {
     const url = new URL(request.url);
 
     const meta = WRITING_META[url.pathname] || WRITING_META[url.pathname.replace(/\/$/, '')];
-    if (meta && env.ASSETS) {
-      try {
-        const base = await env.ASSETS.fetch(new Request(`${url.origin}/`));
-        let html = await base.text();
-        html = html
-          .replace(/<title>[^<]*<\/title>/, `<title>${meta.title}</title>`)
-          .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${meta.description}">`)
-          .replace('</head>', `<link rel="canonical" href="${meta.canonical}"></head>`);
-        return new Response(html, {
-          headers: {
-            'Content-Type': 'text/html;charset=UTF-8',
-            'Cache-Control': 'public, max-age=300',
-          },
-        });
-      } catch {
-        // fall through to default asset serving
-      }
+    if (meta) {
+      // Return a self-contained shell with correct metadata for crawlers/HN.
+      // JS redirects the user to the SPA hash route so the essay renders.
+      const hashUrl = `${url.origin}/${meta.hash}`;
+      const html = `<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<title>${meta.title}</title>
+<meta name="description" content="${meta.description}">
+<link rel="canonical" href="${meta.canonical}">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html,body{margin:0;background:#F4F2EC}</style>
+<script>location.replace(${JSON.stringify(hashUrl)})</script>
+</head><body></body></html>`;
+      return new Response(html, {
+        headers: {
+          'Content-Type': 'text/html;charset=UTF-8',
+          'Cache-Control': 'public, max-age=300',
+        },
+      });
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
