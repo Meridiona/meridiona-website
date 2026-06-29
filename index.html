@@ -197,10 +197,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     // createElement so they execute, awaiting onload for src scripts to
     // preserve ordering (React before ReactDOM before Babel before text/babel).
     const doc = new DOMParser().parseFromString(template, 'text/html');
+    // Set opacity before replaceWith so the element enters the DOM already
+    // invisible — prevents one rendered frame of full-opacity content flashing
+    // between the swap and the subsequent style assignment.
+    doc.documentElement.style.cssText = 'opacity:0;transition:opacity 0.2s ease';
     document.documentElement.replaceWith(doc.documentElement);
-    // Prevent FOUT: hold opacity until embedded fonts are parsed from blob URLs
-    document.documentElement.style.opacity = '0';
-    document.documentElement.style.transition = 'opacity 0.2s ease';
     document.fonts.ready.then(function() {
       requestAnimationFrame(function() { document.documentElement.style.opacity = '1'; });
     });
