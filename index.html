@@ -229,8 +229,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     __bundlerUnpacking = false;
     if (window.location.hash) {
-      const target = document.getElementById(window.location.hash.slice(1));
-      if (target) target.scrollIntoView();
+      window.dispatchEvent(new Event('hashchange'));
     }
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
