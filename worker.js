@@ -60,9 +60,9 @@ export default {
 
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          // Already subscribed — treat as success
+          // Already subscribed — treat as success, but flag it so the UI can say so
           if (res.status === 409 || err.name === 'already_exists') {
-            return json({ success: true });
+            return json({ success: true, duplicate: true });
           }
           console.error('Resend error:', res.status, JSON.stringify(err));
           return json({ error: 'Something went wrong. Please try again.' }, 500);

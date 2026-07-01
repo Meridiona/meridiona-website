@@ -162,15 +162,20 @@ test('header has relative positioning class', () => {
 
 // ─── Group 4: HTML classes ────────────────────────────────────────────────────
 console.log('\nHTML responsive classes');
-test('masthead subtitle has masthead-hide-mobile class', () => {
-  expect(template).toContain('masthead-hide-mobile');
-  expect(template).toContain('A quarterly brief on intelligent organisations');
-  const idx = template.indexOf('A quarterly brief');
-  const before = template.slice(Math.max(0, idx - 200), idx);
-  expect(before).toContain('masthead-hide-mobile');
+test('hero decorative background is hidden on mobile', () => {
+  expect(template).toContain('mer-decor-grid');
+  expect(template).toContain('mer-decor-glow');
+  const idx = template.lastIndexOf('@media (max-width: 768px)');
+  const mobile = template.slice(idx, idx + 500);
+  expect(mobile).toContain('.mer-decor-grid, .mer-decor-glow{ display:none; }');
 });
 test('CTA form has cta-form class', () => {
-  expect(template).toContain('class="mt-8 max-w-[440px] mx-auto flex gap-2 cta-form"');
+  expect(template).toContain('class="flex gap-2 cta-form mer-form"');
+});
+test('hero waitlist form stacks vertically on mobile', () => {
+  const idx = template.lastIndexOf('@media (max-width: 768px)');
+  const mobile = template.slice(idx, idx + 500);
+  expect(mobile).toContain('.mer-form{ flex-direction:column; }');
 });
 test('nav link to CTA has nav-cta class', () => {
   expect(template).toContain('class="text-[13px] mono px-3 py-1.5 rounded-full nav-cta"');
