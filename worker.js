@@ -1,4 +1,9 @@
 const WRITING_META = {
+  '/writing/velocity-visibility': {
+    title: 'Your velocity went up. Your visibility went down. — Meridiona',
+    description: 'AI tools made everyone faster — but the faster you go, the less you can reconstruct about how the work got done. Why the record of your work has to keep pace with it.',
+    canonical: 'https://meridiona.com/writing/velocity-visibility',
+  },
   '/writing/eval-loop': {
     title: 'More context made my classifier worse, not better — Meridiona',
     description: 'A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.',
