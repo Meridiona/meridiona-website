@@ -11,9 +11,25 @@ const WRITING_META = {
   },
 };
 
+// Always resolves to the newest release's asset — no version to bump in code.
+const DOWNLOAD_URL = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian.dmg';
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // App download: log attribution (OS, geo, referrer, source) then redirect to GitHub.
+    if (url.pathname === '/dl' || url.pathname === '/download') {
+      ctx.waitUntil(trackDownload(request, url, env));
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': DOWNLOAD_URL,
+          // Never cache the redirect, or repeat downloads skip the Worker and go uncounted.
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
 
     const meta = WRITING_META[url.pathname] || WRITING_META[url.pathname.replace(/\/$/, '')];
     if (meta && env.ASSETS) {
@@ -84,4 +100,77 @@ function json(data, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+// Fire a server-side PostHog event for every download that flows through /dl.
+// No-op until POSTHOG_KEY is configured (wrangler secret / var), so the site is
+// safe to ship before analytics is set up.
+async function trackDownload(request, url, env) {
+  const key = env.POSTHOG_KEY;
+  if (!key) return;
+
+  const host = env.POSTHOG_HOST || 'https://us.i.posthog.com';
+  const ua = request.headers.get('User-Agent') || '';
+  const cf = request.cf || {};
+  const q = url.searchParams;
+
+  // ?ref= (or utm_source) is the deterministic channel tag you control (hn/reddit/…).
+  const ref = q.get('ref') || q.get('utm_source') || null;
+  // Reuse the browser's PostHog id if the button passed it, so the server event
+  // joins the same person/session; otherwise keep it person-less and anonymous.
+  const did = q.get('did');
+
+  const properties = {
+    $lib: 'meridiona-worker',
+    $current_url: url.href,
+    $os: parseOS(ua),
+    $browser: parseBrowser(ua),
+    $raw_user_agent: ua,
+    $referrer: request.headers.get('Referer') || '$direct',
+    ref,
+    utm_source: q.get('utm_source') || null,
+    utm_medium: q.get('utm_medium') || null,
+    utm_campaign: q.get('utm_campaign') || null,
+    $geoip_country_name: cf.country || null,
+    $geoip_city_name: cf.city || null,
+    $geoip_subdivision_1_name: cf.region || null,
+    $geoip_time_zone: cf.timezone || null,
+    asset: 'Meridian.dmg',
+    platform: 'macos',
+  };
+  if (!did) properties.$process_person_profile = false;
+
+  try {
+    await fetch(`${host}/capture/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: key,
+        event: 'app_download',
+        distinct_id: did || crypto.randomUUID(),
+        properties,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  } catch (err) {
+    console.error('PostHog capture failed:', err);
+  }
+}
+
+function parseOS(ua) {
+  if (/Windows NT/i.test(ua)) return 'Windows';
+  if (/Mac OS X|Macintosh/i.test(ua)) return 'Mac OS X';
+  if (/Android/i.test(ua)) return 'Android';
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+  if (/Linux/i.test(ua)) return 'Linux';
+  return 'Unknown';
+}
+
+function parseBrowser(ua) {
+  if (/Edg\//i.test(ua)) return 'Edge';
+  if (/OPR\/|Opera/i.test(ua)) return 'Opera';
+  if (/Firefox\//i.test(ua)) return 'Firefox';
+  if (/Chrome\//i.test(ua)) return 'Chrome';
+  if (/Safari\//i.test(ua)) return 'Safari';
+  return 'Unknown';
 }
