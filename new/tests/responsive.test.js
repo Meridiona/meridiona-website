@@ -1,0 +1,246 @@
+/**
+ * Structural + responsiveness tests for the Meridiona website.
+ *
+ * The site is two plain static HTML files (index.html, demo.html) plus
+ * external stylesheets/scripts under assets/, served directly by
+ * Cloudflare's ASSETS binding — no bundler, no template JSON, no inline
+ * <style>/<script> blocks.
+ *
+ * Run with: node tests/responsive.test.js
+ * Requires: Node.js 18+
+ */
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(__dirname, '..'); // meridiona-website/new
+const REPO_ROOT = path.join(ROOT, '..'); // meridiona-website (worker.js lives here, shared with the old site)
+const INDEX_PATH = path.join(ROOT, 'index.html');
+const DEMO_PATH = path.join(ROOT, 'demo.html');
+const WORKER_PATH = path.join(REPO_ROOT, 'worker.js');
+const SITE_CSS_PATH = path.join(ROOT, 'assets/css/site.css');
+const SITE_JS_PATH = path.join(ROOT, 'assets/js/site.js');
+const DEMO_CSS_PATH = path.join(ROOT, 'assets/css/demo.css');
+const DEMO_JS_PATH = path.join(ROOT, 'assets/js/demo.js');
+
+// ─── Minimal test harness ─────────────────────────────────────────────────────
+let passed = 0, failed = 0;
+function test(name, fn) {
+  try {
+    fn();
+    console.log(`  ✓ ${name}`);
+    passed++;
+  } catch (e) {
+    console.error(`  ✗ ${name}`);
+    console.error(`    ${e.message}`);
+    failed++;
+  }
+}
+function expect(val) {
+  return {
+    toBe(expected) {
+      if (val !== expected) throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(val)}`);
+    },
+    toContain(substr) {
+      if (!String(val).includes(substr)) throw new Error(`Expected to contain "${substr}"`);
+    },
+    toMatch(re) {
+      if (!re.test(val)) throw new Error(`Expected to match ${re}`);
+    },
+    toBeTruthy() {
+      if (!val) throw new Error(`Expected truthy, got ${JSON.stringify(val)}`);
+    },
+    toBeFalsy() {
+      if (val) throw new Error(`Expected falsy, got ${JSON.stringify(val)}`);
+    },
+    toBeGreaterThan(n) {
+      if (!(val > n)) throw new Error(`Expected ${val} > ${n}`);
+    },
+  };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+const index = fs.readFileSync(INDEX_PATH, 'utf-8');
+const demo = fs.readFileSync(DEMO_PATH, 'utf-8');
+const worker = fs.readFileSync(WORKER_PATH, 'utf-8');
+const siteCss = fs.readFileSync(SITE_CSS_PATH, 'utf-8');
+const siteJs = fs.readFileSync(SITE_JS_PATH, 'utf-8');
+const demoCss = fs.readFileSync(DEMO_CSS_PATH, 'utf-8');
+const demoJs = fs.readFileSync(DEMO_JS_PATH, 'utf-8');
+const head = index.slice(0, index.indexOf('<body'));
+
+// ─── Group 1: Viewport & document shape ──────────────────────────────────────
+console.log('\nDocument shape');
+test('index.html has a DOCTYPE', () => {
+  expect(index.trim().slice(0, 15).toLowerCase()).toContain('<!doctype html');
+});
+test('index.html has viewport meta tag', () => {
+  expect(head).toContain('name="viewport"');
+  expect(head).toContain('width=device-width');
+  expect(head).toContain('initial-scale=1');
+});
+test('demo.html has viewport meta tag', () => {
+  const demoHead = demo.slice(0, demo.indexOf('<body'));
+  expect(demoHead).toContain('name="viewport"');
+});
+test('index.html and demo.html have no inline <style>/<script> blocks (externalized)', () => {
+  expect(index).toContain('<link rel="stylesheet" href="/new/assets/css/site.css">');
+  expect(index).toContain('<script src="/new/assets/js/site.js" defer></script>');
+  expect(/<style>/.test(index)).toBe(false);
+  expect(index).toContain('<script src=');
+  const inlineScriptsIndex = (index.match(/<script(?![^>]*\bsrc=)[^>]*>/g) || []);
+  expect(inlineScriptsIndex.length).toBe(0);
+
+  expect(demo).toContain('<link rel="stylesheet" href="/new/assets/css/demo.css">');
+  expect(demo).toContain('<script src="/new/assets/js/demo.js" defer></script>');
+  expect(/<style>/.test(demo)).toBe(false);
+  const inlineScriptsDemo = (demo.match(/<script(?![^>]*\bsrc=)[^>]*>/g) || []);
+  expect(inlineScriptsDemo.length).toBe(0);
+});
+
+// ─── Group 2: worker.js compatibility ────────────────────────────────────────
+console.log('\nworker.js compatibility');
+test('exactly one <title> tag matching the /writing rewrite regex', () => {
+  const matches = index.match(/<title>[^<]*<\/title>/g) || [];
+  expect(matches.length).toBe(1);
+});
+test('exactly one <meta name="description"> tag matching the /writing rewrite regex', () => {
+  const matches = index.match(/<meta name="description"[^>]*>/g) || [];
+  expect(matches.length).toBe(1);
+});
+test('exactly one </head> tag (canonical link injection point)', () => {
+  const matches = index.match(/<\/head>/g) || [];
+  expect(matches.length).toBe(1);
+});
+test('worker.js still serves /subscribe, /dl, /download and ASSETS fallback', () => {
+  expect(worker).toContain("url.pathname === '/dl'");
+  expect(worker).toContain("url.pathname === '/download'");
+  expect(worker).toContain("url.pathname === '/subscribe'");
+  expect(worker).toContain('env.ASSETS.fetch(request)');
+});
+test('site.js calls /subscribe and /dl the way worker.js expects', () => {
+  expect(siteJs).toContain("fetch('/subscribe'");
+  expect(siteJs).toContain('/dl?ref=');
+});
+test('PostHog analytics parity with the old site (same project key)', () => {
+  const analyticsJs = fs.readFileSync(path.join(ROOT, 'assets/js/analytics.js'), 'utf-8');
+  const oldIndex = fs.readFileSync(path.join(REPO_ROOT, 'index.html'), 'utf-8');
+  const keyMatch = oldIndex.match(/var KEY = "(phc_[^"]+)"/);
+  expect(!!keyMatch).toBe(true);
+  expect(analyticsJs).toContain(keyMatch[1]);
+  expect(index).toContain('<script src="/new/assets/js/analytics.js"></script>');
+});
+
+// ─── Group 3: Theming ─────────────────────────────────────────────────────────
+console.log('\nTheming (dawn / dusk / paper)');
+test('default (dawn) theme variables are defined on body', () => {
+  expect(siteCss).toContain('--acc:#7c3aed');
+  expect(siteCss).toContain('--grad:linear-gradient(100deg,#7c3aed,#db2777)');
+});
+test('dusk theme variables are defined', () => {
+  expect(siteCss).toContain('body[data-theme="dusk"]');
+});
+test('paper theme variables are defined', () => {
+  expect(siteCss).toContain('body[data-theme="paper"]');
+});
+test('theme switcher persists choice and applies data-theme on load', () => {
+  expect(siteJs).toContain("localStorage.setItem(THEME_STORAGE_KEY");
+  expect(siteJs).toContain('document.body.dataset.theme');
+});
+
+// ─── Group 4: Key sections present ───────────────────────────────────────────
+console.log('\nKey sections');
+test('nav with Why/FAQ/GitHub/Connect/Download', () => {
+  expect(index).toContain('href="#why"');
+  expect(index).toContain('href="#faq"');
+  expect(index).toContain('id="btn-connect"');
+  expect(index).toContain('id="btn-download-nav"');
+});
+test('hero section with embedded product demo iframe', () => {
+  expect(index).toContain('id="top"');
+  expect(index).toContain('id="hero-embed-frame"');
+  expect(index).toContain('src="/new/demo.html"');
+});
+test('why section present', () => {
+  expect(index).toContain('id="why"');
+  expect(index).toContain('Your agents shipped 4,000 lines today.');
+});
+test('faq section with accordion data driven from site.js', () => {
+  expect(index).toContain('id="faq"');
+  expect(index).toContain('id="faq-list"');
+  expect(siteJs).toContain('Does anything leave my Mac?');
+});
+test('footer with product/open-source/company columns', () => {
+  expect(index).toContain('Open source');
+  expect(index).toContain('GitHub repo');
+});
+test('download modal with mac/windows/linux picker (rendered by site.js)', () => {
+  expect(index).toContain('id="modal-download"');
+  expect(siteJs).toContain("data-os=\"mac\"");
+  expect(siteJs).toContain("data-os=\"windows\"");
+  expect(siteJs).toContain("data-os=\"linux\"");
+});
+test('social connect modal', () => {
+  expect(index).toContain('id="modal-connect"');
+  expect(index).toContain("Let's be friends");
+});
+test('theme switcher widget with dots container', () => {
+  expect(index).toContain('id="theme-switcher"');
+  expect(index).toContain('id="theme-dots"');
+});
+
+// ─── Group 5: Fluid responsiveness (no fixed breakpoints needed) ─────────────
+console.log('\nFluid responsive layout');
+test('headline uses clamp() for fluid type instead of a fixed breakpoint', () => {
+  expect(siteCss).toMatch(/\.hero__title\{[^}]*font-size:clamp\([^)]+\)/);
+});
+test('card grids use auto-fit/minmax so they reflow at any width', () => {
+  const count = (siteCss.match(/repeat\(auto-fit,minmax\(/g) || []).length;
+  expect(count).toBeGreaterThan(0);
+});
+test('footer grid collapses via minmax, not a hardcoded mobile override', () => {
+  expect(siteCss).toContain('grid-template-columns:2fr 1fr 1fr 1fr');
+});
+test('hero embed recomputes size on window resize (no layout overflow on small viewports)', () => {
+  expect(siteJs).toContain("window.addEventListener('resize', HeroEmbed.size)");
+  expect(siteJs).toContain('Math.max(260, Math.min(1160');
+});
+
+// ─── Group 6: Interactive demo (embedded product) ────────────────────────────
+console.log('\nEmbedded product demo (demo.html)');
+test('demo has the daily timeline, right panel and review modal', () => {
+  expect(demo).toContain('id="timeline"');
+  expect(demo).toContain('id="panel"');
+  expect(demo).toContain('id="review-slot"');
+});
+test('demo has capture/jira toggles and reset wired in demo.js', () => {
+  expect(demoJs).toContain("'toggle-capture': toggleCapture");
+  expect(demoJs).toContain("'toggle-jira': toggleJira");
+  expect(demoJs).toContain("'reset': resetAll");
+});
+test('demo supports swipe-to-approve / swipe-to-dismiss on the review card', () => {
+  expect(demoJs).toContain('pointerdown');
+  expect(demoJs).toContain('approveNow');
+  expect(demoJs).toContain('rejectNow');
+});
+
+// ─── Group 7: Script/style tag safety ─────────────────────────────────────────
+console.log('\nScript/style tag safety');
+test('<script>/<style> open/close tags are balanced in index.html', () => {
+  expect((index.match(/<script[\s>]/g) || []).length).toBe((index.match(/<\/script>/g) || []).length);
+  expect((index.match(/<link rel="stylesheet"/g) || []).length).toBeGreaterThan(0);
+});
+test('<script> open/close tags are balanced in demo.html', () => {
+  expect((demo.match(/<script[\s>]/g) || []).length).toBe((demo.match(/<\/script>/g) || []).length);
+});
+test('demo.css keyframes referenced by demo.js/demo.css are present', () => {
+  expect(demoCss).toContain('@keyframes wsBlink');
+  expect(demoCss).toContain('@keyframes wsShimmer');
+});
+
+// ─── Summary ──────────────────────────────────────────────────────────────────
+console.log(`\n${'─'.repeat(50)}`);
+console.log(`${passed + failed} tests: ${passed} passed, ${failed} failed`);
+if (failed > 0) process.exit(1);
