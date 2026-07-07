@@ -27,7 +27,7 @@ button,input,textarea,select{font-family:inherit}
 .pillnav{display:flex;align-items:center;gap:2px;background:linear-gradient(135deg,#332A63,#241C49);
   border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:5px 6px 5px 16px;
   box-shadow:0 14px 32px -12px rgba(50,30,110,.5)}
-.pillnav .mark{width:20px;height:20px;object-fit:contain}
+.pillnav .mark{width:26px;height:26px;object-fit:contain}
 .pillnav .brand{font:800 13.5px 'Plus Jakarta Sans';color:#fff;margin:0 14px 0 9px}
 .pillnav .item{font:700 12px 'Plus Jakarta Sans';color:rgba(255,255,255,.62);padding:8px 14px}
 .pillnav .item.on{color:#fff;background:rgba(255,255,255,.14);border-radius:999px}
