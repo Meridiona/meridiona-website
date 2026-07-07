@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Deployment**: Cloudflare Workers (via `wrangler deploy`)
 - **Tests**: Custom test harness (responsive design tests)
 
+> **In-progress redesign, live at `/new`.** A ground-up rebuild of this site (new landing page + embedded interactive product demo, no bundler, plain HTML/CSS/JS) lives in `new/` and is served at `/new` by the same Worker/ASSETS binding — see `new/CLAUDE.md`. It does not touch or replace anything below; the old site here keeps serving `/` untouched until a deliberate decision is made to promote it. `new/` has its own test suite (`new/tests/responsive.test.js`), independent of this file's.
+
 ## Architecture
 
 ### The Custom Bundler System
