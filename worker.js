@@ -50,7 +50,12 @@ export default {
         html = html
           .replace(/<title>[^<]*<\/title>/, `<title>${meta.title}</title>`)
           .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${meta.description}">`)
-          .replace('</head>', `<link rel="canonical" href="${meta.canonical}"></head>`);
+          .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${meta.title}">`)
+          .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${meta.description}">`)
+          .replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${meta.canonical}">`)
+          .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${meta.title}">`)
+          .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${meta.description}">`)
+          .replace(/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${meta.canonical}">`);
         return new Response(html, {
           headers: {
             'Content-Type': 'text/html;charset=UTF-8',
