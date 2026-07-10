@@ -489,27 +489,15 @@ body[data-theme="paper"]{
 .success-link{margin-top:16px;font-size:13px}
 .success-link a{color:var(--acc);text-decoration:none}
 
-/* connect modal specifics */
-.connect-list{margin-top:24px;display:flex;flex-direction:column;gap:10px}
-.connect-row{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:14px;text-decoration:none;color:#fff}
-.connect-row:hover{transform:translateY(-2px) scale(1.015)}
-.connect-row__icon{
-  width:38px;height:38px;flex:none;border-radius:10px;background:rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;
+/* connect modal specifics — icon-only, generously spaced, one accent color
+   (var(--acc)) on hover rather than a full-color block per brand */
+.connect-grid{margin-top:28px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.connect-icon{
+  width:52px;height:52px;flex:none;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;transition:border-color .2s ease,color .2s ease,transform .2s ease;
 }
-.connect-row__body{text-align:left;flex:1}
-.connect-row__name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px}
-.connect-row__sub{font-size:12px;color:rgba(255,255,255,.7);margin-top:1px}
-.connect-row__arrow{font-size:15px;color:rgba(255,255,255,.55)}
-.connect-row--github{background:#15130F}
-.connect-row--x{background:#000}
-.connect-row--discord{background:#5865F2}
-.connect-row__icon--discord{background:rgba(255,255,255,.16)}
-.connect-row--instagram{background:linear-gradient(135deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5)}
-.connect-row__icon--instagram{background:rgba(255,255,255,.2)}
-.connect-row--linkedin{background:#0A66C2}
-.connect-row__icon--linkedin{background:rgba(255,255,255,.16)}
-.connect-footnote{margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut)}
+.connect-icon:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
+.connect-footnote{margin-top:24px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut)}
 
 /* ── theme switcher ────────────────────────────────────────────────────── */
 .theme-switcher{
