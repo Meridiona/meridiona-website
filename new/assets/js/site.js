@@ -238,7 +238,11 @@
       fetch('/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, source: DownloadModal.state.os === 'mac' ? 'download' : 'waitlist' }),
+        body: JSON.stringify({
+          email: email,
+          source: DownloadModal.state.os === 'mac' ? 'download' : 'waitlist',
+          os: DownloadModal.state.os,
+        }),
       }).catch(function () { /* non-fatal: the confirmation UI has already been shown */ });
 
       if (DownloadModal.state.os === 'mac') {
