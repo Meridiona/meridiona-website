@@ -1,0 +1,201 @@
+/*
+ * Writing section — essay index + long-form article styles.
+ * Loaded alongside site.css (which owns the theme tokens, nav, footer,
+ * modals). This file only styles the reading experience.
+ *
+ * Type roles here:
+ *   Space Grotesk   — headlines (brand display, same as the landing page)
+ *   Newsreader      — essay body: an optical-size serif made for on-screen
+ *                     long-form reading; only writing pages load it
+ *   JetBrains Mono  — journal furniture: dates, read times, tags, § markers
+ */
+
+/* ── shared page shell ─────────────────────────────────────────────────── */
+.writing-page{padding:140px 24px 0;min-height:100vh}
+.writing-page__inner{max-width:720px;margin:0 auto;width:100%}
+.writing-page__inner--wide{max-width:1160px}
+
+/* ── writing index ─────────────────────────────────────────────────────── */
+.writing-head{padding-bottom:36px;border-bottom:1px solid var(--line)}
+.writing-head__title{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.03em;
+  font-size:clamp(38px,6vw,60px);line-height:1.05;margin:14px 0 0;
+}
+.writing-head__sub{
+  font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:clamp(17px,2vw,20px);
+  color:var(--mut);margin:16px 0 0;line-height:1.6;text-wrap:pretty;
+}
+
+/* Each essay is a journal entry: mono date stamp in the margin, title, dek, meta. */
+.entry{
+  display:grid;grid-template-columns:minmax(110px,150px) 1fr;gap:8px 32px;
+  padding:44px 0;border-bottom:1px solid var(--line);
+}
+.entry__stamp{
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);
+  padding-top:9px;white-space:nowrap;
+}
+.entry__stamp-new{display:block;margin-top:8px;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;font-size:10px}
+.entry__title{margin:0;font-size:clamp(22px,3vw,30px);line-height:1.18}
+.entry__title a{
+  font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-.02em;
+  color:var(--ink);text-decoration:none;
+  background-image:linear-gradient(var(--acc),var(--acc));
+  background-repeat:no-repeat;background-size:0% 2px;background-position:0 100%;
+  transition:background-size .25s ease;
+}
+.entry__title a:hover{background-size:100% 2px}
+.entry__dek{
+  font-family:'Newsreader',Georgia,serif;font-size:17.5px;line-height:1.6;
+  color:var(--mut);margin:12px 0 0;max-width:56ch;text-wrap:pretty;
+}
+.entry__meta{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut);
+}
+.entry__tag{padding:3px 9px;border-radius:999px;background:var(--chip);color:var(--acc)}
+
+/* "more coming" footer line for the list */
+.writing-more{
+  padding:36px 0;display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);
+}
+.writing-more em{font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:15px}
+
+/* letter signup */
+.letter-card{
+  margin:28px 0 0;padding:40px clamp(24px,5vw,48px);border:1px solid var(--line);
+  border-radius:18px;background:var(--chip);text-align:center;
+}
+.letter-card__title{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;
+  font-size:clamp(22px,3vw,28px);margin:10px 0 0;
+}
+.letter-card__body{font-size:14.5px;color:var(--mut);margin:12px auto 0;max-width:44ch;line-height:1.65;text-wrap:pretty}
+.letter-card__form{margin:22px auto 0;max-width:420px;display:flex;gap:8px}
+.letter-card__input{
+  flex:1;min-width:0;padding:12px 16px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);font-size:14px;font-family:'Instrument Sans',sans-serif;outline:none;
+}
+.letter-card__input:focus{border-color:var(--acc)}
+.letter-card__msg{margin:14px 0 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut);min-height:1.4em}
+
+/* ── article ───────────────────────────────────────────────────────────── */
+.backlink{
+  display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);
+}
+.backlink:hover{color:var(--acc)}
+
+.article-head{margin-top:28px;padding-bottom:36px;border-bottom:1px solid var(--line)}
+.article-head__title{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.03em;
+  font-size:clamp(32px,5.2vw,52px);line-height:1.08;margin:14px 0 0;text-wrap:balance;
+}
+.article-head__dek{
+  font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:clamp(18px,2.4vw,22px);
+  line-height:1.5;color:var(--mut);margin:18px 0 0;text-wrap:pretty;
+}
+.article-head__meta{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);
+}
+.article-head__meta-dot{color:var(--acc)}
+
+/* the reading column */
+.prose{
+  font-family:'Newsreader',Georgia,serif;font-size:19px;line-height:1.72;
+  color:var(--ink);padding:44px 0 0;
+}
+.prose p{margin:0 0 1.45em;text-wrap:pretty}
+.prose .prose__lede{font-size:22px;line-height:1.6}
+.prose strong{font-weight:600}
+.prose em{font-style:italic}
+.prose a{color:var(--acc);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+
+/* section headings carry a mono § index — the journal-entry marker */
+.prose h2{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;
+  font-size:clamp(23px,3vw,29px);line-height:1.22;margin:2.4em 0 .8em;text-wrap:balance;
+}
+.prose h2 .sec-index{
+  display:block;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:12px;
+  letter-spacing:.14em;color:var(--acc);margin-bottom:10px;
+}
+
+.prose ul{margin:0 0 1.45em;padding:0;list-style:none}
+.prose ul li{
+  position:relative;padding-left:26px;margin-bottom:.7em;
+  font-size:18px;line-height:1.65;color:var(--ink);
+}
+.prose ul li::before{content:'·';position:absolute;left:6px;color:var(--acc);font-weight:700}
+
+.prose blockquote{
+  margin:2.2em 0;padding:6px 0 6px 26px;border-left:3px solid var(--acc);
+  font-size:21.5px;font-style:italic;line-height:1.55;color:var(--mut);
+}
+.prose blockquote em{color:var(--acc);font-style:italic}
+
+.prose code{
+  font-family:'JetBrains Mono',monospace;font-size:.82em;
+  background:var(--chip);color:var(--ink);padding:2px 7px;border-radius:6px;
+}
+.prose pre{
+  margin:1.8em 0;padding:20px 24px;border-radius:14px;overflow-x:auto;
+  background:var(--card);border:1px solid var(--line);
+  font-family:'JetBrains Mono',monospace;font-size:14.5px;line-height:1.75;color:var(--ink);
+}
+.prose pre code{background:none;padding:0;font-size:inherit;border-radius:0}
+
+/* closing lines set apart from body copy */
+.prose .prose__coda{
+  font-style:italic;font-size:21px;line-height:1.55;color:var(--mut);margin-bottom:.4em;
+}
+
+/* in-flow findings card (migrated from the old article's sidebar) */
+.findings{
+  margin:2.2em 0;padding:26px 28px;border:1px solid var(--line);
+  border-radius:16px;background:var(--card);
+}
+.findings__title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--acc);margin:0 0 16px;
+}
+.findings ol{margin:0;padding:0;list-style:none;counter-reset:finding}
+.findings ol li{
+  counter-increment:finding;position:relative;padding-left:36px;margin-bottom:12px;
+  font-family:'Instrument Sans',sans-serif;font-size:14.5px;line-height:1.55;color:var(--ink);
+}
+.findings ol li:last-child{margin-bottom:0}
+.findings ol li::before{
+  content:counter(finding,decimal-leading-zero);
+  position:absolute;left:0;top:2px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut);
+}
+
+/* article footer: tags + prev/next */
+.article-foot{margin-top:56px;padding:28px 0 0;border-top:1px solid var(--line)}
+.article-foot__tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.article-foot__tag{
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;
+  border-radius:999px;background:var(--chip);color:var(--acc);
+}
+.article-foot__nav{
+  margin-top:28px;display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.article-foot__next{
+  text-decoration:none;color:var(--ink);font-family:'Space Grotesk',sans-serif;
+  font-weight:600;font-size:15px;letter-spacing:-.01em;
+}
+.article-foot__next:hover{color:var(--acc)}
+.article-foot__next-label{
+  display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;
+}
+
+/* keep the fixed theme switcher from covering the last line on short viewports */
+.writing-page .site-footer{margin-top:96px}
+
+@media (prefers-reduced-motion: reduce){
+  .entry__title a{transition:none}
+}

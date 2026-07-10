@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>More context made my classifier worse, not better — Meridian</title>
+<meta name="description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/new/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="512x512" href="/new/favicon-512.png">
+<link rel="apple-touch-icon" href="/new/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/new/assets/css/site.css">
+<link rel="stylesheet" href="/new/assets/css/writing.css">
+<script src="/new/assets/js/analytics.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__inner">
+    <a href="/new/" class="nav__brand">
+      <img class="nav__brand-mark" src="/new/assets/images/meridian-mark.png" alt="Meridian">
+      <span class="nav__brand-name">Meridian</span>
+    </a>
+    <div class="nav__links">
+      <a href="/new/#why" class="nav__link">Why</a>
+      <a href="/new/#faq" class="nav__link">FAQ</a>
+      <a href="/new/writing" class="nav__link" style="color:var(--ink)">Writing</a>
+      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="nav__link nav__link--mono">GitHub ↗</a>
+      <button id="btn-connect" title="Connect" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"></circle><circle cx="6" cy="12" r="2.6"></circle><circle cx="18" cy="19" r="2.6"></circle><path d="M8.4 10.7 L15.6 6.3M8.4 13.3 L15.6 17.7"></path></svg>
+        Connect
+      </button>
+      <button id="btn-download-nav" class="btn-primary">Download</button>
+    </div>
+  </div>
+</nav>
+
+<main class="writing-page">
+  <div class="writing-page__inner">
+
+    <a href="/new/writing" class="backlink"><span style="color:var(--acc)">←</span> All writing</a>
+
+    <header class="article-head">
+      <div class="eyebrow">Engineering · evals · AI</div>
+      <h1 class="article-head__title">Using Claude Code skills to close the eval loop.</h1>
+      <p class="article-head__dek">How I turned classifier failures into a structured, machine-maintained backlog — and why more context made accuracy worse, not better.</p>
+      <div class="article-head__meta">
+        <span>May 29, 2026</span>
+        <span class="article-head__meta-dot">·</span>
+        <span>12 min read</span>
+      </div>
+    </header>
+
+    <article class="prose">
+
+      <p class="prose__lede">You ran an eval. The dashboard says 80% accuracy. Now what?</p>
+
+      <p>For most teams, the answer is surprisingly manual. Someone exports failures, copies a few examples into a document, writes some notes, maybe creates a ticket or two, and then moves on. By the next eval run, those notes are already stale. The failures have changed, new ones have appeared, and nobody remembers whether a particular issue is actually new or something that has been showing up for weeks.</p>
+
+      <p>The bottleneck is not running the eval. It is closing the feedback loop.</p>
+
+      <blockquote>Without a structured path from failure → diagnosis → prompt improvement, evals become <em>scoreboards</em> rather than engineering tools.</blockquote>
+
+      <p>Recently I ran into exactly this problem while working on a local MLX-based classifier that maps developer work sessions to Jira tickets.</p>
+
+      <p>The classifier is evaluated against a golden dataset of 40 hand-authored developer sessions. Each session targets a specific failure mode: hard decoys, overhead work, untracked activity, ambiguous evidence, and other edge cases that show up in real engineering environments.</p>
+
+      <p>After a few iterations, I had run the eval three times. I also had 62 failures.</p>
+
+      <p>What I did not have was a reliable way to answer basic questions:</p>
+      <ul>
+        <li>Which failures keep showing up?</li>
+        <li>Which prompt changes helped?</li>
+        <li>Are the failures random, or manifestations of the same underlying issue?</li>
+        <li>What is the highest-leverage thing to fix next?</li>
+      </ul>
+
+      <p>The traditional approach — maintaining notes manually — breaks down almost immediately. Notes become outdated after the second run. There is no consistent structure. Nobody tracks recurrence. And reviewing dozens of failures turns into a forensic exercise every time.</p>
+
+      <h2><span class="sec-index">§ 01</span>The key insight.</h2>
+
+      <p>The eval was already producing everything I needed. Every failure had structured evidence: a trace, a span, the model's prediction, the expected answer, the classifier's reasoning. The problem was not interpretation. The problem was extraction and organisation.</p>
+
+      <p>That is where I started using a Claude Code skill. A Claude Code skill is essentially a markdown file containing a repeatable workflow: some frontmatter, a procedure, and a set of allowed tools. In my case, the skill is invoked manually with:</p>
+
+      <pre><code>/eval-feedback</code></pre>
+
+      <p>It is not an autonomous agent and it does not run continuously. It is simply a repeatable post-eval analysis workflow — a perfect fit for evaluating classifier failures.</p>
+
+      <h2><span class="sec-index">§ 02</span>The data structure.</h2>
+
+      <p>The most important design decision was not the skill itself. It was the data structure it writes to: a machine-maintained file called <code>FEEDBACK.json</code>.</p>
+
+      <p><em>Machine-maintained</em> is the important part. Humans are terrible at keeping failure logs up to date. Structured JSON does not have that problem. It can be queried, diffed, aggregated, and analysed across runs without anyone manually curating it.</p>
+
+      <p>The file contains three top-level arrays:</p>
+
+      <pre><code>{
+  "runs": [],
+  "observations": [],
+  "failure_classes": []
+}</code></pre>
+
+      <p><code>runs</code> stores evaluation-level metadata and metrics. <code>observations</code> stores individual failure evidence. <code>failure_classes</code> stores named patterns that persist across multiple runs.</p>
+
+      <h2><span class="sec-index">§ 03</span>Three design decisions.</h2>
+
+      <p><strong>First:</strong> a lean-read pattern. Instead of loading the entire file into context every time, the skill pulls only targeted slices using <code>jq</code> — recent runs, open failure classes, matching observations, summary statistics. This lets the file grow indefinitely without consuming large amounts of context. Based on current usage, roughly 20&nbsp;KB of additional data per run.</p>
+
+      <p><strong>Second:</strong> updates through a small Python append workflow — load → mutate → write. The skill never edits JSON directly.</p>
+
+      <p><strong>Third, and most valuable:</strong> every observation contains a <code>failure_class_id</code>. That single field links individual failures to a persistent failure pattern. When the same pattern appears again, its occurrence count increases automatically. Recurring problems rise to the top without any manual prioritisation.</p>
+
+      <h2><span class="sec-index">§ 04</span>What the taxonomy revealed.</h2>
+
+      <p>After three runs, the system identified 10 named failure classes across 62 observations. One class dominated everything else. I called it <em>optimism-bias</em>. It appeared 27 times across all three runs.</p>
+
+      <p>The pattern was consistent: whenever the classifier encountered any adjacent signal — a mention in a document, a related article, a matching keyword, or a topically similar file path — it tended to classify the session as belonging to the target task with high confidence.</p>
+
+      <p>Even more interesting was what happened during a context experiment. I removed a 2,500-character OCR truncation limit, expecting additional context to improve accuracy. The opposite happened. Performance got worse. The classifier became more confident in incorrect predictions because the additional context provided more opportunities to find loosely related evidence.</p>
+
+      <p>Without the structured cross-run view, I probably would have concluded the model needed more data. Instead, the evidence pointed somewhere else entirely: the issue was not data volume. It was prompt design.</p>
+
+      <div class="findings">
+        <p class="findings__title">Key findings</p>
+        <ol>
+          <li>10 named failure classes across 62 observations</li>
+          <li><em>optimism-bias</em> accounted for 27 of them</li>
+          <li>More context made accuracy worse, not better</li>
+          <li>The fix was prompt design, not more data</li>
+        </ol>
+      </div>
+
+      <h2><span class="sec-index">§ 05</span>The broader lesson.</h2>
+
+      <p>AI systems are often very good at analysing the failures of other AI systems. The classifier's reasoning output turned out to be the richest signal in the entire pipeline. It exposed exactly which evidence the model was over-weighting and why a prediction seemed reasonable from the model's perspective.</p>
+
+      <p>Reading the reasoning traces and clustering them into recurring failure modes is precisely the kind of task Claude excels at. Once those patterns are captured in a structured format, the same system can generate prompt changes targeted at specific failure classes.</p>
+
+      <h2><span class="sec-index">§ 06</span>How to replicate this.</h2>
+
+      <p>You do not need much:</p>
+      <ul>
+        <li>An eval that emits structured traces (OpenTelemetry or similar)</li>
+        <li>A golden dataset with expected outputs</li>
+        <li>A place to persist observations across runs</li>
+      </ul>
+
+      <p>The skill itself is only a couple hundred lines of markdown describing the workflow, schema, and guardrails. The underlying idea generalises well beyond classifiers. Any system where you are running repeated experiments can benefit from a persistent failure taxonomy that accumulates evidence over time.</p>
+
+      <p class="prose__coda">Because the loop does not close when you hit 95% accuracy.</p>
+      <p class="prose__coda">The loop closes when the failure taxonomy starts driving the next prompt revision.</p>
+
+    </article>
+
+    <footer class="article-foot">
+      <div class="article-foot__tags">
+        <span class="article-foot__tag">evals</span>
+        <span class="article-foot__tag">Claude Code</span>
+        <span class="article-foot__tag">classifiers</span>
+        <span class="article-foot__tag">MLX</span>
+        <span class="article-foot__tag">observability</span>
+      </div>
+      <div class="article-foot__nav">
+        <a href="/new/writing" class="backlink"><span style="color:var(--acc)">←</span> All writing</a>
+        <a href="/new/writing/velocity-visibility" class="article-foot__next">
+          <span class="article-foot__next-label">Read next</span>
+          Your velocity went up. Your visibility went down. →
+        </a>
+      </div>
+    </footer>
+
+  </div>
+
+  <div class="writing-page__inner writing-page__inner--wide">
+    <footer class="site-footer">
+      <div class="footer-bottom" style="border-top:none;margin-top:0;padding-top:0">
+        <span>© 2026 Meridian · MIT License</span>
+        <span>made for people who'd rather be coding</span>
+        <a href="/new/" class="footlink">← back home</a>
+      </div>
+    </footer>
+  </div>
+</main>
+
+<!-- ============ DOWNLOAD MODAL ============ -->
+<div id="modal-download" class="modal-overlay modal-overlay--center">
+  <div id="modal-download-card" class="modal-card modal-card--download">
+    <button id="btn-close-download" class="icon-close" style="top:14px;right:14px">✕</button>
+    <img class="modal-mark" src="/new/assets/images/meridian-mark.png" alt="Meridian">
+    <div id="modal-download-body"></div>
+  </div>
+</div>
+
+<!-- ============ SOCIAL CONNECT DIALOG ============ -->
+<div id="modal-connect" class="modal-overlay modal-overlay--top">
+  <div class="modal-card modal-card--connect">
+    <button id="btn-close-connect" class="icon-close" style="top:16px;right:16px">✕</button>
+
+    <div style="font-size:34px;line-height:1">👋</div>
+    <h3 class="modal-title modal-title--connect">Let's be friends</h3>
+    <p class="modal-subtitle" style="max-width:340px;margin-left:auto;margin-right:auto">We're a lot more fun over here than in a changelog. Pick your platform:</p>
+
+    <div class="connect-list">
+      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="connect-row connect-row--github">
+        <span class="connect-row__icon">gh</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">GitHub</div>
+          <div class="connect-row__sub">star us — we WILL notice 👀</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--x">
+        <span class="connect-row__icon">𝕏</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">X / Twitter</div>
+          <div class="connect-row__sub">hot takes & release memes</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--discord">
+        <span class="connect-row__icon connect-row__icon--discord">dc</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">Discord</div>
+          <div class="connect-row__sub">come yell at us live, it's fun</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--instagram">
+        <span class="connect-row__icon connect-row__icon--instagram">ig</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">Instagram</div>
+          <div class="connect-row__sub">mostly aesthetic timeline screenshots</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--linkedin">
+        <span class="connect-row__icon connect-row__icon--linkedin">in</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">LinkedIn</div>
+          <div class="connect-row__sub">the professional one, we promise</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="connect-footnote">no spam, just diamonds in your feed ✦</div>
+  </div>
+</div>
+
+<!-- ============ THEME SWITCHER ============ -->
+<div id="theme-switcher" class="theme-switcher">
+  <span class="theme-switcher__label">theme</span>
+  <div id="theme-dots" class="theme-dots"></div>
+</div>
+
+<iframe id="dl-frame" style="display:none" title="download" aria-hidden="true"></iframe>
+
+<script src="/new/assets/js/site.js" defer></script>
+</body>
+</html>

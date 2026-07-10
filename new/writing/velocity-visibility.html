@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your velocity went up. Your visibility went down. — Meridian</title>
+<meta name="description" content="AI tools made everyone faster — but the faster you go, the less you can reconstruct about how the work got done. Why the record of your work has to keep pace with it.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/new/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="512x512" href="/new/favicon-512.png">
+<link rel="apple-touch-icon" href="/new/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/new/assets/css/site.css">
+<link rel="stylesheet" href="/new/assets/css/writing.css">
+<script src="/new/assets/js/analytics.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__inner">
+    <a href="/new/" class="nav__brand">
+      <img class="nav__brand-mark" src="/new/assets/images/meridian-mark.png" alt="Meridian">
+      <span class="nav__brand-name">Meridian</span>
+    </a>
+    <div class="nav__links">
+      <a href="/new/#why" class="nav__link">Why</a>
+      <a href="/new/#faq" class="nav__link">FAQ</a>
+      <a href="/new/writing" class="nav__link" style="color:var(--ink)">Writing</a>
+      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="nav__link nav__link--mono">GitHub ↗</a>
+      <button id="btn-connect" title="Connect" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"></circle><circle cx="6" cy="12" r="2.6"></circle><circle cx="18" cy="19" r="2.6"></circle><path d="M8.4 10.7 L15.6 6.3M8.4 13.3 L15.6 17.7"></path></svg>
+        Connect
+      </button>
+      <button id="btn-download-nav" class="btn-primary">Download</button>
+    </div>
+  </div>
+</nav>
+
+<main class="writing-page">
+  <div class="writing-page__inner">
+
+    <a href="/new/writing" class="backlink"><span style="color:var(--acc)">←</span> All writing</a>
+
+    <header class="article-head">
+      <div class="eyebrow">AI · workflow · observability</div>
+      <h1 class="article-head__title">Your velocity went up. Your visibility went down.</h1>
+      <p class="article-head__dek">AI made everyone faster. The record of how the work got done did not keep up.</p>
+      <div class="article-head__meta">
+        <span>July 2, 2026</span>
+        <span class="article-head__meta-dot">·</span>
+        <span>5 min read</span>
+      </div>
+    </header>
+
+    <article class="prose">
+
+      <p class="prose__lede">AI tools made everyone faster. Coding agents, writing assistants, research tools, design copilots — across every domain, the same thing happened: people do more in less time. More tasks touched, more changes made, more ground covered per day.</p>
+
+      <p>That's the win everyone talks about. Here's the part nobody does: the faster you go, the less you can see about how you got there.</p>
+
+      <h2><span class="sec-index">§ 01</span>Velocity is throughput, not memory.</h2>
+
+      <p>When you did three things in a day, you could hold them in your head. What you tried, what worked, what the dead end was, why you went with this approach — it fit in working memory and spilled naturally into a standup or a commit message.</p>
+
+      <p>Now you do fifteen things in a day, and a large share of the actual work was done by something else. The agent made a dozen micro-decisions. The AI tool chose an approach, you nodded, it moved on. By the evening you genuinely cannot reconstruct half of it — not because you weren't paying attention, but because there was too much, moving too fast, and a lot of it wasn't even your keystrokes.</p>
+
+      <p>The throughput went up. The trail did not. Those two things used to rise together; AI split them apart.</p>
+
+      <h2><span class="sec-index">§ 02</span>"More done" hides a question: done how?</h2>
+
+      <p>Higher velocity blurs a distinction that used to be obvious — the difference between activity and progress. When work was slow and manual, you could feel which was which. At high speed, fifteen completed tasks all look the same on the board, whether they were solid or whether the agent took a shortcut you'd have rejected if you'd been watching closely.</p>
+
+      <p>The only way to tell them apart is to be able to look back at how each task was actually done — including what the AI did on your behalf. Not a vague memory. The actual sequence: what was attempted, what the tool decided, what you approved, what shipped. Without that, "I got a lot done today" is a feeling, not a fact you can check.</p>
+
+      <p>And it compounds. A month of high-velocity work with no trail is a month of outcomes you have to take on faith. The code runs, the tickets are closed — but ask how any specific thing came to be and the honest answer is a shrug.</p>
+
+      <h2><span class="sec-index">§ 03</span>The record has to keep pace with the work.</h2>
+
+      <p>The reflex answer is "write it down as you go." That never worked when work was slow, and it's hopeless now. You can't manually narrate fifteen fast, AI-assisted tasks in parallel — the documenting would cost more time than the AI saved. The whole velocity gain would go to bookkeeping.</p>
+
+      <p>So the capture has to be automatic, and it has to run at the same speed as the work:</p>
+
+      <ul>
+        <li><strong>Observe</strong> the sessions as they happen — the agent runs, the tool calls, the approvals — without the developer stopping to record anything.</li>
+        <li><strong>Attribute</strong> each stretch of work to the task it belongs to, so the day's activity maps back onto real tickets instead of a blur.</li>
+        <li><strong>Reconstruct</strong> what actually happened per task: what the AI did, what the human decided, what the outcome was.</li>
+        <li><strong>Write it back</strong> where the record is supposed to live — the ticket, the worklog, the doc — kept current automatically instead of by hand.</li>
+      </ul>
+
+      <p>The point isn't surveillance and it isn't process for its own sake. It's that you should be able to see your own work — how a task got done, and what the AI did inside it — with the same clarity you had back when you were slow enough to remember.</p>
+
+      <h2><span class="sec-index">§ 04</span>The faster the tools get, the more this matters.</h2>
+
+      <p>Every gain in AI capability widens the gap between how much you produce and how much you can account for. That gap is fine right up until someone asks what happened — a review, an incident, a handoff, or just you trying to understand your own last month.</p>
+
+      <p>Speed without a trail isn't really progress you can stand behind. It's just motion you can no longer inspect.</p>
+
+    </article>
+
+    <footer class="article-foot">
+      <div class="article-foot__tags">
+        <span class="article-foot__tag">AI</span>
+        <span class="article-foot__tag">velocity</span>
+        <span class="article-foot__tag">observability</span>
+        <span class="article-foot__tag">agents</span>
+        <span class="article-foot__tag">workflow</span>
+      </div>
+      <div class="article-foot__nav">
+        <a href="/new/writing" class="backlink"><span style="color:var(--acc)">←</span> All writing</a>
+        <a href="/new/writing/eval-loop" class="article-foot__next">
+          <span class="article-foot__next-label">Read next</span>
+          More context made my classifier worse, not better →
+        </a>
+      </div>
+    </footer>
+
+  </div>
+
+  <div class="writing-page__inner writing-page__inner--wide">
+    <footer class="site-footer">
+      <div class="footer-bottom" style="border-top:none;margin-top:0;padding-top:0">
+        <span>© 2026 Meridian · MIT License</span>
+        <span>made for people who'd rather be coding</span>
+        <a href="/new/" class="footlink">← back home</a>
+      </div>
+    </footer>
+  </div>
+</main>
+
+<!-- ============ DOWNLOAD MODAL ============ -->
+<div id="modal-download" class="modal-overlay modal-overlay--center">
+  <div id="modal-download-card" class="modal-card modal-card--download">
+    <button id="btn-close-download" class="icon-close" style="top:14px;right:14px">✕</button>
+    <img class="modal-mark" src="/new/assets/images/meridian-mark.png" alt="Meridian">
+    <div id="modal-download-body"></div>
+  </div>
+</div>
+
+<!-- ============ SOCIAL CONNECT DIALOG ============ -->
+<div id="modal-connect" class="modal-overlay modal-overlay--top">
+  <div class="modal-card modal-card--connect">
+    <button id="btn-close-connect" class="icon-close" style="top:16px;right:16px">✕</button>
+
+    <div style="font-size:34px;line-height:1">👋</div>
+    <h3 class="modal-title modal-title--connect">Let's be friends</h3>
+    <p class="modal-subtitle" style="max-width:340px;margin-left:auto;margin-right:auto">We're a lot more fun over here than in a changelog. Pick your platform:</p>
+
+    <div class="connect-list">
+      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="connect-row connect-row--github">
+        <span class="connect-row__icon">gh</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">GitHub</div>
+          <div class="connect-row__sub">star us — we WILL notice 👀</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--x">
+        <span class="connect-row__icon">𝕏</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">X / Twitter</div>
+          <div class="connect-row__sub">hot takes & release memes</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--discord">
+        <span class="connect-row__icon connect-row__icon--discord">dc</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">Discord</div>
+          <div class="connect-row__sub">come yell at us live, it's fun</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--instagram">
+        <span class="connect-row__icon connect-row__icon--instagram">ig</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">Instagram</div>
+          <div class="connect-row__sub">mostly aesthetic timeline screenshots</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+      <a href="#" class="connect-row connect-row--linkedin">
+        <span class="connect-row__icon connect-row__icon--linkedin">in</span>
+        <span class="connect-row__body">
+          <div class="connect-row__name">LinkedIn</div>
+          <div class="connect-row__sub">the professional one, we promise</div>
+        </span>
+        <span class="connect-row__arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="connect-footnote">no spam, just diamonds in your feed ✦</div>
+  </div>
+</div>
+
+<!-- ============ THEME SWITCHER ============ -->
+<div id="theme-switcher" class="theme-switcher">
+  <span class="theme-switcher__label">theme</span>
+  <div id="theme-dots" class="theme-dots"></div>
+</div>
+
+<iframe id="dl-frame" style="display:none" title="download" aria-hidden="true"></iframe>
+
+<script src="/new/assets/js/site.js" defer></script>
+</body>
+</html>
