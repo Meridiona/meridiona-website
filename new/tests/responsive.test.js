@@ -165,7 +165,9 @@ test('hero section with embedded product demo iframe', () => {
 });
 test('why section present', () => {
   expect(index).toContain('id="why"');
-  expect(index).toContain('Your agents shipped 4,000 lines today.');
+  expect(index).toContain('id="why-scrolly"');
+  expect(index).toContain('id="lines-ticker"');
+  expect(index).toContain('Your agents shipped');
 });
 test('faq section with accordion data driven from site.js', () => {
   expect(index).toContain('id="faq"');

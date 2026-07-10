@@ -87,43 +87,170 @@
   </div>
 </section>
 
-<section id="why" class="section">
+<section id="why" class="section why">
   <div class="section__inner">
-    <div data-rv style="max-width:760px">
-      <div class="eyebrow">Built for how you code now</div>
-      <h2 class="section-title" style="font-size:clamp(32px,4.4vw,54px)">Your agents shipped 4,000 lines today.<br>Do you know what they decided?</h2>
-    </div>
-
-    <div data-rv class="card-grid" style="margin-top:52px">
-      <div class="feature-card">
-        <div class="feature-card__index">01</div>
-        <h3 class="feature-card__title">See where your day went</h3>
-        <p class="feature-card__body">Focus time, per-app, per-project. Coding vs. debugging vs. review vs. meetings — the real shape of your day, on your machine only.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card__index">02</div>
-        <h3 class="feature-card__title">Keep the decisions</h3>
-        <p class="feature-card__body">AI wrote the code — but which architecture did it pick, and why? Meridian captures every session's decisions and tradeoffs while you supervise.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card__index">03</div>
-        <h3 class="feature-card__title">Docs that write themselves</h3>
-        <p class="feature-card__body">A searchable journal of every investigation, fix and rabbit hole. Backtrack any day, hour by hour. You write nothing.</p>
+    <div data-rv class="why__intro">
+      <div class="why__intro-row">
+        <span class="eyebrow">Built for how you code now</span>
+        <span class="why__intro-line">Your agents shipped <span class="ticker-num" id="lines-ticker" data-target="4000">0</span> lines today.<br>Do you know what they decided?</span>
       </div>
     </div>
 
-    <div data-rv class="worklog-banner">
-      <div class="worklog-banner__text"><strong>And the worklog grind?</strong> <span style="color:var(--mut)">Drafted, matched to the right ticket, posted when you approve.</span></div>
-      <div class="integration-row">
-        <span class="integration-chip"><span class="integration-dot" style="background:#2684FF"></span>Jira</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#5E6AD2"></span>Linear</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:var(--ink)"></span>GitHub Projects</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#0078D4"></span>Azure DevOps</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#0079BF"></span>Trello</span>
+    <div id="why-scrolly" class="scrolly">
+      <div class="scrolly__stage">
+        <div class="scrolly__grid">
+          <ol class="scrolly__rail">
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">01</span><span class="scrolly__rail-label">Your day</span></li>
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">02</span><span class="scrolly__rail-label">Decisions</span></li>
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">03</span><span class="scrolly__rail-label">Docs</span></li>
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">04</span><span class="scrolly__rail-label">Worklog</span></li>
+          </ol>
+
+          <div class="scrolly__panels">
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">01</div>
+              <h3 class="scrolly__panel-title">See where your day went</h3>
+              <p class="scrolly__panel-body">Coding, debugging, review, meetings — the real shape of your day, on your machine only.</p>
+              <div class="scrolly__panel-visual">
+                <div class="daystat-row">
+                  <div class="daystat"><span class="daystat__value">5h 12m</span><span class="daystat__label">focused</span></div>
+                  <div class="daystat"><span class="daystat__value">4</span><span class="daystat__label">tasks touched</span></div>
+                  <div class="daystat"><span class="daystat__value">2</span><span class="daystat__label">shipped</span></div>
+                </div>
+                <div class="dayshape">
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Coding</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--coding" style="--w:100%"></span></div>
+                    <span class="dayshape__time">2h 10m</span>
+                  </div>
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Debugging</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--debugging" style="--w:50%"></span></div>
+                    <span class="dayshape__time">1h 05m</span>
+                  </div>
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Review</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--review" style="--w:55%"></span></div>
+                    <span class="dayshape__time">1h 12m</span>
+                  </div>
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Meetings</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--meetings" style="--w:35%"></span></div>
+                    <span class="dayshape__time">45m</span>
+                  </div>
+                </div>
+                <div class="tasklist-head">Today's tasks <span class="tasklist-head__count">2/3 done</span></div>
+                <ul class="tasklist">
+                  <li class="task task--done"><span class="task__check"></span><span class="task__name">Fix slow product search</span><span class="task__time">2h 40m</span><button type="button" class="task__jump" data-jump-step="2">docs →</button></li>
+                  <li class="task task--done"><span class="task__check"></span><span class="task__name">Refactor onboarding email copy</span><span class="task__time">55m</span></li>
+                  <li class="task task--active"><span class="task__check"></span><span class="task__name">Add retry/backoff to billing webhook</span><span class="task__time">1h 15m</span></li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">02</div>
+              <span class="doc-task-chip">Fix slow product search · P1</span>
+              <h3 class="scrolly__panel-title">Keep the decisions</h3>
+              <p class="scrolly__panel-body">Which approach it picked, and why — every tradeoff, captured while you supervise.</p>
+              <div class="scrolly__panel-visual">
+                <p class="decision-context">Product search was taking <strong>4.2s</strong> on the full catalog.</p>
+                <div class="decision-compare">
+                  <div class="decision-option decision-option--rejected">
+                    <span class="decision-option__label">considered</span>
+                    <span class="decision-option__name">Stand up Elasticsearch</span>
+                    <span class="decision-option__note">fast, but a new service to run and keep in sync</span>
+                  </div>
+                  <div class="decision-option decision-option--chosen">
+                    <span class="decision-option__label">chosen</span>
+                    <span class="decision-option__name">Postgres full-text index</span>
+                    <span class="decision-option__note">ships today, one fewer service to run</span>
+                  </div>
+                </div>
+                <p class="decision-note"><span class="decision-note__label">tradeoff</span>revisit past ~5x the current catalog size — Postgres FTS won't scale forever</p>
+              </div>
+            </article>
+
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">03</div>
+              <div class="doc-layout">
+                <div class="doc-layout__text">
+                  <span class="doc-task-chip">Fix slow product search · P1</span>
+                  <h3 class="scrolly__panel-title">Docs that write themselves</h3>
+                  <p class="scrolly__panel-body">Every fix gets its own page — what changed, why, and how it was verified. You write nothing.</p>
+                </div>
+                <div class="doc-layout__card">
+                  <div class="doc-card">
+                    <div class="doc-card__head"><span class="doc-card__dot"></span>auto-generated doc</div>
+                    <div class="doc-diagram">
+                      <div class="doc-diagram__row doc-diagram__row--before">
+                        <span class="doc-diagram__tag">before</span>
+                        <span class="doc-diagram__node">query</span>
+                        <span class="doc-diagram__arrow">→</span>
+                        <span class="doc-diagram__node">seq. scan</span>
+                        <span class="doc-diagram__metric">4.2s</span>
+                      </div>
+                      <div class="doc-diagram__row doc-diagram__row--after">
+                        <span class="doc-diagram__tag">after</span>
+                        <span class="doc-diagram__node">query</span>
+                        <span class="doc-diagram__arrow">→</span>
+                        <span class="doc-diagram__node">GIN index</span>
+                        <span class="doc-diagram__metric">180ms</span>
+                      </div>
+                    </div>
+                    <div class="journal">
+                      <div class="journal__line"><span class="journal__time">2:47p</span>Added a GIN index on <code>products.search_vector</code>.</div>
+                      <div class="journal__line"><span class="journal__time">3:24p</span>Confirmed the planner uses it — p95 latency down to 180ms.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">04</div>
+              <h3 class="scrolly__panel-title">The worklog, handled</h3>
+              <p class="scrolly__panel-body">Drafted, matched to the right ticket, and posted — only when you approve.</p>
+              <div class="scrolly__panel-visual">
+                <div class="worklog-flow">
+                  <div class="worklog-draft">
+                    <p class="worklog-draft__text">Fixed slow product search — added a Postgres full-text index instead of standing up Elasticsearch. p95 latency down from 4.2s to 180ms.</p>
+                    <span class="worklog-ticket-chip"><span class="worklog-ticket-dot"></span>MER-241 · Search latency</span>
+                    <div class="worklog-draft__status"><span class="worklog-draft__status-dot"></span>Posted to Jira</div>
+                  </div>
+                  <div class="worklog-connector" aria-hidden="true">
+                    <svg class="worklog-connector__svg" viewBox="0 0 60 200" preserveAspectRatio="none">
+                      <path class="worklog-connector__line worklog-connector__line--jira" d="M0,100 L60,20"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,60"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,100"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,140"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,180"></path>
+                    </svg>
+                  </div>
+                  <div class="worklog-targets">
+                    <div class="worklog-target worklog-target--posted">
+                      <span class="integration-chip integration-chip--posted"><span class="integration-dot" style="background:#2684FF"></span>Jira<span class="integration-chip__badge">✓ posted</span></span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:#5E6AD2"></span>Linear</span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:var(--ink)"></span>GitHub Projects</span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:#0078D4"></span>Azure DevOps</span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:#0079BF"></span>Trello</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div data-rv class="privacy-line">100% local — nothing leaves your Mac without your yes · completely open source</div>
   </div>
 </section>
 
