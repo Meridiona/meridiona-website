@@ -56,6 +56,17 @@
   var $ = function (id) { return document.getElementById(id); };
   var EMAIL_RE = /\S+@\S+\.\S+/;
 
+  var COUNTRY_CODES = [
+    { code: '+1', name: 'US/Canada' }, { code: '+44', name: 'UK' }, { code: '+91', name: 'India' },
+    { code: '+61', name: 'Australia' }, { code: '+49', name: 'Germany' }, { code: '+33', name: 'France' },
+    { code: '+81', name: 'Japan' }, { code: '+82', name: 'South Korea' }, { code: '+86', name: 'China' },
+    { code: '+65', name: 'Singapore' }, { code: '+971', name: 'UAE' }, { code: '+31', name: 'Netherlands' },
+    { code: '+34', name: 'Spain' }, { code: '+39', name: 'Italy' }, { code: '+46', name: 'Sweden' },
+    { code: '+41', name: 'Switzerland' }, { code: '+52', name: 'Mexico' }, { code: '+55', name: 'Brazil' },
+    { code: '+27', name: 'South Africa' }, { code: '+64', name: 'New Zealand' }, { code: '+63', name: 'Philippines' },
+    { code: '+62', name: 'Indonesia' }, { code: '+92', name: 'Pakistan' }, { code: '+880', name: 'Bangladesh' },
+  ];
+
   // ── theme switcher ───────────────────────────────────────────────────────
   var Theme = {
     current: function () {
@@ -163,9 +174,9 @@
 
   // ── download modal ───────────────────────────────────────────────────────
   var DownloadModal = {
-    state: { os: null, email: '', sent: false },
+    state: { os: null, email: '', phoneCode: '+1', phone: '', sent: false },
     open: function () {
-      DownloadModal.state = { os: null, email: '', sent: false };
+      DownloadModal.state = { os: null, email: '', phoneCode: '+1', phone: '', sent: false };
       DownloadModal.render();
       $('modal-download').classList.add('is-open');
     },
@@ -200,12 +211,21 @@
       var copy = DOWNLOAD_COPY[s.os];
 
       if (!s.sent) {
+        var countryOptions = COUNTRY_CODES.map(function (c) {
+          var selected = c.code === s.phoneCode ? ' selected' : '';
+          return '<option value="' + c.code + '"' + selected + '>' + c.code + ' ' + c.name + '</option>';
+        }).join('');
         body.innerHTML =
           '<h3 class="modal-title">' + copy.emailTitle + '</h3>' +
           '<p class="modal-subtitle">' + copy.emailPrompt + '</p>' +
           '<form id="dl-form" class="email-form">' +
             '<input id="dl-email" class="email-input" type="email" required autofocus ' +
               'placeholder="you@work.com" value="' + s.email + '" aria-label="Email address">' +
+            '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
+            '<div class="phone-row">' +
+              '<select id="dl-phone-code" class="phone-select" aria-label="Country code">' + countryOptions + '</select>' +
+              '<input id="dl-phone" class="phone-input" type="tel" placeholder="55 5123 4567" value="' + s.phone + '" aria-label="Phone number (optional)">' +
+            '</div>' +
             '<button type="submit" class="btn-primary btn-primary--block">' + copy.ctaLabel + '</button>' +
           '</form>' +
           '<div class="form-note">' + copy.emailNote + '</div>' +
@@ -232,7 +252,13 @@
       var email = input.value.trim();
       if (!EMAIL_RE.test(email)) return;
 
+      var phoneDigits = ($('dl-phone').value || '').trim();
+      var phoneCode = $('dl-phone-code').value;
+      var phone = phoneDigits ? (phoneCode + ' ' + phoneDigits) : '';
+
       DownloadModal.state.email = email;
+      DownloadModal.state.phoneCode = phoneCode;
+      DownloadModal.state.phone = phoneDigits;
       DownloadModal.state.sent = true;
 
       fetch('/subscribe', {
@@ -242,6 +268,7 @@
           email: email,
           source: DownloadModal.state.os === 'mac' ? 'download' : 'waitlist',
           os: DownloadModal.state.os,
+          phone: phone,
         }),
       }).catch(function () { /* non-fatal: the confirmation UI has already been shown */ });
 
