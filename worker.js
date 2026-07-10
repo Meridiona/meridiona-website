@@ -68,7 +68,7 @@ export default {
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
-      let email, source, os;
+      let email, source, os, phone;
       try {
         const body = await request.json();
         email = (body.email || '').trim().toLowerCase();
@@ -76,6 +76,8 @@ export default {
         // unreleased OS. Anything else/missing falls back to the shared audience below.
         source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
         os = ['mac', 'windows', 'linux'].includes(body.os) ? body.os : null;
+        // Optional; a malformed value is dropped rather than failing the whole signup.
+        phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 32) : '';
       } catch {
         return json({ error: 'Invalid request.' }, 400);
       }
@@ -89,10 +91,12 @@ export default {
         (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
         env.RESEND_AUDIENCE_ID;
 
-      // Resend rejects "properties" unless the key is pre-registered on the account
-      // (undocumented at the time this was written), so last_name carries the OS tag instead.
+      // Resend contacts only have email/first_name/last_name/properties, and "properties"
+      // rejects unregistered keys (see the os-tag revert above) - so last_name carries the
+      // OS tag and first_name carries the optional phone number, both just along for the ride.
       const contact = { email, unsubscribed: false };
       if (os) contact.last_name = os.charAt(0).toUpperCase() + os.slice(1);
+      if (/^[+\d][\d\s()-]{4,30}$/.test(phone)) contact.first_name = phone;
 
       try {
         const res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
@@ -168,10 +172,13 @@ function downloadPage(env, url) {
   h1{font-family:Georgia,'Times New Roman',serif;font-size:34px;line-height:1.12;margin:18px 0 8px;letter-spacing:-.01em}
   .sub{font-size:14px;color:var(--ink-3);margin:0 0 30px}
   .label{font-size:14px;color:var(--ink);margin:0 0 12px}
-  form{display:flex;gap:8px;max-width:390px;margin:0 auto}
-  input{flex:1;padding:12px 16px;border-radius:999px;border:1px solid var(--line);
+  form{display:flex;flex-direction:column;gap:8px;max-width:390px;margin:0 auto}
+  .form-row{display:flex;gap:8px}
+  .phone-hint{font-size:11px;color:var(--ink-4);margin:0;text-align:left}
+  input,select{flex:1;padding:12px 16px;border-radius:999px;border:1px solid var(--line);
     background:#fff;font-size:14px;color:var(--ink);outline:none}
-  input:focus{border-color:var(--ink)}
+  select{flex:0 0 116px;padding:12px 8px;font-size:12.5px}
+  input:focus,select:focus{border-color:var(--ink)}
   button{padding:12px 20px;border-radius:999px;border:0;background:var(--ink);color:var(--paper);
     font-size:14px;cursor:pointer;white-space:nowrap}
   button:hover{opacity:.9}
@@ -192,7 +199,14 @@ function downloadPage(env, url) {
 
   <p class="label">Want to hear about updates?</p>
   <form id="sub-form">
-    <input id="sub-email" type="email" placeholder="you@company.com" required autocomplete="email" aria-label="Email address">
+    <div class="form-row">
+      <input id="sub-email" type="email" placeholder="you@company.com" required autocomplete="email" aria-label="Email address">
+    </div>
+    <p class="phone-hint">📱 Got a number? (optional) So we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>
+    <div class="form-row">
+      <select id="sub-phone-code" aria-label="Country code"></select>
+      <input id="sub-phone" type="tel" placeholder="55 5123 4567" aria-label="Phone number (optional)">
+    </div>
     <button type="submit">Join →</button>
   </form>
   <p class="msg mono" id="sub-msg">New releases and the occasional note. No spam.</p>
@@ -229,13 +243,25 @@ function downloadPage(env, url) {
   // Small delay so PostHog can boot and set a distinct_id before we fire /dl.
   setTimeout(startDownload, 400);
 
+  var COUNTRY_CODES = [
+    ['+1','US/Canada'],['+44','UK'],['+91','India'],['+61','Australia'],['+49','Germany'],
+    ['+33','France'],['+81','Japan'],['+82','South Korea'],['+86','China'],['+65','Singapore'],
+    ['+971','UAE'],['+31','Netherlands'],['+34','Spain'],['+39','Italy'],['+46','Sweden'],
+    ['+41','Switzerland'],['+52','Mexico'],['+55','Brazil'],['+27','South Africa'],['+64','New Zealand'],
+    ['+63','Philippines'],['+62','Indonesia'],['+92','Pakistan'],['+880','Bangladesh']
+  ];
+  var codeSelect = document.getElementById('sub-phone-code');
+  codeSelect.innerHTML = COUNTRY_CODES.map(function(c){ return '<option value="' + c[0] + '">' + c[0] + ' ' + c[1] + '</option>'; }).join('');
+
   var form = document.getElementById('sub-form');
   var msg = document.getElementById('sub-msg');
   form.addEventListener('submit', function(ev){
     ev.preventDefault();
     var email = document.getElementById('sub-email').value.trim();
+    var phoneDigits = document.getElementById('sub-phone').value.trim();
+    var phone = phoneDigits ? (codeSelect.value + ' ' + phoneDigits) : '';
     msg.textContent = 'Joining…';
-    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'download',os:'mac'})})
+    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'download',os:'mac',phone:phone})})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(function(res){
         if(res.ok && res.j && res.j.success){
