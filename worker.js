@@ -89,10 +89,8 @@ export default {
         (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
         env.RESEND_AUDIENCE_ID;
 
-      // Resend contacts have no custom-field support, so the OS rides along in
-      // last_name purely so it's visible as a column in the dashboard contacts table.
       const contact = { email, unsubscribed: false };
-      if (os) contact.last_name = os.charAt(0).toUpperCase() + os.slice(1);
+      if (os) contact.properties = { os: os.charAt(0).toUpperCase() + os.slice(1) };
 
       try {
         const res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
