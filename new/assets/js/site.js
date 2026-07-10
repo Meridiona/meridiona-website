@@ -96,6 +96,7 @@
       }).join('');
     },
     init: function () {
+      if (!$('theme-dots')) return;
       $('theme-dots').addEventListener('click', function (e) {
         var el = e.target.closest('[data-theme-id]');
         if (el) Theme.apply(el.dataset.themeId);
@@ -128,6 +129,7 @@
     },
     init: function () {
       var list = $('faq-list');
+      if (!list) return;
       list.addEventListener('click', function (e) {
         var el = e.target.closest('[data-faq-idx]');
         if (el) Faq.toggle(Number(el.dataset.faqIdx));
@@ -175,6 +177,7 @@
       iframe.style.transform = 'scale(' + scale + ')';
     },
     init: function () {
+      if (!$('hero-embed-wrap')) return;
       HeroEmbed.size();
       window.addEventListener('resize', HeroEmbed.size);
     },
@@ -293,8 +296,9 @@
       DownloadModal.render();
     },
     init: function () {
-      $('btn-download-nav').addEventListener('click', DownloadModal.open);
-      $('btn-download-faq').addEventListener('click', DownloadModal.open);
+      if (!$('modal-download')) return;
+      if ($('btn-download-nav')) $('btn-download-nav').addEventListener('click', DownloadModal.open);
+      if ($('btn-download-faq')) $('btn-download-faq').addEventListener('click', DownloadModal.open);
       $('btn-close-download').addEventListener('click', DownloadModal.close);
       $('modal-download').addEventListener('click', function (e) {
         if (e.target.id === 'modal-download') DownloadModal.close();
@@ -310,10 +314,50 @@
     open: function () { $('modal-connect').classList.add('is-open'); },
     close: function () { $('modal-connect').classList.remove('is-open'); },
     init: function () {
+      if (!$('modal-connect') || !$('btn-connect')) return;
       $('btn-connect').addEventListener('click', ConnectModal.open);
       $('btn-close-connect').addEventListener('click', ConnectModal.close);
       $('modal-connect').addEventListener('click', function (e) {
         if (e.target.id === 'modal-connect') ConnectModal.close();
+      });
+    },
+  };
+
+  // ── writing-page subscribe form ("the field notes letter") ───────────────
+  var SubscribeForm = {
+    init: function () {
+      var form = $('subscribe-form');
+      if (!form) return;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var input = $('subscribe-email');
+        var msg = $('subscribe-msg');
+        var btn = form.querySelector('button[type="submit"]');
+        var email = (input.value || '').trim();
+        if (!EMAIL_RE.test(email)) return;
+        btn.disabled = true;
+        btn.textContent = 'Subscribing…';
+        fetch('/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.success) {
+              form.style.display = 'none';
+              msg.textContent = 'You’re on the list. The next essay lands in your inbox.';
+            } else {
+              msg.textContent = data.error || 'Something went wrong. Please try again.';
+              btn.disabled = false;
+              btn.textContent = 'Subscribe';
+            }
+          })
+          .catch(function () {
+            msg.textContent = 'Something went wrong. Please try again.';
+            btn.disabled = false;
+            btn.textContent = 'Subscribe';
+          });
       });
     },
   };
@@ -327,4 +371,5 @@
   HeroEmbed.init();
   DownloadModal.init();
   ConnectModal.init();
+  SubscribeForm.init();
 })();

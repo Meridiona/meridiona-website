@@ -106,6 +106,17 @@ body[data-theme="paper"]{
 .nav__link{color:var(--mut);text-decoration:none}
 .nav__link:hover{color:var(--ink)}
 .nav__link--mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+/* The nav grew past what fits inline on phones (Why/FAQ/Writing/GitHub/Connect/
+   Download). Rather than a hamburger, progressively shed the secondary items —
+   Download (the one action that matters) and the brand always stay. */
+@media (max-width:760px){
+  .nav__inner{padding:0 20px;gap:14px}
+  .nav__links{gap:16px}
+  .nav__link--mono,.btn-ghost{display:none}
+}
+@media (max-width:560px){
+  .nav__link{display:none}
+}
 
 /* ── hero ──────────────────────────────────────────────────────────────── */
 .hero{
@@ -179,6 +190,9 @@ body[data-theme="paper"]{
 /* ── footer ────────────────────────────────────────────────────────────── */
 .site-footer{border-top:1px solid var(--line);margin-top:80px;padding:48px 0 36px}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px 32px}
+@media (max-width:640px){
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
 .footer-brand{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
 .footer-brand__row{display:flex;align-items:center;gap:10px}
 .footer-brand__mark{width:28px;height:28px;object-fit:contain;display:inline-block}

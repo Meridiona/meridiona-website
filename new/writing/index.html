@@ -3,31 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meridian — the work journal that remembers your day</title>
-<meta name="description" content="Meridian is a 100% local, open-source work journal for developers. It remembers your day and syncs your worklog to Jira, Linear, GitHub Projects, Azure DevOps and Trello automatically.">
+<title>Writing — Meridian</title>
+<meta name="description" content="Technical essays and field notes on AI, engineering, and keeping a record of work that moves faster than memory.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="/new/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/new/favicon-512.png">
 <link rel="apple-touch-icon" href="/new/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/new/assets/css/site.css">
-<!-- PostHog product analytics — same project as the root site (../index.html); loaded eagerly (no defer) so pageviews are captured as early as possible. -->
+<link rel="stylesheet" href="/new/assets/css/writing.css">
 <script src="/new/assets/js/analytics.js"></script>
 </head>
 <body>
 
 <nav class="nav">
   <div class="nav__inner">
-    <a href="#top" class="nav__brand">
+    <a href="/new/" class="nav__brand">
       <img class="nav__brand-mark" src="/new/assets/images/meridian-mark.png" alt="Meridian">
       <span class="nav__brand-name">Meridian</span>
     </a>
     <div class="nav__links">
-      <a href="#why" class="nav__link">Why</a>
-      <a href="#faq" class="nav__link">FAQ</a>
-      <a href="/new/writing" class="nav__link">Writing</a>
+      <a href="/new/#why" class="nav__link">Why</a>
+      <a href="/new/#faq" class="nav__link">FAQ</a>
+      <a href="/new/writing" class="nav__link" style="color:var(--ink)">Writing</a>
       <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="nav__link nav__link--mono">GitHub ↗</a>
       <button id="btn-connect" title="Connect" class="btn-ghost">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"></circle><circle cx="6" cy="12" r="2.6"></circle><circle cx="18" cy="19" r="2.6"></circle><path d="M8.4 10.7 L15.6 6.3M8.4 13.3 L15.6 17.7"></path></svg>
@@ -38,109 +38,76 @@
   </div>
 </nav>
 
-<section id="top" class="hero">
-  <div class="hero__glow"></div>
+<main class="writing-page">
+  <div class="writing-page__inner">
 
-  <div class="hero__content">
-    <h1 class="hero__title">
-      You code faster than you can remember.<br>
-      <span class="hero__title-accent">Meridian remembers.</span>
-    </h1>
-    <p class="hero__subtitle">An intelligent work journal that remembers your day — and syncs it with your project management tool automatically.</p>
-  </div>
+    <header class="writing-head">
+      <div class="eyebrow">Field notes · from the people building Meridian</div>
+      <h1 class="writing-head__title">Writing</h1>
+      <p class="writing-head__sub">Technical essays on AI, engineering, and keeping a record of work that moves faster than memory.</p>
+    </header>
 
-  <div class="hero__pointer" aria-hidden="true">
-    <svg width="70" height="70" viewBox="0 0 70 70" style="overflow:visible">
-      <path d="M 6 66 C 40 72 66 54 60 12" fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-linecap="round"></path>
-      <path d="M 53 19 L 60 11 L 66 19" fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
-    </svg>
-  </div>
-
-  <div id="hero-embed-wrap" class="hero__embed-wrap">
-    <div class="hero__embed-annotation" aria-hidden="true">
-      <span class="hero__embed-note">it's live — go poke around</span>
-      <svg width="32" height="34" viewBox="0 0 38 40" style="overflow:visible;margin-top:10px">
-        <path d="M4 4 Q26 4 30 30" fill="none" stroke="var(--acc2)" stroke-width="2" stroke-linecap="round"></path>
-        <path d="M22 25 L30 30 L32 21" fill="none" stroke="var(--acc2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-    </div>
-    <div id="hero-outer-frame" class="hero__embed-frame">
-      <div id="hero-viewport" class="hero__embed-viewport">
-        <iframe id="hero-embed-frame" class="hero__iframe" src="/new/demo.html" title="Meridian product demo" hint-size="1240,720"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <div class="trust-strip">
-    <span class="trust-strip__item">
-      <svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L19 6 V11 C19 15.5 16 19 12 21 C8 19 5 15.5 5 11 V6 Z"></path></svg>
-      100% local — your work never leaves your Mac
-    </span>
-    <span class="trust-strip__item">
-      <svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7 L3 12 L8 17"></path><path d="M16 7 L21 12 L16 17"></path></svg>
-      Open source — see exactly what it does
-    </span>
-    <span class="trust-strip__item">
-      <svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 H11 L20 13 L13 20 L4 11 Z"></path><circle cx="8.5" cy="8.5" r="1.5"></circle></svg>
-      Free
-    </span>
-  </div>
-</section>
-
-<section id="why" class="section">
-  <div class="section__inner">
-    <div data-rv style="max-width:760px">
-      <div class="eyebrow">Built for how you code now</div>
-      <h2 class="section-title" style="font-size:clamp(32px,4.4vw,54px)">Your agents shipped 4,000 lines today.<br>Do you know what they decided?</h2>
-    </div>
-
-    <div data-rv class="card-grid" style="margin-top:52px">
-      <div class="feature-card">
-        <div class="feature-card__index">01</div>
-        <h3 class="feature-card__title">See where your day went</h3>
-        <p class="feature-card__body">Focus time, per-app, per-project. Coding vs. debugging vs. review vs. meetings — the real shape of your day, on your machine only.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card__index">02</div>
-        <h3 class="feature-card__title">Keep the decisions</h3>
-        <p class="feature-card__body">AI wrote the code — but which architecture did it pick, and why? Meridian captures every session's decisions and tradeoffs while you supervise.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card__index">03</div>
-        <h3 class="feature-card__title">Docs that write themselves</h3>
-        <p class="feature-card__body">A searchable journal of every investigation, fix and rabbit hole. Backtrack any day, hour by hour. You write nothing.</p>
-      </div>
-    </div>
-
-    <div data-rv class="worklog-banner">
-      <div class="worklog-banner__text"><strong>And the worklog grind?</strong> <span style="color:var(--mut)">Drafted, matched to the right ticket, posted when you approve.</span></div>
-      <div class="integration-row">
-        <span class="integration-chip"><span class="integration-dot" style="background:#2684FF"></span>Jira</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#5E6AD2"></span>Linear</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:var(--ink)"></span>GitHub Projects</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#0078D4"></span>Azure DevOps</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#0079BF"></span>Trello</span>
-      </div>
-    </div>
-
-    <div data-rv class="privacy-line">100% local — nothing leaves your Mac without your yes · completely open source</div>
-  </div>
-</section>
-
-<section id="faq" class="section section--flush-bottom" style="display:flex;flex-direction:column;justify-content:center">
-  <div class="section__inner">
-
-    <div data-rv class="faq-layout">
+    <article class="entry" data-rv>
+      <div class="entry__stamp">2026-07-10<span class="entry__stamp-new">Latest</span></div>
       <div>
-        <h2 class="faq-intro__title">Fair questions</h2>
-        <p class="faq-intro__body">Anything an app that watches your screen should answer plainly.</p>
-        <button id="btn-download-faq" class="btn-primary btn-primary--lg" style="margin-top:26px">Download for Mac</button>
+        <h2 class="entry__title"><a href="/new/writing/invisible-work">The timesheet wasn't lying. It was blind.</a></h2>
+        <p class="entry__dek">We recorded everything a developer did for a week. The hours weren't in the wrong place — a third of them were nowhere at all.</p>
+        <div class="entry__meta">
+          <span>6 min read</span>
+          <span class="entry__tag">worklogs</span>
+          <span class="entry__tag">estimates</span>
+          <span class="entry__tag">data</span>
+        </div>
       </div>
-      <div class="faq-list">
-        <div id="faq-list"></div>
+    </article>
+
+    <article class="entry" data-rv>
+      <div class="entry__stamp">2026-07-02</div>
+      <div>
+        <h2 class="entry__title"><a href="/new/writing/velocity-visibility">Your velocity went up. Your visibility went down.</a></h2>
+        <p class="entry__dek">AI made everyone faster — but the faster you go, the less you can see about how the work actually got done.</p>
+        <div class="entry__meta">
+          <span>5 min read</span>
+          <span class="entry__tag">AI</span>
+          <span class="entry__tag">workflow</span>
+          <span class="entry__tag">observability</span>
+        </div>
       </div>
+    </article>
+
+    <article class="entry" data-rv>
+      <div class="entry__stamp">2026-05-29</div>
+      <div>
+        <h2 class="entry__title"><a href="/new/writing/eval-loop">More context made my classifier worse, not better</a></h2>
+        <p class="entry__dek">Closing the eval loop with a machine-maintained failure taxonomy — built using a Claude Code skill.</p>
+        <div class="entry__meta">
+          <span>12 min read</span>
+          <span class="entry__tag">AI</span>
+          <span class="entry__tag">engineering</span>
+          <span class="entry__tag">evals</span>
+        </div>
+      </div>
+    </article>
+
+    <div class="writing-more">
+      <span>3 essays so far</span>
+      <em>more coming →</em>
     </div>
 
+    <section class="letter-card" data-rv>
+      <div class="eyebrow">Never miss an essay</div>
+      <h2 class="letter-card__title">Get the next one in your inbox.</h2>
+      <p class="letter-card__body">Essays, field notes, and the occasional provocation. No schedule, no spam — we only write when there's something worth saying.</p>
+      <form id="subscribe-form" class="letter-card__form">
+        <input id="subscribe-email" class="letter-card__input" type="email" required placeholder="you@company.com" aria-label="Email address">
+        <button type="submit" class="btn-primary">Subscribe</button>
+      </form>
+      <p id="subscribe-msg" class="letter-card__msg"></p>
+    </section>
+
+  </div>
+
+  <div class="writing-page__inner writing-page__inner--wide">
     <footer class="site-footer">
       <div class="footer-grid">
         <div class="footer-brand">
@@ -159,8 +126,8 @@
         </div>
         <div class="footer-col">
           <div class="footer-col__title">Product</div>
-          <a href="#why" class="footlink">Why Meridian</a>
-          <a href="#faq" class="footlink">FAQ</a>
+          <a href="/new/#why" class="footlink">Why Meridian</a>
+          <a href="/new/#faq" class="footlink">FAQ</a>
           <a href="/new/writing" class="footlink">Writing</a>
           <a href="#" class="footlink">Changelog</a>
         </div>
@@ -182,12 +149,11 @@
       <div class="footer-bottom">
         <span>© 2026 Meridian · MIT License</span>
         <span>made for people who'd rather be coding</span>
-        <a href="#top" class="footlink">back to top ↑</a>
+        <a href="/new/" class="footlink">← back home</a>
       </div>
     </footer>
-
   </div>
-</section>
+</main>
 
 <!-- ============ DOWNLOAD MODAL ============ -->
 <div id="modal-download" class="modal-overlay modal-overlay--center">

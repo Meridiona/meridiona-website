@@ -240,6 +240,80 @@ test('demo.css keyframes referenced by demo.js/demo.css are present', () => {
   expect(demoCss).toContain('@keyframes wsShimmer');
 });
 
+// ─── Group 8: Writing section ─────────────────────────────────────────────────
+console.log('\nWriting section');
+const WRITING_DIR = path.join(ROOT, 'writing');
+const writingIndex = fs.readFileSync(path.join(WRITING_DIR, 'index.html'), 'utf-8');
+const essayFiles = fs.readdirSync(WRITING_DIR).filter((f) => f.endsWith('.html') && f !== 'index.html');
+const essays = essayFiles.map((f) => ({ name: f, html: fs.readFileSync(path.join(WRITING_DIR, f), 'utf-8') }));
+const writingCss = fs.readFileSync(path.join(ROOT, 'assets/css/writing.css'), 'utf-8');
+const allWritingPages = [{ name: 'index.html', html: writingIndex }, ...essays];
+
+test('writing index lists every essay file (and no dead links)', () => {
+  for (const f of essayFiles) {
+    const slug = f.replace(/\.html$/, '');
+    expect(writingIndex).toContain(`href="/new/writing/${slug}"`);
+  }
+  expect(essayFiles.length).toBeGreaterThan(1);
+});
+test('every writing page has viewport meta, single <title>, and single description', () => {
+  for (const p of allWritingPages) {
+    const head = p.html.slice(0, p.html.indexOf('<body'));
+    expect(head).toContain('name="viewport"');
+    expect((p.html.match(/<title>[^<]*<\/title>/g) || []).length).toBe(1);
+    expect((p.html.match(/<meta name="description"[^>]*>/g) || []).length).toBe(1);
+  }
+});
+test('writing pages have no inline <style>/<script> blocks (externalized)', () => {
+  for (const p of allWritingPages) {
+    expect(p.html).toContain('<link rel="stylesheet" href="/new/assets/css/site.css">');
+    expect(p.html).toContain('<link rel="stylesheet" href="/new/assets/css/writing.css">');
+    expect(p.html).toContain('<script src="/new/assets/js/site.js" defer></script>');
+    expect(/<style>/.test(p.html)).toBe(false);
+    const inlineScripts = (p.html.match(/<script(?![^>]*\bsrc=)[^>]*>/g) || []);
+    expect(inlineScripts.length).toBe(0);
+  }
+});
+test('writing pages carry the shared chrome: nav, theme switcher, modals, /new-rooted assets', () => {
+  for (const p of allWritingPages) {
+    expect(p.html).toContain('id="theme-dots"');
+    expect(p.html).toContain('id="modal-download"');
+    expect(p.html).toContain('id="modal-connect"');
+    expect(p.html).toContain('href="/new/writing"');
+    expect(p.html).toContain('src="/new/assets/js/analytics.js"');
+  }
+});
+test('essay pages have the reading structure: backlink, article head, prose, footer nav', () => {
+  for (const p of essays) {
+    expect(p.html).toContain('class="backlink"');
+    expect(p.html).toContain('class="article-head__title"');
+    expect(p.html).toContain('class="prose"');
+    expect(p.html).toContain('class="article-foot');
+  }
+});
+test('writing.css defines the reading column with fluid type', () => {
+  expect(writingCss).toContain('.prose{');
+  expect(writingCss).toMatch(/\.article-head__title\{[^}]*font-size:clamp\(/);
+  expect(writingCss).toContain('Newsreader');
+});
+test('landing page nav links to the writing index', () => {
+  expect(index).toContain('href="/new/writing"');
+});
+test('writing index subscribe form is wired to site.js /subscribe handler', () => {
+  expect(writingIndex).toContain('id="subscribe-form"');
+  expect(writingIndex).toContain('id="subscribe-email"');
+  expect(siteJs).toContain("$('subscribe-form')");
+});
+test('site.js modules guard for pages without the hero/faq DOM', () => {
+  expect(siteJs).toContain("if (!$('hero-embed-wrap')) return;");
+  expect(siteJs).toContain('if (!list) return;');
+});
+test('<script> open/close tags are balanced on every writing page', () => {
+  for (const p of allWritingPages) {
+    expect((p.html.match(/<script[\s>]/g) || []).length).toBe((p.html.match(/<\/script>/g) || []).length);
+  }
+});
+
 // ─── Summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${'─'.repeat(50)}`);
 console.log(`${passed + failed} tests: ${passed} passed, ${failed} failed`);
