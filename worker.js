@@ -68,13 +68,14 @@ export default {
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
-      let email, source;
+      let email, source, os;
       try {
         const body = await request.json();
         email = (body.email || '').trim().toLowerCase();
         // 'download' = already has (or is getting) the Mac build; 'waitlist' = waiting on an
         // unreleased OS. Anything else/missing falls back to the shared audience below.
         source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
+        os = ['mac', 'windows', 'linux'].includes(body.os) ? body.os : null;
       } catch {
         return json({ error: 'Invalid request.' }, 400);
       }
@@ -88,6 +89,11 @@ export default {
         (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
         env.RESEND_AUDIENCE_ID;
 
+      // Resend contacts have no custom-field support, so the OS rides along in
+      // last_name purely so it's visible as a column in the dashboard contacts table.
+      const contact = { email, unsubscribed: false };
+      if (os) contact.last_name = os.charAt(0).toUpperCase() + os.slice(1);
+
       try {
         const res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
           method: 'POST',
@@ -95,7 +101,7 @@ export default {
             'Authorization': `Bearer ${env.RESEND_API_KEY}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email, unsubscribed: false }),
+          body: JSON.stringify(contact),
         });
 
         if (!res.ok) {
@@ -229,7 +235,7 @@ function downloadPage(env, url) {
     ev.preventDefault();
     var email = document.getElementById('sub-email').value.trim();
     msg.textContent = 'Joining…';
-    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'download'})})
+    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'download',os:'mac'})})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(function(res){
         if(res.ok && res.j && res.j.success){
