@@ -323,6 +323,107 @@
     },
   };
 
+  // ── why: scroll-driven panel stage ────────────────────────────────────────
+  // The #why section pins one "stage" and swaps a single panel at a time as the
+  // reader scrolls through it — one idea per screen, minimal text. Driven by
+  // scroll position (getBoundingClientRect), not IntersectionObserver, so it
+  // works anywhere; falls back to a plain stacked list when motion is reduced.
+  var WhyScroll = {
+    el: null, panels: [], rail: [], steps: 0, active: -1,
+    init: function () {
+      WhyScroll.el = $('why-scrolly');
+      if (!WhyScroll.el) return;
+      WhyScroll.panels = [].slice.call(WhyScroll.el.querySelectorAll('.scrolly__panel'));
+      WhyScroll.rail = [].slice.call(WhyScroll.el.querySelectorAll('.scrolly__rail-item'));
+      WhyScroll.steps = WhyScroll.panels.length;
+      if (!WhyScroll.steps) return;
+
+      WhyScroll.el.style.setProperty('--steps', WhyScroll.steps);
+      WhyScroll.el.classList.add('is-ready');
+      WhyScroll.setActive(0);
+
+      // the sticky intro bar's height varies with text wrap at different
+      // widths — measure it so the pinned stage always starts exactly below
+      // it, instead of guessing a fixed offset that breaks on some widths.
+      WhyScroll.measureIntro();
+      window.addEventListener('resize', WhyScroll.measureIntro, { passive: true });
+
+      window.addEventListener('scroll', WhyScroll.update, { passive: true });
+      window.addEventListener('resize', WhyScroll.update, { passive: true });
+      WhyScroll.update();
+
+      // "docs →" jump: lets a reader click straight from a task in step 1 to
+      // its auto-generated doc later in the stage, instead of only scrolling.
+      [].slice.call(WhyScroll.el.querySelectorAll('[data-jump-step]')).forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          WhyScroll.goTo(parseInt(btn.getAttribute('data-jump-step'), 10) || 0);
+        });
+      });
+    },
+    measureIntro: function () {
+      var intro = document.querySelector('.why__intro');
+      if (!intro) return;
+      document.documentElement.style.setProperty('--intro-h', intro.offsetHeight + 'px');
+    },
+    goTo: function (idx) {
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var total = WhyScroll.el.offsetHeight - vh;
+      if (total <= 0) return;
+      var target = WhyScroll.el.offsetTop + total * ((idx + 0.5) / WhyScroll.steps);
+      window.scrollTo({ top: target, behavior: 'smooth' });
+    },
+    update: function () {
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var rect = WhyScroll.el.getBoundingClientRect();
+      var total = WhyScroll.el.offsetHeight - vh;
+      var p = total > 0 ? (-rect.top) / total : 0;
+      p = Math.max(0, Math.min(0.99999, p));
+      var idx = Math.floor(p * WhyScroll.steps);
+      if (idx !== WhyScroll.active) WhyScroll.setActive(idx);
+    },
+    setActive: function (idx) {
+      WhyScroll.active = idx;
+      WhyScroll.panels.forEach(function (el, i) { el.classList.toggle('is-active', i === idx); });
+      WhyScroll.rail.forEach(function (el, i) {
+        var on = i === idx;
+        el.classList.toggle('is-active', on);
+        el.setAttribute('aria-current', on ? 'step' : 'false');
+      });
+    },
+  };
+
+  // ── lines-shipped ticker: counts up once, then keeps ticking slowly so the
+  // stat reads as "live" rather than a static number. setInterval (not rAF —
+  // more reliably paced across environments).
+  var LinesTicker = {
+    init: function () {
+      var el = $('lines-ticker');
+      if (!el) return;
+      var target = parseInt(el.getAttribute('data-target'), 10) || 0;
+      var steps = 34, i = 0;
+      var cu = setInterval(function () {
+        i++;
+        var p = Math.min(1, i / steps);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased).toLocaleString('en-US');
+        if (i >= steps) {
+          clearInterval(cu);
+          el.textContent = target.toLocaleString('en-US');
+          LinesTicker.liveTick(el, target);
+        }
+      }, 40);
+    },
+    liveTick: function (el, base) {
+      var current = base;
+      var tick = function () {
+        current += Math.floor(Math.random() * 3) + 1;
+        el.textContent = current.toLocaleString('en-US');
+        setTimeout(tick, 2200 + Math.random() * 1800);
+      };
+      setTimeout(tick, 2200 + Math.random() * 1800);
+    },
+  };
+
   // ── writing-page subscribe form ("the field notes letter") ───────────────
   var SubscribeForm = {
     init: function () {
@@ -371,5 +472,7 @@
   HeroEmbed.init();
   DownloadModal.init();
   ConnectModal.init();
+  WhyScroll.init();
+  LinesTicker.init();
   SubscribeForm.init();
 })();

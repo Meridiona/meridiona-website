@@ -87,43 +87,170 @@
   </div>
 </section>
 
-<section id="why" class="section">
+<section id="why" class="section why">
   <div class="section__inner">
-    <div data-rv style="max-width:760px">
-      <div class="eyebrow">Built for how you code now</div>
-      <h2 class="section-title" style="font-size:clamp(32px,4.4vw,54px)">Your agents shipped 4,000 lines today.<br>Do you know what they decided?</h2>
-    </div>
-
-    <div data-rv class="card-grid" style="margin-top:52px">
-      <div class="feature-card">
-        <div class="feature-card__index">01</div>
-        <h3 class="feature-card__title">See where your day went</h3>
-        <p class="feature-card__body">Focus time, per-app, per-project. Coding vs. debugging vs. review vs. meetings — the real shape of your day, on your machine only.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card__index">02</div>
-        <h3 class="feature-card__title">Keep the decisions</h3>
-        <p class="feature-card__body">AI wrote the code — but which architecture did it pick, and why? Meridian captures every session's decisions and tradeoffs while you supervise.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card__index">03</div>
-        <h3 class="feature-card__title">Docs that write themselves</h3>
-        <p class="feature-card__body">A searchable journal of every investigation, fix and rabbit hole. Backtrack any day, hour by hour. You write nothing.</p>
+    <div data-rv class="why__intro">
+      <div class="why__intro-row">
+        <span class="eyebrow">Built for how you code now</span>
+        <span class="why__intro-line">Your agents shipped <span class="ticker-num" id="lines-ticker" data-target="4000">0</span> lines today.<br>Do you know what they decided?</span>
       </div>
     </div>
 
-    <div data-rv class="worklog-banner">
-      <div class="worklog-banner__text"><strong>And the worklog grind?</strong> <span style="color:var(--mut)">Drafted, matched to the right ticket, posted when you approve.</span></div>
-      <div class="integration-row">
-        <span class="integration-chip"><span class="integration-dot" style="background:#2684FF"></span>Jira</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#5E6AD2"></span>Linear</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:var(--ink)"></span>GitHub Projects</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#0078D4"></span>Azure DevOps</span>
-        <span class="integration-chip"><span class="integration-dot" style="background:#0079BF"></span>Trello</span>
+    <div id="why-scrolly" class="scrolly">
+      <div class="scrolly__stage">
+        <div class="scrolly__grid">
+          <ol class="scrolly__rail">
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">01</span><span class="scrolly__rail-label">Your day</span></li>
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">02</span><span class="scrolly__rail-label">Decisions</span></li>
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">03</span><span class="scrolly__rail-label">Docs</span></li>
+            <li class="scrolly__rail-item"><span class="scrolly__rail-num">04</span><span class="scrolly__rail-label">Worklog</span></li>
+          </ol>
+
+          <div class="scrolly__panels">
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">01</div>
+              <h3 class="scrolly__panel-title">See where your day went</h3>
+              <p class="scrolly__panel-body">Coding, debugging, review, meetings — the real shape of your day, on your machine only.</p>
+              <div class="scrolly__panel-visual">
+                <div class="daystat-row">
+                  <div class="daystat"><span class="daystat__value">5h 12m</span><span class="daystat__label">focused</span></div>
+                  <div class="daystat"><span class="daystat__value">4</span><span class="daystat__label">tasks touched</span></div>
+                  <div class="daystat"><span class="daystat__value">2</span><span class="daystat__label">shipped</span></div>
+                </div>
+                <div class="dayshape">
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Coding</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--coding" style="--w:100%"></span></div>
+                    <span class="dayshape__time">2h 10m</span>
+                  </div>
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Debugging</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--debugging" style="--w:50%"></span></div>
+                    <span class="dayshape__time">1h 05m</span>
+                  </div>
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Review</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--review" style="--w:55%"></span></div>
+                    <span class="dayshape__time">1h 12m</span>
+                  </div>
+                  <div class="dayshape__row">
+                    <span class="dayshape__label">Meetings</span>
+                    <div class="dayshape__track"><span class="dayshape__fill dayshape__fill--meetings" style="--w:35%"></span></div>
+                    <span class="dayshape__time">45m</span>
+                  </div>
+                </div>
+                <div class="tasklist-head">Today's tasks <span class="tasklist-head__count">2/3 done</span></div>
+                <ul class="tasklist">
+                  <li class="task task--done"><span class="task__check"></span><span class="task__name">Fix slow product search</span><span class="task__time">2h 40m</span><button type="button" class="task__jump" data-jump-step="2">docs →</button></li>
+                  <li class="task task--done"><span class="task__check"></span><span class="task__name">Refactor onboarding email copy</span><span class="task__time">55m</span></li>
+                  <li class="task task--active"><span class="task__check"></span><span class="task__name">Add retry/backoff to billing webhook</span><span class="task__time">1h 15m</span></li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">02</div>
+              <span class="doc-task-chip">Fix slow product search · P1</span>
+              <h3 class="scrolly__panel-title">Keep the decisions</h3>
+              <p class="scrolly__panel-body">Which approach it picked, and why — every tradeoff, captured while you supervise.</p>
+              <div class="scrolly__panel-visual">
+                <p class="decision-context">Product search was taking <strong>4.2s</strong> on the full catalog.</p>
+                <div class="decision-compare">
+                  <div class="decision-option decision-option--rejected">
+                    <span class="decision-option__label">considered</span>
+                    <span class="decision-option__name">Stand up Elasticsearch</span>
+                    <span class="decision-option__note">fast, but a new service to run and keep in sync</span>
+                  </div>
+                  <div class="decision-option decision-option--chosen">
+                    <span class="decision-option__label">chosen</span>
+                    <span class="decision-option__name">Postgres full-text index</span>
+                    <span class="decision-option__note">ships today, one fewer service to run</span>
+                  </div>
+                </div>
+                <p class="decision-note"><span class="decision-note__label">tradeoff</span>revisit past ~5x the current catalog size — Postgres FTS won't scale forever</p>
+              </div>
+            </article>
+
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">03</div>
+              <div class="doc-layout">
+                <div class="doc-layout__text">
+                  <span class="doc-task-chip">Fix slow product search · P1</span>
+                  <h3 class="scrolly__panel-title">Docs that write themselves</h3>
+                  <p class="scrolly__panel-body">Every fix gets its own page — what changed, why, and how it was verified. You write nothing.</p>
+                </div>
+                <div class="doc-layout__card">
+                  <div class="doc-card">
+                    <div class="doc-card__head"><span class="doc-card__dot"></span>auto-generated doc</div>
+                    <div class="doc-diagram">
+                      <div class="doc-diagram__row doc-diagram__row--before">
+                        <span class="doc-diagram__tag">before</span>
+                        <span class="doc-diagram__node">query</span>
+                        <span class="doc-diagram__arrow">→</span>
+                        <span class="doc-diagram__node">seq. scan</span>
+                        <span class="doc-diagram__metric">4.2s</span>
+                      </div>
+                      <div class="doc-diagram__row doc-diagram__row--after">
+                        <span class="doc-diagram__tag">after</span>
+                        <span class="doc-diagram__node">query</span>
+                        <span class="doc-diagram__arrow">→</span>
+                        <span class="doc-diagram__node">GIN index</span>
+                        <span class="doc-diagram__metric">180ms</span>
+                      </div>
+                    </div>
+                    <div class="journal">
+                      <div class="journal__line"><span class="journal__time">2:47p</span>Added a GIN index on <code>products.search_vector</code>.</div>
+                      <div class="journal__line"><span class="journal__time">3:24p</span>Confirmed the planner uses it — p95 latency down to 180ms.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="scrolly__panel">
+              <div class="scrolly__panel-index">04</div>
+              <h3 class="scrolly__panel-title">The worklog, handled</h3>
+              <p class="scrolly__panel-body">Drafted, matched to the right ticket, and posted — only when you approve.</p>
+              <div class="scrolly__panel-visual">
+                <div class="worklog-flow">
+                  <div class="worklog-draft">
+                    <p class="worklog-draft__text">Fixed slow product search — added a Postgres full-text index instead of standing up Elasticsearch. p95 latency down from 4.2s to 180ms.</p>
+                    <span class="worklog-ticket-chip"><span class="worklog-ticket-dot"></span>MER-241 · Search latency</span>
+                    <div class="worklog-draft__status"><span class="worklog-draft__status-dot"></span>Posted to Jira</div>
+                  </div>
+                  <div class="worklog-connector" aria-hidden="true">
+                    <svg class="worklog-connector__svg" viewBox="0 0 60 200" preserveAspectRatio="none">
+                      <path class="worklog-connector__line worklog-connector__line--jira" d="M0,100 L60,20"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,60"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,100"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,140"></path>
+                      <path class="worklog-connector__line" d="M0,100 L60,180"></path>
+                    </svg>
+                  </div>
+                  <div class="worklog-targets">
+                    <div class="worklog-target worklog-target--posted">
+                      <span class="integration-chip integration-chip--posted"><span class="integration-dot" style="background:#2684FF"></span>Jira<span class="integration-chip__badge">✓ posted</span></span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:#5E6AD2"></span>Linear</span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:var(--ink)"></span>GitHub Projects</span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:#0078D4"></span>Azure DevOps</span>
+                    </div>
+                    <div class="worklog-target">
+                      <span class="integration-chip"><span class="integration-dot" style="background:#0079BF"></span>Trello</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div data-rv class="privacy-line">100% local — nothing leaves your Mac without your yes · completely open source</div>
   </div>
 </section>
 
@@ -207,46 +334,21 @@
     <h3 class="modal-title modal-title--connect">Let's be friends</h3>
     <p class="modal-subtitle" style="max-width:340px;margin-left:auto;margin-right:auto">We're a lot more fun over here than in a changelog. Pick your platform:</p>
 
-    <div class="connect-list">
-      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="connect-row connect-row--github">
-        <span class="connect-row__icon">gh</span>
-        <span class="connect-row__body">
-          <div class="connect-row__name">GitHub</div>
-          <div class="connect-row__sub">star us — we WILL notice 👀</div>
-        </span>
-        <span class="connect-row__arrow">↗</span>
+    <div class="connect-grid">
+      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="connect-icon" title="GitHub — star us, we WILL notice" aria-label="GitHub — star us, we WILL notice">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.98 5.24.98 11.52c0 4.96 3.16 9.16 7.55 10.65.55.1.75-.24.75-.53 0-.26-.01-1.13-.01-2.05-3.07.66-3.72-1.31-3.72-1.31-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.67.08-.67 1.11.08 1.7 1.15 1.7 1.15.99 1.7 2.6 1.21 3.23.92.1-.72.39-1.21.7-1.49-2.45-.28-5.03-1.23-5.03-5.47 0-1.21.43-2.19 1.14-2.97-.11-.28-.5-1.42.11-2.95 0 0 .93-.3 3.05 1.13a10.5 10.5 0 0 1 5.55 0c2.12-1.43 3.05-1.13 3.05-1.13.61 1.53.22 2.67.11 2.95.71.78 1.14 1.76 1.14 2.97 0 4.25-2.59 5.19-5.05 5.46.4.35.75 1.02.75 2.07 0 1.49-.01 2.7-.01 3.06 0 .29.2.64.76.53 4.38-1.49 7.54-5.69 7.54-10.65C23.02 5.24 18.27.5 12 .5Z"/></svg>
       </a>
-      <a href="#" class="connect-row connect-row--x">
-        <span class="connect-row__icon">𝕏</span>
-        <span class="connect-row__body">
-          <div class="connect-row__name">X / Twitter</div>
-          <div class="connect-row__sub">hot takes & release memes</div>
-        </span>
-        <span class="connect-row__arrow">↗</span>
+      <a href="#" class="connect-icon" title="X / Twitter — hot takes & release memes" aria-label="X / Twitter — hot takes & release memes">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.46l8.6-9.83L0 1.15h7.59l5.25 6.93 6.06-6.93Zm-1.29 19.5h2.04L6.49 3.23H4.3l13.3 17.42Z"/></svg>
       </a>
-      <a href="#" class="connect-row connect-row--discord">
-        <span class="connect-row__icon connect-row__icon--discord">dc</span>
-        <span class="connect-row__body">
-          <div class="connect-row__name">Discord</div>
-          <div class="connect-row__sub">come yell at us live, it's fun</div>
-        </span>
-        <span class="connect-row__arrow">↗</span>
+      <a href="#" class="connect-icon" title="Discord — come yell at us live, it's fun" aria-label="Discord — come yell at us live, it's fun">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.38-.45.86-.61 1.25a18.27 18.27 0 0 0-5.48 0 12.6 12.6 0 0 0-.62-1.25.08.08 0 0 0-.08-.04c-1.7.29-3.36.8-4.89 1.52a.07.07 0 0 0-.03.03C.53 8.68-.32 12.85.1 16.97a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 5.99 3.03.08.08 0 0 0 .09-.03c.46-.63.87-1.3 1.23-2a.08.08 0 0 0-.04-.11 13.1 13.1 0 0 1-1.87-.89.08.08 0 0 1-.01-.13c.13-.09.25-.19.37-.29a.08.08 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.08.08 0 0 1 .08.01c.12.1.25.2.37.29a.08.08 0 0 1-.01.13c-.6.35-1.23.65-1.88.89a.08.08 0 0 0-.04.11c.36.7.78 1.36 1.23 2a.08.08 0 0 0 .09.03 19.83 19.83 0 0 0 6-3.03.08.08 0 0 0 .03-.06c.5-4.76-.83-8.9-3.5-12.57a.06.06 0 0 0-.03-.03ZM8.02 14.44c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.96 2.42-2.16 2.42Zm7.97 0c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.95 2.42-2.16 2.42Z"/></svg>
       </a>
-      <a href="#" class="connect-row connect-row--instagram">
-        <span class="connect-row__icon connect-row__icon--instagram">ig</span>
-        <span class="connect-row__body">
-          <div class="connect-row__name">Instagram</div>
-          <div class="connect-row__sub">mostly aesthetic timeline screenshots</div>
-        </span>
-        <span class="connect-row__arrow">↗</span>
+      <a href="#" class="connect-icon" title="Instagram — mostly aesthetic timeline screenshots" aria-label="Instagram — mostly aesthetic timeline screenshots">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.55.22.95.47 1.37.89.42.42.67.82.89 1.37.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.55-.47.95-.89 1.37-.42.42-.82.67-1.37.89-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.37-.89 3.7 3.7 0 0 1-.89-1.37c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.55.47-.95.89-1.37.42-.42.82-.67 1.37-.89.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07ZM12 0C8.74 0 8.33.01 7.05.07c-1.28.06-2.15.26-2.91.56a5.87 5.87 0 0 0-2.13 1.38A5.87 5.87 0 0 0 .63 4.14c-.3.76-.5 1.63-.56 2.91C.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.28.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.66.66 1.34 1.07 2.13 1.38.76.3 1.63.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.28-.06 2.15-.26 2.91-.56a5.87 5.87 0 0 0 2.13-1.38 5.87 5.87 0 0 0 1.38-2.13c.3-.76.5-1.63.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.28-.26-2.15-.56-2.91a5.87 5.87 0 0 0-1.38-2.13A5.87 5.87 0 0 0 19.86.63c-.76-.3-1.63-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84Zm0 10.16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm7.85-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0Z"/></svg>
       </a>
-      <a href="#" class="connect-row connect-row--linkedin">
-        <span class="connect-row__icon connect-row__icon--linkedin">in</span>
-        <span class="connect-row__body">
-          <div class="connect-row__name">LinkedIn</div>
-          <div class="connect-row__sub">the professional one, we promise</div>
-        </span>
-        <span class="connect-row__arrow">↗</span>
+      <a href="#" class="connect-icon" title="LinkedIn — the professional one, we promise" aria-label="LinkedIn — the professional one, we promise">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.44-2.14 2.94v5.66H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0Z"/></svg>
       </a>
     </div>
 
