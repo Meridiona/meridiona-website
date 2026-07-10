@@ -68,10 +68,13 @@ export default {
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
-      let email;
+      let email, source;
       try {
         const body = await request.json();
         email = (body.email || '').trim().toLowerCase();
+        // 'download' = already has (or is getting) the Mac build; 'waitlist' = waiting on an
+        // unreleased OS. Anything else/missing falls back to the shared audience below.
+        source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
       } catch {
         return json({ error: 'Invalid request.' }, 400);
       }
@@ -80,8 +83,13 @@ export default {
         return json({ error: 'Please enter a valid email address.' }, 400);
       }
 
+      const audienceId =
+        (source === 'download' && env.RESEND_AUDIENCE_ID_DOWNLOAD) ||
+        (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
+        env.RESEND_AUDIENCE_ID;
+
       try {
-        const res = await fetch(`https://api.resend.com/audiences/${env.RESEND_AUDIENCE_ID}/contacts`, {
+        const res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${env.RESEND_API_KEY}`,
@@ -221,7 +229,7 @@ function downloadPage(env, url) {
     ev.preventDefault();
     var email = document.getElementById('sub-email').value.trim();
     msg.textContent = 'Joining…';
-    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})})
+    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'download'})})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(function(res){
         if(res.ok && res.j && res.j.success){
