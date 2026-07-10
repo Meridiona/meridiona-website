@@ -57,15 +57,23 @@
   var EMAIL_RE = /\S+@\S+\.\S+/;
 
   var COUNTRY_CODES = [
-    { code: '+1', name: 'US/Canada' }, { code: '+44', name: 'UK' }, { code: '+91', name: 'India' },
-    { code: '+61', name: 'Australia' }, { code: '+49', name: 'Germany' }, { code: '+33', name: 'France' },
-    { code: '+81', name: 'Japan' }, { code: '+82', name: 'South Korea' }, { code: '+86', name: 'China' },
-    { code: '+65', name: 'Singapore' }, { code: '+971', name: 'UAE' }, { code: '+31', name: 'Netherlands' },
-    { code: '+34', name: 'Spain' }, { code: '+39', name: 'Italy' }, { code: '+46', name: 'Sweden' },
-    { code: '+41', name: 'Switzerland' }, { code: '+52', name: 'Mexico' }, { code: '+55', name: 'Brazil' },
-    { code: '+27', name: 'South Africa' }, { code: '+64', name: 'New Zealand' }, { code: '+63', name: 'Philippines' },
-    { code: '+62', name: 'Indonesia' }, { code: '+92', name: 'Pakistan' }, { code: '+880', name: 'Bangladesh' },
+    { code: '+1', name: 'US/Canada', ph: '201 555 0123' }, { code: '+44', name: 'UK', ph: '7911 123456' },
+    { code: '+91', name: 'India', ph: '98765 43210' }, { code: '+61', name: 'Australia', ph: '412 345 678' },
+    { code: '+49', name: 'Germany', ph: '1512 3456789' }, { code: '+33', name: 'France', ph: '6 12 34 56 78' },
+    { code: '+81', name: 'Japan', ph: '90 1234 5678' }, { code: '+82', name: 'South Korea', ph: '10 1234 5678' },
+    { code: '+86', name: 'China', ph: '131 2345 6789' }, { code: '+65', name: 'Singapore', ph: '8123 4567' },
+    { code: '+971', name: 'UAE', ph: '50 123 4567' }, { code: '+31', name: 'Netherlands', ph: '6 12345678' },
+    { code: '+34', name: 'Spain', ph: '612 345 678' }, { code: '+39', name: 'Italy', ph: '312 345 6789' },
+    { code: '+46', name: 'Sweden', ph: '70 123 45 67' }, { code: '+41', name: 'Switzerland', ph: '78 123 45 67' },
+    { code: '+52', name: 'Mexico', ph: '55 1234 5678' }, { code: '+55', name: 'Brazil', ph: '11 91234 5678' },
+    { code: '+27', name: 'South Africa', ph: '71 123 4567' }, { code: '+64', name: 'New Zealand', ph: '21 123 4567' },
+    { code: '+63', name: 'Philippines', ph: '917 123 4567' }, { code: '+62', name: 'Indonesia', ph: '812 3456 789' },
+    { code: '+92', name: 'Pakistan', ph: '301 2345678' }, { code: '+880', name: 'Bangladesh', ph: '1712 345678' },
   ];
+  var COUNTRY_CODE_PLACEHOLDERS = COUNTRY_CODES.reduce(function (map, c) {
+    map[c.code] = c.ph;
+    return map;
+  }, {});
 
   // ── theme switcher ───────────────────────────────────────────────────────
   var Theme = {
@@ -224,7 +232,7 @@
             '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
             '<div class="phone-row">' +
               '<select id="dl-phone-code" class="phone-select" aria-label="Country code">' + countryOptions + '</select>' +
-              '<input id="dl-phone" class="phone-input" type="tel" placeholder="55 5123 4567" value="' + s.phone + '" aria-label="Phone number (optional)">' +
+              '<input id="dl-phone" class="phone-input" type="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[s.phoneCode] || '') + '" value="' + s.phone + '" aria-label="Phone number (optional)">' +
             '</div>' +
             '<button type="submit" class="btn-primary btn-primary--block">' + copy.ctaLabel + '</button>' +
           '</form>' +
@@ -244,6 +252,13 @@
       var osBtn = e.target.closest('[data-os]');
       if (osBtn) { DownloadModal.state.os = osBtn.dataset.os; DownloadModal.render(); return; }
       if (e.target.id === 'dl-back') { DownloadModal.state.os = null; DownloadModal.render(); }
+    },
+    handleBodyChange: function (e) {
+      if (e.target.id !== 'dl-phone-code') return;
+      // Direct DOM update (not a full render()) so the number the user already typed isn't wiped.
+      DownloadModal.state.phoneCode = e.target.value;
+      var input = $('dl-phone');
+      if (input) input.placeholder = COUNTRY_CODE_PLACEHOLDERS[e.target.value] || '';
     },
     handleBodySubmit: function (e) {
       if (e.target.id !== 'dl-form') return;
@@ -286,6 +301,7 @@
       });
       $('modal-download-body').addEventListener('click', DownloadModal.handleBodyClick);
       $('modal-download-body').addEventListener('submit', DownloadModal.handleBodySubmit);
+      $('modal-download-body').addEventListener('change', DownloadModal.handleBodyChange);
     },
   };
 
