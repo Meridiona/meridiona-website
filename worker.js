@@ -244,14 +244,24 @@ function downloadPage(env, url) {
   setTimeout(startDownload, 400);
 
   var COUNTRY_CODES = [
-    ['+1','US/Canada'],['+44','UK'],['+91','India'],['+61','Australia'],['+49','Germany'],
-    ['+33','France'],['+81','Japan'],['+82','South Korea'],['+86','China'],['+65','Singapore'],
-    ['+971','UAE'],['+31','Netherlands'],['+34','Spain'],['+39','Italy'],['+46','Sweden'],
-    ['+41','Switzerland'],['+52','Mexico'],['+55','Brazil'],['+27','South Africa'],['+64','New Zealand'],
-    ['+63','Philippines'],['+62','Indonesia'],['+92','Pakistan'],['+880','Bangladesh']
+    ['+1','US/Canada','201 555 0123'],['+44','UK','7911 123456'],['+91','India','98765 43210'],
+    ['+61','Australia','412 345 678'],['+49','Germany','1512 3456789'],['+33','France','6 12 34 56 78'],
+    ['+81','Japan','90 1234 5678'],['+82','South Korea','10 1234 5678'],['+86','China','131 2345 6789'],
+    ['+65','Singapore','8123 4567'],['+971','UAE','50 123 4567'],['+31','Netherlands','6 12345678'],
+    ['+34','Spain','612 345 678'],['+39','Italy','312 345 6789'],['+46','Sweden','70 123 45 67'],
+    ['+41','Switzerland','78 123 45 67'],['+52','Mexico','55 1234 5678'],['+55','Brazil','11 91234 5678'],
+    ['+27','South Africa','71 123 4567'],['+64','New Zealand','21 123 4567'],['+63','Philippines','917 123 4567'],
+    ['+62','Indonesia','812 3456 789'],['+92','Pakistan','301 2345678'],['+880','Bangladesh','1712 345678']
   ];
+  var COUNTRY_CODE_PLACEHOLDERS = {};
+  COUNTRY_CODES.forEach(function(c){ COUNTRY_CODE_PLACEHOLDERS[c[0]] = c[2]; });
   var codeSelect = document.getElementById('sub-phone-code');
+  var phoneInput = document.getElementById('sub-phone');
   codeSelect.innerHTML = COUNTRY_CODES.map(function(c){ return '<option value="' + c[0] + '">' + c[0] + ' ' + c[1] + '</option>'; }).join('');
+  phoneInput.placeholder = COUNTRY_CODE_PLACEHOLDERS[codeSelect.value] || '';
+  codeSelect.addEventListener('change', function(){
+    phoneInput.placeholder = COUNTRY_CODE_PLACEHOLDERS[codeSelect.value] || '';
+  });
 
   var form = document.getElementById('sub-form');
   var msg = document.getElementById('sub-msg');
