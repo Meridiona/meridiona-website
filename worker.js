@@ -89,8 +89,10 @@ export default {
         (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
         env.RESEND_AUDIENCE_ID;
 
+      // Resend rejects "properties" unless the key is pre-registered on the account
+      // (undocumented at the time this was written), so last_name carries the OS tag instead.
       const contact = { email, unsubscribed: false };
-      if (os) contact.properties = { os: os.charAt(0).toUpperCase() + os.slice(1) };
+      if (os) contact.last_name = os.charAt(0).toUpperCase() + os.slice(1);
 
       try {
         const res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
