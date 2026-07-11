@@ -16,3 +16,5 @@ worker.js
 .gitignore
 *.log
 *.map
+.DS_Store
+**/.DS_Store

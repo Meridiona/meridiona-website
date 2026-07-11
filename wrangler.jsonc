@@ -34,6 +34,12 @@
       "custom_domain": true
     },
     {
+      // www → apex; the Worker 301-redirects it (see worker.js) so there's a
+      // single canonical host. custom_domain provisions its DNS record + cert.
+      "pattern": "www.meridiona.com",
+      "custom_domain": true
+    },
+    {
       // Google-SSO relay for the Meridian desktop app (see worker.js).
       "pattern": "auth.meridiona.com",
       "custom_domain": true
