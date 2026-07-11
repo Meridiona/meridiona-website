@@ -13,6 +13,15 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  // Custom domain for the Google-SSO relay. `custom_domain: true` makes wrangler
+  // provision the DNS record + edge certificate for auth.meridiona.com on deploy
+  // (the meridiona.com zone must live on the same Cloudflare account).
+  "routes": [
+    {
+      "pattern": "auth.meridiona.com",
+      "custom_domain": true
+    }
+  ],
   // One-time-token store for the auth.meridiona.com Google-SSO relay (see
   // worker.js's /auth/callback + /auth/exchange routes) — short-TTL entries,
   // deleted on first read. Created via `wrangler kv namespace create AUTH_TOKENS`.
