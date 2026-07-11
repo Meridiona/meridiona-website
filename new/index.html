@@ -68,6 +68,12 @@
       <div id="hero-viewport" class="hero__embed-viewport">
         <iframe id="hero-embed-frame" class="hero__iframe" src="/new/demo.html" title="Meridian product demo" hint-size="1240,720"></iframe>
       </div>
+      <!-- Mobile only: the inline embed is a scaled-down preview too small to
+           use on a phone. This tap target (shown via CSS ≤640px) opens the
+           real demo full screen in landscape — see DemoFullscreen in site.js. -->
+      <button id="demo-open" class="demo-open" aria-label="Open the interactive demo full screen">
+        <span class="demo-open__label">tap to explore ↗</span>
+      </button>
     </div>
   </div>
 

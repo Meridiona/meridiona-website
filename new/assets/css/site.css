@@ -141,7 +141,7 @@ body[data-theme="paper"]{
 .hero__embed-wrap{position:relative;margin-top:18px;animation:heroIn 1s .15s ease both}
 .hero__embed-annotation{position:absolute;top:-30px;right:26px;z-index:5;display:flex;align-items:flex-start;gap:8px;pointer-events:none}
 .hero__embed-note{font-family:'Caveat',cursive;font-size:19px;color:var(--acc2);transform:rotate(-3deg);white-space:nowrap}
-.hero__embed-frame{border-radius:18px;border:2px solid #E8ECFC;box-shadow:var(--shadow);background:#E8ECFC}
+.hero__embed-frame{position:relative;border-radius:18px;border:2px solid #E8ECFC;box-shadow:var(--shadow);background:#E8ECFC}
 .hero__embed-viewport{position:relative;overflow:hidden;border-radius:12px}
 .hero__iframe{border:0;transform-origin:0 0}
 
@@ -514,4 +514,79 @@ body[data-theme="paper"]{
 .visually-hidden{
   position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
   clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+
+/* ── mobile: tap-to-open demo preview ──────────────────────────────────────
+   The inline hero embed stays a scaled-down preview; on phones we lay a tap
+   target over it that opens the real demo full screen (DemoFullscreen). Hidden
+   above 640px so the inline demo stays directly interactive on desktop. */
+.demo-open{display:none}
+@media (max-width:640px){
+  .hero__iframe{pointer-events:none} /* let the whole preview be one tap target */
+  .demo-open{
+    display:flex;align-items:flex-end;justify-content:center;
+    position:absolute;inset:0;z-index:6;border:0;cursor:pointer;padding:0 0 12px;
+    background:linear-gradient(to top,color-mix(in oklab,var(--acc) 22%,transparent),transparent 42%);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .demo-open__label{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.04em;font-weight:600;
+    color:#fff;background:var(--acc);border-radius:999px;padding:8px 16px;
+    box-shadow:0 8px 24px -6px rgba(60,30,140,.5);
+  }
+}
+
+/* ── demo fullscreen overlay (mobile) ──────────────────────────────────────
+   Opens the interactive demo edge-to-edge, laid out in landscape. When the
+   phone is portrait the frame is rotated 90° (in JS) to fill the screen. */
+.demo-fs{display:none;position:fixed;inset:0;z-index:200;background:#0b0814}
+.demo-fs.is-open{display:block}
+.demo-fs__stage{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.demo-fs__frame{border:0;background:#fff;transform-origin:center center;display:block}
+.demo-fs__close{
+  position:fixed;top:14px;right:14px;z-index:2;width:40px;height:40px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.24);background:rgba(20,16,34,.72);color:#fff;
+  font-size:16px;line-height:1;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.demo-fs__hint{
+  display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:2;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.72);
+  background:rgba(20,16,34,.72);border-radius:999px;padding:7px 14px;white-space:nowrap;pointer-events:none;
+}
+.demo-fs.is-portrait .demo-fs__hint{display:block}
+
+/* ── mobile responsive breakpoints ─────────────────────────────────────────
+   The layout is fluid by default (clamp + auto-fit grids); these breakpoints
+   handle the few components that can't reflow with sizing alone — tighter
+   section rhythm, the un-pinned "why" stage (JS drops scrolljacking ≤760px,
+   here we polish the resulting stacked layout), and the worklog flow. */
+@media (max-width:760px){
+  .section{padding:72px 20px}
+  .hero{padding:64px 20px 8px}
+  .hero__pointer{display:none} /* decorative arrow points at nav items that shed on mobile */
+
+  /* stacked "why" fallback (no is-ready): give the sticky intro + panels room */
+  .why__intro{position:static;padding:0 0 8px}
+  .scrolly:not(.is-ready) .scrolly__panels{gap:44px;margin-top:32px}
+  .scrolly:not(.is-ready) .task__jump{display:none} /* jump only works with scrolljack on */
+  .scrolly__panel-body,.decision-context,.decision-note{max-width:none}
+
+  /* worklog flow: draft on top, providers below — the row is too wide to fit */
+  .worklog-flow{flex-direction:column;gap:18px;max-width:none}
+  .worklog-connector{display:none} /* the fan-out svg is meaningless once stacked */
+  .worklog-targets{flex-direction:row;flex-wrap:wrap;gap:10px 16px}
+
+  .faq-layout{gap:32px}
+}
+@media (max-width:560px){
+  .section{padding:56px 18px}
+  .hero{padding:56px 18px 8px}
+  .hero__embed-annotation{display:none} /* "go poke around" — replaced by the tap-to-explore target */
+  .doc-diagram__row{flex-wrap:wrap}
+  .doc-diagram__metric{margin-left:0}
+  .decision-compare{gap:10px}
+  .theme-switcher{bottom:14px;right:14px;padding:7px 10px}
+  .theme-switcher__label{display:none} /* keep just the dots on the smallest screens */
 }

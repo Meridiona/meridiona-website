@@ -125,9 +125,15 @@ new/
 
 `worker.js` fetches `env.ASSETS` for `/` and does a regex replace on `<title>[^<]*</title>` and `<meta name="description"[^>]*>` for `/writing/*` essay routes, then injects a `<link rel="canonical">` before `</head>`. Keep exactly one of each tag in `index.html`, and keep `</head>` unique — the test suite enforces this.
 
-### Fluid responsiveness, not media queries
+### Fluid first, breakpoints where fluid can't reach
 
-Unlike the old bundler-era site, this design intentionally has no `@media (max-width: 768px)` breakpoints — layout is fluid via `clamp()` and `auto-fit` grids. If you add a component that doesn't reflow well at narrow widths, prefer fixing it with fluid sizing over bolting on a breakpoint, to stay consistent with the rest of the page.
+Default to fluid sizing — `clamp()` type and `repeat(auto-fit,minmax(...))` grids — so sections reflow continuously; that's still the bulk of the layout. But a few things genuinely can't be made responsive with sizing alone, and those have explicit mobile `@media` breakpoints (the demo/why/spacing rules are grouped at the bottom of `site.css`; the nav has its own at 760/560px; breakpoints used across the file are 760/640/560px):
+
+- **The hero product demo** is a fixed 1240×720 canvas scaled with a transform (`HeroEmbed` in `site.js`); at phone widths that scale is illegible. So ≤640px the inline embed becomes a **tap target** (`#demo-open`) that opens the demo full screen in landscape via the `DemoFullscreen` module — rotated 90° when the phone is portrait. `HeroEmbed.size()` measures the hero's real inner width (not a hardcoded reservation) so the matted frame never clips under `overflow-x:hidden`.
+- **The "why" scroll-jacked stage** pins a fixed-height viewport and can't fit a tall panel on a short phone screen, so `WhyScroll.init()` skips the pin ≤760px (`MOBILE_MAX`) and the panels fall back to the plain stacked `.scrolly:not(.is-ready)` layout.
+- **`.worklog-flow`** (a wide non-wrapping row) stacks ≤760px.
+
+When you add a component, still prefer fluid sizing first; only reach for a breakpoint when a component structurally can't reflow (fixed-resolution embed, pinned stage, wide non-wrapping row). Keep the JS width gates (`WhyScroll.MOBILE_MAX`, the `.demo-open` 640px rule) in sync with the CSS breakpoints if you move them.
 
 ### Mobile Nav
 
