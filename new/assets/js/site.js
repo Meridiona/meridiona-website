@@ -157,10 +157,24 @@
       var CHROME = 350; // title block + margins + trust strip + section paddings + embed mat, measured empirically
       var MAT_PAD = 18, MAT_BORDER = 2;
       var MAT = (MAT_PAD + MAT_BORDER) * 2;
+      // Available content width = the hero's inner box, i.e. its width minus its
+      // own horizontal padding (which shrinks at mobile breakpoints). Measuring
+      // it — rather than subtracting a hardcoded reservation — is what keeps the
+      // matted frame from spilling past the hero and getting clipped by
+      // overflow-x:hidden on narrow phones.
+      var hero = document.querySelector('.hero');
+      var avail = vw - 48; // fallback: default .hero padding is 24px/side
+      if (hero) {
+        var cs = window.getComputedStyle(hero);
+        avail = hero.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      }
       var embedW = Math.max(260, Math.min(1160, Math.min(
         (vh - CHROME) * (HeroEmbed.DEVICE_W / HeroEmbed.DEVICE_H),
-        vw - 32 - MAT
+        avail - MAT
       )));
+      // Hard cap to the available width even when the 260px floor above would
+      // otherwise win (very small viewports, ≤320px) so the frame never clips.
+      embedW = Math.min(embedW, avail - MAT);
       var scale = embedW / HeroEmbed.DEVICE_W;
       var embedH = Math.round(embedW * HeroEmbed.DEVICE_H / HeroEmbed.DEVICE_W);
 
@@ -180,6 +194,71 @@
       if (!$('hero-embed-wrap')) return;
       HeroEmbed.size();
       window.addEventListener('resize', HeroEmbed.size);
+    },
+  };
+
+  // ── demo fullscreen (mobile) ──────────────────────────────────────────────
+  // The inline hero embed is only a scaled-down preview; on a phone it's too
+  // small to actually use. Tapping it opens the real demo full screen, laid
+  // out in landscape (the demo's canvas is 1240x720, i.e. landscape) so it's
+  // legible and interactive. When the phone is held in portrait we rotate the
+  // frame 90° to fill the screen; the demo's own pointer handlers live inside
+  // the iframe and measure in its local space, so swipe-to-approve keeps
+  // working through the rotation. Already-landscape viewports skip the rotate.
+  var DemoFullscreen = {
+    DEVICE_W: 1240,
+    DEVICE_H: 720,
+    overlay: null, frame: null, open: false,
+    build: function () {
+      if (DemoFullscreen.overlay) return;
+      var o = document.createElement('div');
+      o.id = 'demo-fs';
+      o.className = 'demo-fs';
+      o.setAttribute('role', 'dialog');
+      o.setAttribute('aria-modal', 'true');
+      o.setAttribute('aria-label', 'Meridian interactive demo');
+      o.innerHTML =
+        '<div class="demo-fs__stage">' +
+          '<iframe class="demo-fs__frame" title="Meridian product demo" src="/new/demo.html"></iframe>' +
+        '</div>' +
+        '<button class="demo-fs__close" aria-label="Close demo">✕</button>' +
+        '<div class="demo-fs__hint" aria-hidden="true">rotate your phone for the full view</div>';
+      document.body.appendChild(o);
+      DemoFullscreen.overlay = o;
+      DemoFullscreen.frame = o.querySelector('.demo-fs__frame');
+      o.querySelector('.demo-fs__close').addEventListener('click', DemoFullscreen.hide);
+      o.addEventListener('click', function (e) { if (e.target === o) DemoFullscreen.hide(); });
+    },
+    size: function () {
+      if (!DemoFullscreen.open || !DemoFullscreen.frame) return;
+      var sw = window.innerWidth, sh = window.innerHeight;
+      var longEdge = Math.max(sw, sh), shortEdge = Math.min(sw, sh);
+      var portrait = sh >= sw;
+      var scale = Math.min(longEdge / DemoFullscreen.DEVICE_W, shortEdge / DemoFullscreen.DEVICE_H);
+      var f = DemoFullscreen.frame;
+      f.style.width = DemoFullscreen.DEVICE_W + 'px';
+      f.style.height = DemoFullscreen.DEVICE_H + 'px';
+      f.style.transform = (portrait ? 'rotate(90deg) ' : '') + 'scale(' + scale + ')';
+      DemoFullscreen.overlay.classList.toggle('is-portrait', portrait);
+    },
+    show: function () {
+      DemoFullscreen.build();
+      DemoFullscreen.open = true;
+      DemoFullscreen.overlay.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      DemoFullscreen.size();
+    },
+    hide: function () {
+      if (!DemoFullscreen.overlay) return;
+      DemoFullscreen.open = false;
+      DemoFullscreen.overlay.classList.remove('is-open');
+      document.body.style.overflow = '';
+    },
+    init: function () {
+      var opener = $('demo-open');
+      if (!opener) return;
+      opener.addEventListener('click', DemoFullscreen.show);
+      window.addEventListener('resize', DemoFullscreen.size);
     },
   };
 
@@ -329,10 +408,17 @@
   // scroll position (getBoundingClientRect), not IntersectionObserver, so it
   // works anywhere; falls back to a plain stacked list when motion is reduced.
   var WhyScroll = {
+    // Below this width the pinned, scroll-jacked stage is skipped entirely:
+    // the panels fall back to the plain stacked `.scrolly:not(.is-ready)`
+    // layout (all panels visible, no fixed-height clipping, no scrolljack),
+    // which reads far better on a phone than a pinned viewport that can't
+    // fit a tall panel. Kept in sync with the CSS mobile breakpoint.
+    MOBILE_MAX: 760,
     el: null, panels: [], rail: [], steps: 0, active: -1,
     init: function () {
       WhyScroll.el = $('why-scrolly');
       if (!WhyScroll.el) return;
+      if (window.innerWidth <= WhyScroll.MOBILE_MAX) return; // stacked fallback on mobile
       WhyScroll.panels = [].slice.call(WhyScroll.el.querySelectorAll('.scrolly__panel'));
       WhyScroll.rail = [].slice.call(WhyScroll.el.querySelectorAll('.scrolly__rail-item'));
       WhyScroll.steps = WhyScroll.panels.length;
@@ -464,12 +550,13 @@
   };
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { DownloadModal.close(); ConnectModal.close(); }
+    if (e.key === 'Escape') { DownloadModal.close(); ConnectModal.close(); DemoFullscreen.hide(); }
   });
 
   Theme.init();
   Faq.init();
   HeroEmbed.init();
+  DemoFullscreen.init();
   DownloadModal.init();
   ConnectModal.init();
   WhyScroll.init();
