@@ -1,0 +1,23 @@
+{
+  "name": "meridiona-website",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Meridiona's Cloudflare Workers-hosted website + the auth.meridiona.com Google-SSO relay for the Meridian desktop app.",
+  "main": "worker.js",
+  "scripts": {
+    "test": "node tests/responsive.test.js && node tests/auth-relay.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Meridiona/meridiona-website.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Meridiona/meridiona-website/issues"
+  },
+  "homepage": "https://github.com/Meridiona/meridiona-website#readme",
+  "dependencies": {
+    "@clerk/backend": "^3.11.3"
+  }
+}

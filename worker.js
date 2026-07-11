@@ -1,3 +1,17 @@
+import { createClerkClient } from '@clerk/backend';
+
+// Google-SSO relay for the Meridian desktop app (tray/src-tauri/src/commands/clerk_signin.rs).
+// Routed by hostname so none of the rest of this file's logic is touched.
+const AUTH_HOSTNAME = 'auth.meridiona.com';
+// Clerk's Account Portal for the Meridian app — the real, hosted Google
+// sign-in page. NOT a secret, just config; update once production has its
+// own Account Portal domain (see the Meridian repo's setup-wizard plan).
+const ACCOUNT_PORTAL_URL = 'https://touching-unicorn-15.accounts.dev';
+// One-time exchange token TTL — long enough for the browser round-trip
+// through Google + Clerk, short enough that a leaked/logged URL is useless
+// within minutes.
+const AUTH_TOKEN_TTL_SECONDS = 120;
+
 const WRITING_META = {
   '/writing/velocity-visibility': {
     title: 'Your velocity went up. Your visibility went down. — Meridiona',
@@ -22,6 +36,13 @@ const DOWNLOAD_URL = 'https://github.com/Meridiona/meridian/releases/latest/down
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // Google-SSO relay — isolated by hostname, never touches the routes below.
+    if (url.hostname === AUTH_HOSTNAME) {
+      if (url.pathname === '/auth/callback') return handleAuthCallback(request, url, env);
+      if (url.pathname === '/auth/exchange') return handleAuthExchange(url, env);
+      return json({ error: 'not found' }, 404);
+    }
 
     // Direct file download: log attribution (OS, geo, referrer, source) then redirect to GitHub.
     if (url.pathname === '/dl') {
@@ -134,6 +155,91 @@ function json(data, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+// Validates the `port` query param the desktop app passed through the whole
+// flow — it's what we redirect the browser back to, so it must be a real
+// ephemeral TCP port, not attacker-controlled input reflected into a redirect.
+// Exported for tests/auth-relay.test.js (the Clerk-dependent handlers below
+// aren't unit-tested — they need a live Clerk instance).
+export function isValidLoopbackPort(raw) {
+  if (!raw || !/^\d{1,5}$/.test(raw)) return false;
+  const n = Number(raw);
+  return n >= 1024 && n <= 65535;
+}
+
+// The Meridian desktop app's Google-SSO handoff. Landed on by the browser
+// after the user signs in on Clerk's Account Portal (the primary domain);
+// this hostname is registered as a Clerk satellite domain, so
+// `authenticateRequest` with `satelliteAutoSync: true` completes the
+// handshake and syncs the session here automatically. See
+// tray/src-tauri/src/commands/clerk_signin.rs for the desktop side.
+async function handleAuthCallback(request, url, env) {
+  const port = url.searchParams.get('port');
+  const state = url.searchParams.get('state');
+  if (!isValidLoopbackPort(port)) return json({ error: 'invalid or missing port' }, 400);
+  if (!state) return json({ error: 'missing state' }, 400);
+
+  const clerkClient = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
+  const requestState = await clerkClient.authenticateRequest(request, {
+    authorizedParties: [ACCOUNT_PORTAL_URL, `https://${AUTH_HOSTNAME}`],
+    isSatellite: true,
+    domain: AUTH_HOSTNAME,
+    satelliteAutoSync: true,
+    signInUrl: `${ACCOUNT_PORTAL_URL}/sign-in`,
+  });
+
+  // Mid-handshake — Clerk needs one more round-trip to finish syncing the
+  // session from the primary domain. Forward its headers verbatim (they
+  // carry the redirect that continues the dance); we'll see this same
+  // request again once it completes.
+  if (requestState.status === 'handshake') {
+    return new Response(null, { status: 307, headers: requestState.headers });
+  }
+
+  if (!requestState.isAuthenticated) {
+    // Not signed in yet (e.g. this URL was opened directly, or the handshake
+    // came back empty) — send them to sign in, preserving our own callback
+    // URL as the post-sign-in redirect so they land back here.
+    const callbackUrl = `https://${AUTH_HOSTNAME}${url.pathname}?${url.searchParams.toString()}`;
+    const signInUrl = `${ACCOUNT_PORTAL_URL}/sign-in?redirect_url=${encodeURIComponent(callbackUrl)}`;
+    return Response.redirect(signInUrl, 302);
+  }
+
+  const auth = requestState.toAuth();
+  const user = await clerkClient.users.getUser(auth.userId);
+  const email = user.primaryEmailAddress?.emailAddress;
+  if (!email) {
+    console.error('Clerk user has no primary email:', auth.userId);
+    return json({ error: 'signed-in user has no email address' }, 500);
+  }
+
+  const token = crypto.randomUUID();
+  await env.AUTH_TOKENS.put(
+    token,
+    JSON.stringify({ email, userId: auth.userId }),
+    { expirationTtl: AUTH_TOKEN_TTL_SECONDS },
+  );
+
+  const finish = new URL(`http://127.0.0.1:${port}/finish`);
+  finish.searchParams.set('token', token);
+  finish.searchParams.set('state', state);
+  return Response.redirect(finish.toString(), 302);
+}
+
+// Server-to-server redemption of the one-time token minted above — called by
+// the desktop app's loopback listener, never by the browser. Single-use: the
+// token is deleted on first successful read, so a leaked/logged callback URL
+// (which only the browser and the desktop app ever see) can't be replayed.
+// Exported for tests/auth-relay.test.js (exercised against a fake KV).
+export async function handleAuthExchange(url, env) {
+  const token = url.searchParams.get('token');
+  if (!token) return json({ error: 'missing token' }, 400);
+  const raw = await env.AUTH_TOKENS.get(token);
+  if (!raw) return json({ error: 'invalid or expired token' }, 400);
+  await env.AUTH_TOKENS.delete(token);
+  const data = JSON.parse(raw);
+  return json({ email: data.email, userId: data.userId });
 }
 
 // Interstitial download page. Auto-triggers the real file download through /dl
