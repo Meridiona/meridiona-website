@@ -4,3 +4,7 @@ RESEND_API_KEY=
 RESEND_AUDIENCE_ID=
 RESEND_AUDIENCE_ID_DOWNLOAD=
 RESEND_AUDIENCE_ID_WAITLIST=
+# Meridian desktop app's Google-SSO relay (auth.meridiona.com) — Clerk secret
+# key, never the publishable key. Full admin access to the Clerk instance;
+# never commit the real value. `wrangler secret put CLERK_SECRET_KEY` for prod.
+CLERK_SECRET_KEY=

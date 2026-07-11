@@ -12,5 +12,14 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  // One-time-token store for the auth.meridiona.com Google-SSO relay (see
+  // worker.js's /auth/callback + /auth/exchange routes) — short-TTL entries,
+  // deleted on first read. Created via `wrangler kv namespace create AUTH_TOKENS`.
+  "kv_namespaces": [
+    {
+      "binding": "AUTH_TOKENS",
+      "id": "05edf1c41eb842fa8caf7de0536495d9"
+    }
   ]
 }
