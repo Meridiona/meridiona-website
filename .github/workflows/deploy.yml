@@ -20,7 +20,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # wrangler requires Node >= 22; 20 makes `wrangler deploy` abort on
+          # its version check before it ever contacts Cloudflare.
+          node-version: 24
           cache: npm
 
       - run: npm ci
