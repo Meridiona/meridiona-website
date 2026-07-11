@@ -20,7 +20,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Wrangler v4 requires Node >= 22; the runner's default Node was
+          # bumped past 20 and setup-node@v4 with node-version: 20 broke the
+          # deploy. Pin to 22 (current LTS) so the version is explicit.
+          node-version: 22
           cache: npm
 
       - run: npm ci
