@@ -13,6 +13,13 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  // Clerk publishable key for the Google-SSO relay (auth.meridiona.com) — a
+  // public identifier, safe to commit (unlike CLERK_SECRET_KEY, which is a
+  // `wrangler secret put` value, never checked in). authenticateRequest()
+  // needs both keys to resolve the satellite-domain handshake correctly.
+  "vars": {
+    "CLERK_PUBLISHABLE_KEY": "pk_test_dG91Y2hpbmctdW5pY29ybi0xNS5jbGVyay5hY2NvdW50cy5kZXYk"
+  },
   // Custom domain for the Google-SSO relay. `custom_domain: true` makes wrangler
   // provision the DNS record + edge certificate for auth.meridiona.com on deploy
   // (the meridiona.com zone must live on the same Cloudflare account).
