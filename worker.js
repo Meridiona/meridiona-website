@@ -180,8 +180,12 @@ async function handleAuthCallback(request, url, env) {
   if (!isValidLoopbackPort(port)) return json({ error: 'invalid or missing port' }, 400);
   if (!state) return json({ error: 'missing state' }, 400);
 
-  const clerkClient = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
+  const clerkClient = createClerkClient({
+    secretKey: env.CLERK_SECRET_KEY,
+    publishableKey: env.CLERK_PUBLISHABLE_KEY,
+  });
   const requestState = await clerkClient.authenticateRequest(request, {
+    publishableKey: env.CLERK_PUBLISHABLE_KEY,
     authorizedParties: [ACCOUNT_PORTAL_URL, `https://${AUTH_HOSTNAME}`],
     isSatellite: true,
     domain: AUTH_HOSTNAME,
