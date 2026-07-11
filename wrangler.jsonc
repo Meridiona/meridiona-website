@@ -20,11 +20,21 @@
   "vars": {
     "CLERK_PUBLISHABLE_KEY": "pk_test_dG91Y2hpbmctdW5pY29ybi0xNS5jbGVyay5hY2NvdW50cy5kZXYk"
   },
-  // Custom domain for the Google-SSO relay. `custom_domain: true` makes wrangler
-  // provision the DNS record + edge certificate for auth.meridiona.com on deploy
-  // (the meridiona.com zone must live on the same Cloudflare account).
+  // Custom domains served by this Worker. `custom_domain: true` makes wrangler
+  // provision the DNS record + edge certificate on deploy (the meridiona.com
+  // zone must live on the same Cloudflare account).
+  //
+  // meridiona.com (the apex — the main website) MUST stay listed here. When a
+  // `routes` array is present, wrangler treats it as the Worker's complete set
+  // of custom domains and detaches any not listed; leaving the apex out drops
+  // its custom-domain DNS record and takes the site down.
   "routes": [
     {
+      "pattern": "meridiona.com",
+      "custom_domain": true
+    },
+    {
+      // Google-SSO relay for the Meridian desktop app (see worker.js).
       "pattern": "auth.meridiona.com",
       "custom_domain": true
     }
