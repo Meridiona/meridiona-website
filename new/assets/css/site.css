@@ -141,7 +141,7 @@ body[data-theme="paper"]{
 .hero__embed-wrap{position:relative;margin-top:18px;animation:heroIn 1s .15s ease both}
 .hero__embed-annotation{position:absolute;top:-30px;right:26px;z-index:5;display:flex;align-items:flex-start;gap:8px;pointer-events:none}
 .hero__embed-note{font-family:'Caveat',cursive;font-size:19px;color:var(--acc2);transform:rotate(-3deg);white-space:nowrap}
-.hero__embed-frame{position:relative;border-radius:18px;border:2px solid #E8ECFC;box-shadow:var(--shadow);background:#E8ECFC}
+.hero__embed-frame{position:relative;overflow:hidden;border-radius:18px;border:2px solid #E8ECFC;box-shadow:var(--shadow);background:#E8ECFC}
 .hero__embed-viewport{position:relative;overflow:hidden;border-radius:12px}
 .hero__iframe{border:0;transform-origin:0 0}
 
@@ -523,16 +523,20 @@ body[data-theme="paper"]{
 .demo-open{display:none}
 @media (max-width:640px){
   .hero__iframe{pointer-events:none} /* let the whole preview be one tap target */
+  /* A dim scrim over the (tiny, illegible) inline preview with a centered pill
+     that clearly invites the tap. Plain rgba — no color-mix, which renders
+     inconsistently on some mobile browsers. Clipped to the frame's rounded
+     corners by .hero__embed-frame's overflow:hidden. */
   .demo-open{
-    display:flex;align-items:flex-end;justify-content:center;
-    position:absolute;inset:0;z-index:6;border:0;cursor:pointer;padding:0 0 12px;
-    background:linear-gradient(to top,color-mix(in oklab,var(--acc) 22%,transparent),transparent 42%);
-    -webkit-tap-highlight-color:transparent;
+    display:flex;align-items:center;justify-content:center;
+    position:absolute;inset:0;z-index:6;border:0;cursor:pointer;
+    background:rgba(11,8,20,.34);-webkit-tap-highlight-color:transparent;
   }
   .demo-open__label{
-    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.04em;font-weight:600;
-    color:#fff;background:var(--acc);border-radius:999px;padding:8px 16px;
-    box-shadow:0 8px 24px -6px rgba(60,30,140,.5);
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;letter-spacing:.01em;
+    color:#fff;background:var(--acc);border-radius:999px;padding:11px 20px;
+    box-shadow:0 12px 30px -8px rgba(0,0,0,.55);
   }
 }
 
@@ -564,7 +568,9 @@ body[data-theme="paper"]{
    here we polish the resulting stacked layout), and the worklog flow. */
 @media (max-width:760px){
   .section{padding:72px 20px}
-  .hero{padding:64px 20px 8px}
+  /* top padding must clear the 64px fixed nav (+breathing room) or the title
+     tucks under it; only the bottom/side padding tightens on mobile */
+  .hero{padding:92px 20px 8px}
   .hero__pointer{display:none} /* decorative arrow points at nav items that shed on mobile */
 
   /* stacked "why" fallback (no is-ready): give the sticky intro + panels room */
@@ -582,7 +588,7 @@ body[data-theme="paper"]{
 }
 @media (max-width:560px){
   .section{padding:56px 18px}
-  .hero{padding:56px 18px 8px}
+  .hero{padding:88px 18px 8px}
   .hero__embed-annotation{display:none} /* "go poke around" — replaced by the tap-to-explore target */
   .doc-diagram__row{flex-wrap:wrap}
   .doc-diagram__metric{margin-left:0}
