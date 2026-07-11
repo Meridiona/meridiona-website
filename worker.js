@@ -37,6 +37,12 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // www → apex, 301, preserving path + query — one canonical host.
+    if (url.hostname === 'www.meridiona.com') {
+      url.hostname = 'meridiona.com';
+      return Response.redirect(url.toString(), 301);
+    }
+
     // Google-SSO relay — isolated by hostname, never touches the routes below.
     if (url.hostname === AUTH_HOSTNAME) {
       if (url.pathname === '/auth/callback') return handleAuthCallback(request, url, env);
