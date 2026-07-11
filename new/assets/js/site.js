@@ -228,18 +228,37 @@
       DemoFullscreen.frame = o.querySelector('.demo-fs__frame');
       o.querySelector('.demo-fs__close').addEventListener('click', DemoFullscreen.hide);
       o.addEventListener('click', function (e) { if (e.target === o) DemoFullscreen.hide(); });
+      // Re-fit when the demo document itself finishes loading (its layout can
+      // settle after our first size() call).
+      DemoFullscreen.frame.addEventListener('load', DemoFullscreen.size);
     },
     size: function () {
       if (!DemoFullscreen.open || !DemoFullscreen.frame) return;
-      var sw = window.innerWidth, sh = window.innerHeight;
+      // visualViewport is the reliable source for the actually-visible area on
+      // mobile Safari (window.innerWidth/Height can be stale right after an
+      // orientation change); fall back to innerWidth/documentElement.
+      var vv = window.visualViewport;
+      var sw = Math.round((vv && vv.width) || window.innerWidth || document.documentElement.clientWidth);
+      var sh = Math.round((vv && vv.height) || window.innerHeight || document.documentElement.clientHeight);
       var longEdge = Math.max(sw, sh), shortEdge = Math.min(sw, sh);
       var portrait = sh >= sw;
+      // Fit the 1240x720 (landscape) canvas into the screen's landscape box.
+      // min() guarantees BOTH axes fit — the demo is letterboxed, never clipped.
       var scale = Math.min(longEdge / DemoFullscreen.DEVICE_W, shortEdge / DemoFullscreen.DEVICE_H);
       var f = DemoFullscreen.frame;
       f.style.width = DemoFullscreen.DEVICE_W + 'px';
       f.style.height = DemoFullscreen.DEVICE_H + 'px';
-      f.style.transform = (portrait ? 'rotate(90deg) ' : '') + 'scale(' + scale + ')';
+      // Centred with translate(-50%,-50%) against left/top:50% (in CSS) rather
+      // than flexbox — flex-centring an item far wider than its container
+      // clips the overflow unpredictably; translate-centring never does.
+      f.style.transform = 'translate(-50%,-50%) ' + (portrait ? 'rotate(90deg) ' : '') + 'scale(' + scale + ')';
       DemoFullscreen.overlay.classList.toggle('is-portrait', portrait);
+    },
+    // iOS reports stale viewport dimensions immediately after an orientation
+    // change, so recompute now and again after the rotation settles.
+    resize: function () {
+      DemoFullscreen.size();
+      window.setTimeout(DemoFullscreen.size, 250);
     },
     show: function () {
       DemoFullscreen.build();
@@ -247,6 +266,7 @@
       DemoFullscreen.overlay.classList.add('is-open');
       document.body.style.overflow = 'hidden';
       DemoFullscreen.size();
+      window.requestAnimationFrame(DemoFullscreen.size); // after the overlay paints
     },
     hide: function () {
       if (!DemoFullscreen.overlay) return;
@@ -258,7 +278,9 @@
       var opener = $('demo-open');
       if (!opener) return;
       opener.addEventListener('click', DemoFullscreen.show);
-      window.addEventListener('resize', DemoFullscreen.size);
+      window.addEventListener('resize', DemoFullscreen.resize);
+      window.addEventListener('orientationchange', DemoFullscreen.resize);
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', DemoFullscreen.size);
     },
   };
 
