@@ -4,33 +4,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Meridiona** is a Cloudflare Workers-hosted static website. It's a single-page application bundled into a single `index.html` file with embedded JavaScript, CSS, and assets. The site showcases "An AI that knows your company" with a focus on mobile responsiveness and a sophisticated loading experience.
+**Meridiona** is a Cloudflare Workers-hosted static website. It showcases "An AI that knows your company" with a focus on mobile responsiveness and an interactive product demo embedded in the hero. The site is plain, framework-free static HTML/CSS/JS with no build step and no bundler — what's in git is what's deployed.
 
-- **Type**: Static website, Cloudflare Workers + Cloudflare Pages
-- **Language**: HTML, CSS, JavaScript (vanilla, no framework)
-- **Entry Point**: `index.html` (fully bundled)
+- **Type**: Static website, Cloudflare Workers + Cloudflare Pages assets
+- **Language**: HTML, CSS, JavaScript (vanilla, no framework, no build step)
+- **Entry points**: `index.html` (the landing page), `demo.html` (the interactive product demo embedded in the hero)
 - **Deployment**: Cloudflare Workers (via `wrangler deploy`)
-- **Tests**: Custom test harness (responsive design tests)
-
-> **In-progress redesign, live at `/new`.** A ground-up rebuild of this site (new landing page + embedded interactive product demo, no bundler, plain HTML/CSS/JS) lives in `new/` and is served at `/new` by the same Worker/ASSETS binding — see `new/CLAUDE.md`. It does not touch or replace anything below; the old site here keeps serving `/` untouched until a deliberate decision is made to promote it. `new/` has its own test suite (`new/tests/responsive.test.js`), independent of this file's.
+- **Tests**: `tests/responsive.test.js` (structural + responsiveness checks) and `tests/auth-relay.test.js` (Google-SSO relay unit tests)
 
 ## Architecture
 
-### The Custom Bundler System
+### Two plain HTML files, no bundler, externalized CSS/JS
 
-The site uses a custom bundler that packages the entire application into a single HTML file:
+`index.html` and `demo.html` are ordinary static HTML with **zero inline `<style>`/`<script>` blocks** — all CSS and JS live under `assets/` as separate, cacheable, reusable files.
 
-1. **Manifest (`<script type="__bundler/manifest">`)**: Contains base64-encoded, optionally gzip-compressed asset data (images, CSS bundles, etc.). Indexed by UUID.
+- **`index.html`** — the landing page markup only: nav, hero, "Why" section, testimonials/FAQ/footer, download modal, social-connect modal, and the theme-switcher widget. Styled by `assets/css/site.css`, driven by `assets/js/site.js`.
+- **`writing/`** — the essays section. `writing/index.html` is the essay list (served at `/writing`); each essay is a flat file (`writing/<slug>.html`, served extensionless at `/writing/<slug>` by the ASSETS binding's default html handling). All pages share `site.css` (tokens, nav, footer, modals) plus `assets/css/writing.css` (the reading experience: `.prose`, `.entry`, `.article-head__*`). Essay body copy is set in **Newsreader** (loaded only on writing pages); headings stay Space Grotesk, metadata JetBrains Mono.
+- **`demo.html`** — the markup shell for a self-contained interactive recreation of the Meridian app (daily timeline, insights panel, swipe-to-approve/dismiss review modal, capture/Jira toggles, reset). Styled by `assets/css/demo.css`, driven by `assets/js/demo.js`. Embedded in the landing hero via a fixed-resolution (1240×720) `<iframe>` that `assets/js/site.js`'s `HeroEmbed` module scales with `transform: scale(...)` to fit the viewport.
+- **`assets/css/site.css`** — design tokens (3 themes: dawn/dusk/paper, as CSS custom properties on `body`/`body[data-theme=...]`) plus every landing-page component class (`.nav__*`, `.hero__*`, `.feature-card`, `.faq-item__*`, `.modal-*`, `.connect-row--*`, `.theme-dot`, etc.).
+- **`assets/js/site.js`** — landing-page behavior, split into small modules (`Theme`, `Faq`, `HeroEmbed`, `DownloadModal`, `ConnectModal`), each owning one piece of UI state and re-rendering only its own DOM region.
+- **`assets/css/demo.css`** / **`assets/js/demo.js`** — the embedded demo's own design language (Plus Jakarta Sans, fixed-resolution dashboard chrome) and its state machine (`state` + `render()` → `renderToolbar/renderTimeline/renderPanel/renderFloating/renderReview`).
+- **`worker.js`** — Cloudflare Worker handling the Google-SSO relay for the Meridian desktop app (isolated by the `auth.meridiona.com` hostname), `/dl` (redirect to the latest GitHub release + PostHog attribution), `/download` (interstitial page with waitlist opt-in), `/subscribe` (Resend audience signup, called from `assets/js/site.js`'s download modal and the `/download` page), and per-path `<title>`/description rewriting for `/writing/*` essay pages (via `env.ASSETS.fetch` + string replace — this is why `index.html` must keep exactly one `<title>` and one `<meta name="description">` tag).
 
-2. **Template (`<script type="__bundler/template">`)**: The actual HTML/CSS content that gets rendered into the DOM. This is the core page markup.
+### Key design decisions
 
-3. **Runtime (`index.html`)**: On page load, JavaScript in `index.html` unpacks the manifest, decompresses assets, and injects the template into the DOM. There's also a "thumbnail" loading state shown before the full template renders.
-
-### Key Design Decisions
-
-- **Single HTML file**: Simplifies deployment and caching. The entire site fits in one request.
-- **Lazy unpack**: Assets are decompressed on the client using the `DecompressionStream` API (with a fallback to `pako` for older browsers).
-- **Bundler error overlay**: A red error box in the bottom-left corner (styled with `display:fixed; background:#2a1215; color:#ff8a80`) shows unpack errors. This overlay is suppressed after the template is injected into the DOM so that third-party scripts (e.g., Cloudflare beacon) don't pollute the error log.
+- **No bundler, no build step**: what's in git is what's deployed. Simpler to review, edit, and reason about than a base64/gzip manifest.
+- **Externalized, component-classed CSS/JS**: no inline `style="..."` soup or per-page `<script>` blocks — structure lives in HTML, presentation in `assets/css/*.css` (BEM-ish component classes), behavior in `assets/js/*.js` (small named modules, each rendering its own DOM region).
+- **Fluid layout, not breakpoints**: responsiveness comes from `clamp()` type sizing and `repeat(auto-fit,minmax(...))` grids, so sections reflow continuously rather than snapping at fixed breakpoints. There's no hamburger nav — the nav is compact enough to stay inline at all widths tested.
+- **iframe-embedded demo, not inlined markup**: keeping `demo.html` as a separate document (rather than inlining its DOM into `index.html`) keeps its own event handling and CSS self-contained. It intentionally has its own design language (Plus Jakarta Sans, fixed dashboard colors) rather than sharing `site.css`'s theme tokens — it's a mock of the *product*, not the marketing site.
 
 ## Commands
 
@@ -38,84 +39,110 @@ The site uses a custom bundler that packages the entire application into a singl
 
 ```bash
 node tests/responsive.test.js
+node tests/auth-relay.test.js
 ```
 
-Tests validate:
-- Viewport meta tag is present (required for mobile scaling)
-- Media queries exist at 768px and 480px breakpoints
-- Grid layouts collapse to single/dual columns on mobile
-- Mobile navigation (hamburger menu) is properly hidden/shown
-- CTA form stacks vertically on mobile
-- JSON encoding is safe (no unescaped `</script>` tags that break parsing)
+Or both via `npm test`.
+
+`responsive.test.js` validates: viewport meta tags, worker.js compatibility (title/description/`</head>` regex targets, `/subscribe` + `/dl` wiring), all three themes present, key sections present (nav, hero, why, faq, footer, both modals, theme switcher), fluid-responsive patterns (`clamp()`, `auto-fit/minmax`), the embedded demo's interactive affordances, balanced `<script>`/`<style>` tags, and the writing section's structure/links.
 
 **Exit code**: 0 on success, 1 if any test fails.
+
+### Local preview
+
+```bash
+npx wrangler dev
+```
+
+or, for a quick static preview without Workers semantics:
+
+```bash
+python3 -m http.server 8080
+```
 
 ### Deploy to Cloudflare
 
 ```bash
-wrangler deploy
+node tests/responsive.test.js && node tests/auth-relay.test.js && wrangler deploy
 ```
 
-Deploys `index.html` to Cloudflare Pages via the Cloudflare Workers CLI. The `wrangler.jsonc` config specifies:
+Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangler.jsonc` config specifies:
 - `compatibility_date: 2026-05-21`
 - `compatibility_flags: ["nodejs_compat"]`
 - `observability: enabled` (sends metrics to Cloudflare analytics)
+- `assets.directory: "."` — the ASSETS binding serves the whole repo root as static files
+- the `auth.meridiona.com` custom-domain route for the Google-SSO relay
 
 ## File Structure
 
 ```
 .
-├── index.html              # Main bundled application (entry point)
+├── index.html              # Landing page markup, served at / — no inline CSS/JS
+├── demo.html                # Embedded interactive product demo markup, served at /demo.html — no inline CSS/JS
+├── assets/
+│   ├── css/
+│   │   ├── site.css          # Landing page: theme tokens (dawn/dusk/paper) + component classes
+│   │   ├── demo.css          # Embedded demo: its own fixed dashboard design language
+│   │   └── writing.css       # Essay reading experience
+│   ├── js/
+│   │   ├── site.js           # Landing page behavior: Theme, Faq, HeroEmbed, DownloadModal, ConnectModal
+│   │   ├── demo.js           # Embedded demo state machine + render pipeline
+│   │   └── analytics.js      # PostHog snippet, loaded eagerly in <head>
+│   └── images/
+│       └── meridian-mark.png # Official logo
+├── writing/
+│   ├── index.html            # Essay list, served at /writing
+│   └── <slug>.html           # Individual essays, served at /writing/<slug>
+├── worker.js               # Cloudflare Worker: Google-SSO relay, /dl, /download, /subscribe, writing-page meta rewriting
 ├── wrangler.jsonc          # Cloudflare Workers configuration
+├── favicon.ico / favicon-512.png / apple-touch-icon.png
+├── robots.txt / sitemap.xml
 ├── tests/
-│   └── responsive.test.js  # Mobile responsiveness test suite
+│   ├── responsive.test.js  # Structural + responsiveness test suite
+│   └── auth-relay.test.js  # Google-SSO relay unit tests
 ├── .gitignore
 └── CLAUDE.md               # This file
 ```
 
 ## Development Workflow
 
-### Making Changes to Content/Styling
+### Making changes to content/styling
 
-1. Edit the `index.html` file directly. The template is embedded in the `<script type="__bundler/template">` tag as a JSON string.
-2. If you add assets (images, fonts), encode them as base64 and add to the manifest with a UUID.
-3. Run tests to verify responsive design: `node tests/responsive.test.js`
-4. Deploy: `wrangler deploy`
+1. Edit markup in `index.html`/`demo.html`, styles in `assets/css/site.css`/`assets/css/demo.css`, and behavior in `assets/js/site.js`/`assets/js/demo.js`. Don't add inline `<style>`/`<script>` blocks back — the test suite fails the build if it finds any.
+2. Prefer reusing or extending an existing component class (`.feature-card`, `.modal-*`, `.faq-item__*`, ...) over adding new one-off inline styles. If a pattern repeats 2+ times, promote it to a class.
+3. Run `node tests/responsive.test.js` to catch regressions (missing sections, broken worker.js contract, unbalanced tags).
+4. Preview with `wrangler dev` before deploying.
 
-### Common Tasks
+### Common tasks
 
-**Adding a new HTML section:**
-- Locate the template in `index.html` (search for `<script type="__bundler/template">`)
-- Edit the HTML/CSS inside the JSON string
-- Ensure responsive classes are applied (e.g., `@media (max-width: 768px)`)
-- Run tests to check for regressions
+**Adding a new landing-page section:**
+- Add the `<section>` in `index.html` using existing classes from `assets/css/site.css` (`.section`, `.section__inner`, `.card-grid`, `.eyebrow`, `.section-title`, etc.) — add new component classes to `site.css` following the existing `.block__element--modifier` naming, not new inline styles.
+- If it needs interactivity, add a small named module to `assets/js/site.js` (see `Faq`/`DownloadModal`/`ConnectModal` for the shape: an object with `init()`, its own render function, and event handlers), following the render-on-state-change pattern.
 
-**Fixing mobile layout issues:**
-- Check the media query at 768px or 480px in the template
-- Adjust grid columns (`.grid-cols-N`) or flex properties (`.cta-form`)
-- Run tests to ensure the fix is captured: `node tests/responsive.test.js`
+**Adding a new essay:**
+- Copy an existing essay file (e.g. `writing/velocity-visibility.html`) to `writing/<new-slug>.html`; replace the `<title>`, description, `.article-head` block, and the `.prose` body. Available prose building blocks (all in `assets/css/writing.css`): `.prose__lede` opener, `h2` with a `<span class="sec-index">§ 0N</span>` marker, `ul` (accent-dot bullets), `blockquote` (pull quote), `pre>code` / inline `code`, `.findings` (numbered key-findings card), `.prose__coda` closing lines.
+- Add an `.entry` block for it at the top of `writing/index.html` (move the `entry__stamp-new` "Latest" badge to it) and update the essay count in `.writing-more`.
+- The test suite automatically picks up every `writing/*.html` file and checks its structure and that the index links to it.
 
-**Changing colors or typography:**
-- Colors and fonts are defined inline in the `<style>` block within the template
-- Update the CSS inside the template JSON string
-- No separate CSS files — all styling is embedded
+**Changing the interactive demo:**
+- All state lives in the `state` object in `assets/js/demo.js`; `render()` re-renders the affected DOM regions after every mutation. Follow the existing `renderToolbar/renderTimeline/renderPanel/renderFloating/renderReview` split rather than a single monolithic re-render. Add new component classes to `assets/css/demo.css`.
+
+**Changing colors/typography:**
+- Theme colors are CSS custom properties on `body` / `body[data-theme="dusk"]` / `body[data-theme="paper"]` in `assets/css/site.css`. Never hardcode a theme-sensitive color inline — use `var(--acc)`, `var(--card)`, etc. The embedded demo (`assets/css/demo.css`) is a fixed light dashboard mock and intentionally does not use these tokens.
 
 ## Known Issues & Patterns
 
-### Bundler Error Overlay
-- The error overlay is automatically hidden after the template is successfully injected into the DOM
-- This prevents noise from third-party scripts (Cloudflare beacon, analytics)
-- If you see persistent errors, check the bundler manifest for corruption
+### worker.js's `<title>`/description rewrite
 
-### JSON Encoding in HTML
-- The template is stored as a JSON string inside `<script type="__bundler/template">`
-- Do not include unescaped `</script>` tags in the JSON (the HTML parser will prematurely close the script tag)
-- The test suite validates this: `no unescaped </script> in raw JSON`
+`worker.js` fetches `env.ASSETS` for `/` and does a regex replace on `<title>[^<]*</title>` and `<meta name="description"[^>]*>` for `/writing/*` essay routes, then injects a `<link rel="canonical">` before `</head>`. Keep exactly one of each tag in `index.html`, and keep `</head>` unique — the test suite enforces this.
 
-### Mobile Breakpoints
-- **768px**: Tablet/mobile threshold — grids collapse, nav becomes hamburger
-- **480px**: Small phone threshold — further grid reductions, text scaling
-- Both breakpoints are tested automatically
+### Fluid responsiveness, not media queries
+
+This design intentionally has no `@media (max-width: 768px)` breakpoints — layout is fluid via `clamp()` and `auto-fit` grids. If you add a component that doesn't reflow well at narrow widths, prefer fixing it with fluid sizing over bolting on a breakpoint, to stay consistent with the rest of the page.
+
+### Mobile Nav
+
+There's no hamburger menu; the nav is deliberately minimal (4 items) so it stays inline down to small viewports. If nav items grow, revisit this.
 
 ## Git & Deployment Notes
 
@@ -124,16 +151,17 @@ Deploys `index.html` to Cloudflare Pages via the Cloudflare Workers CLI. The `wr
 - `.wrangler` and `.dev.vars*` are ignored (Cloudflare build artifacts)
 - `.env*` files are ignored (never commit secrets)
 - Use `.env.example` for documenting required environment variables
-- Deploy only after tests pass: `node tests/responsive.test.js && wrangler deploy`
+- Deploy only after tests pass: `node tests/responsive.test.js && node tests/auth-relay.test.js && wrangler deploy`
 
 ## Browser Support
 
 - **Modern browsers** (Chrome, Firefox, Safari, Edge) — primary target
-- **Fallback decompression**: `DecompressionStream` is used if available; `pako` library can be added as fallback
-- **Mobile**: Full responsive support down to 480px viewport width
+- `animation-timeline: view()` (scroll-reveal on `[data-rv]` elements) degrades gracefully to "visible immediately" on browsers without support (the `animation` still runs once on load).
+- **Mobile**: fluid layout tested down to ~360px viewport width.
 
 ## Performance & Observability
 
 - Cloudflare observability is enabled (`observability.enabled: true` in `wrangler.jsonc`)
 - Metrics are sent to Cloudflare's analytics dashboard
-- The single-file bundle ensures caching works efficiently (one long-lived HTTP request)
+- PostHog captures `app_download` server-side (via `/dl`) and `download_page_viewed`/`waitlist_signup` client-side (via `/download`)
+- Resend stores waitlist/download-modal emails via `/subscribe`
