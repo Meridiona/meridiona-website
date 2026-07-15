@@ -7,3 +7,6 @@
 
 # npm (added for the auth.meridiona.com relay's @clerk/backend dependency)
 node_modules
+
+# macOS
+.DS_Store

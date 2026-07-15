@@ -1,0 +1,39 @@
+name: Deploy to Cloudflare
+
+# Every push to main (i.e. a merged PR) runs the test suite and, if it passes,
+# deploys the Worker — which re-provisions the custom_domain records in
+# wrangler.jsonc, so a merge and the live site never drift apart.
+on:
+  push:
+    branches: [main]
+
+# One deploy at a time; a newer push supersedes an in-flight run.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Wrangler v4 requires Node >= 22; the runner's default Node was
+          # bumped past 20 and setup-node@v4 with node-version: 20 broke the
+          # deploy. Pin to 22 (current LTS) so the version is explicit.
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Gate the deploy on the existing suite (responsive + auth-relay tests).
+      - run: npm test
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Pinned for reproducible deploys; bump deliberately.
+          wranglerVersion: "4.105.0"
