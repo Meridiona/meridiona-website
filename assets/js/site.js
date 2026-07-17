@@ -28,12 +28,12 @@
 
   var DOWNLOAD_COPY = {
     mac: {
-      emailTitle: 'Almost there',
-      emailPrompt: 'Drop your email and the download starts right away.',
-      ctaLabel: 'Continue → download',
+      updatesPrompt: 'Want a heads up on new releases? Leave your email — totally optional.',
+      updatesCta: 'Keep me posted',
       emailNote: 'macOS 14+ · Apple Silicon (M1 or later)',
       successTitle: 'Download started',
       successBody: 'Meridian.dmg is on its way. Drag it to Applications and look for the diamond in your menu bar.',
+      subscribedNote: 'Thanks — we’ll ping you when there’s something new.',
     },
     windows: {
       emailTitle: 'Get in line',
@@ -286,9 +286,9 @@
 
   // ── download modal ───────────────────────────────────────────────────────
   var DownloadModal = {
-    state: { os: null, email: '', phoneCode: '+1', phone: '', sent: false },
+    state: { os: null, email: '', phoneCode: '+1', phone: '', sent: false, subscribed: false },
     open: function () {
-      DownloadModal.state = { os: null, email: '', phoneCode: '+1', phone: '', sent: false };
+      DownloadModal.state = { os: null, email: '', phoneCode: '+1', phone: '', sent: false, subscribed: false };
       DownloadModal.render();
       $('modal-download').classList.add('is-open');
     },
@@ -322,6 +322,40 @@
 
       var copy = DOWNLOAD_COPY[s.os];
 
+      if (s.os === 'mac') {
+        // The download already started when the OS was picked (see handleBodyClick) —
+        // no email required. What follows is an optional, non-blocking updates opt-in.
+        if (s.subscribed) {
+          body.innerHTML =
+            '<h3 class="modal-title"><span class="success-check">✓</span> ' + copy.successTitle + '</h3>' +
+            '<p class="modal-subtitle">' + copy.successBody + '</p>' +
+            '<div class="form-note">' + copy.subscribedNote + '</div>' +
+            '<div class="success-link"><a href="/dl?ref=landing-modal-again">didn’t start? download again</a></div>';
+          return;
+        }
+        var countryOptions = COUNTRY_CODES.map(function (c) {
+          var selected = c.code === s.phoneCode ? ' selected' : '';
+          return '<option value="' + c.code + '"' + selected + '>' + c.code + ' ' + c.name + '</option>';
+        }).join('');
+        body.innerHTML =
+          '<h3 class="modal-title"><span class="success-check">✓</span> ' + copy.successTitle + '</h3>' +
+          '<p class="modal-subtitle">' + copy.successBody + '</p>' +
+          '<form id="dl-form" class="email-form">' +
+            '<p class="phone-hint">' + copy.updatesPrompt + '</p>' +
+            '<input id="dl-email" class="email-input" type="email" ' +
+              'placeholder="you@work.com" value="' + s.email + '" aria-label="Email address (optional)">' +
+            '<div class="phone-row">' +
+              '<select id="dl-phone-code" class="phone-select" aria-label="Country code">' + countryOptions + '</select>' +
+              '<input id="dl-phone" class="phone-input" type="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[s.phoneCode] || '') + '" value="' + s.phone + '" aria-label="Phone number (optional)">' +
+            '</div>' +
+            '<button type="submit" class="btn-primary btn-primary--block">' + copy.updatesCta + '</button>' +
+          '</form>' +
+          '<div class="form-note">' + copy.emailNote + '</div>' +
+          '<button id="dl-skip" class="btn-text" style="margin-top:12px">No thanks</button>' +
+          '<div class="success-link"><a href="/dl?ref=landing-modal-again">didn’t start? download again</a></div>';
+        return;
+      }
+
       if (!s.sent) {
         var countryOptions = COUNTRY_CODES.map(function (c) {
           var selected = c.code === s.phoneCode ? ' selected' : '';
@@ -347,15 +381,27 @@
 
       body.innerHTML =
         '<h3 class="modal-title"><span class="success-check">✓</span> ' + copy.successTitle + '</h3>' +
-        '<p class="modal-subtitle">' + copy.successBody + '</p>' +
-        (s.os === 'mac'
-          ? '<div class="success-link"><a href="/dl?ref=landing-modal-again">didn’t start? download again</a></div>'
-          : '');
+        '<p class="modal-subtitle">' + copy.successBody + '</p>';
     },
     handleBodyClick: function (e) {
       var osBtn = e.target.closest('[data-os]');
-      if (osBtn) { DownloadModal.state.os = osBtn.dataset.os; DownloadModal.render(); return; }
-      if (e.target.id === 'dl-back') { DownloadModal.state.os = null; DownloadModal.render(); }
+      if (osBtn) {
+        DownloadModal.state.os = osBtn.dataset.os;
+        if (osBtn.dataset.os === 'mac') {
+          // Kick off the download immediately — no email wall. The form shown
+          // next is purely an optional opt-in for release updates.
+          $('dl-frame').src = '/dl?ref=landing-modal';
+        }
+        DownloadModal.render();
+        return;
+      }
+      if (e.target.id === 'dl-back') {
+        DownloadModal.state.os = null;
+        DownloadModal.state.sent = false;
+        DownloadModal.state.subscribed = false;
+        DownloadModal.render();
+      }
+      if (e.target.id === 'dl-skip') DownloadModal.close();
     },
     handleBodyChange: function (e) {
       if (e.target.id !== 'dl-phone-code') return;
@@ -369,7 +415,12 @@
       e.preventDefault();
       var input = $('dl-email');
       var email = input.value.trim();
-      if (!EMAIL_RE.test(email)) return;
+
+      var isMac = DownloadModal.state.os === 'mac';
+      // Mac's download already started on OS selection — email here is an
+      // optional updates opt-in, so an empty field just closes it out quietly.
+      if (!isMac && !EMAIL_RE.test(email)) return;
+      if (isMac && email && !EMAIL_RE.test(email)) return;
 
       var phoneDigits = ($('dl-phone').value || '').trim();
       var phoneCode = $('dl-phone-code').value;
@@ -379,21 +430,21 @@
       DownloadModal.state.phoneCode = phoneCode;
       DownloadModal.state.phone = phoneDigits;
       DownloadModal.state.sent = true;
+      if (isMac) DownloadModal.state.subscribed = true;
 
-      fetch('/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email,
-          source: DownloadModal.state.os === 'mac' ? 'download' : 'waitlist',
-          os: DownloadModal.state.os,
-          phone: phone,
-        }),
-      }).catch(function () { /* non-fatal: the confirmation UI has already been shown */ });
-
-      if (DownloadModal.state.os === 'mac') {
-        $('dl-frame').src = '/dl?ref=landing-modal';
+      if (email) {
+        fetch('/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            source: isMac ? 'download' : 'waitlist',
+            os: DownloadModal.state.os,
+            phone: phone,
+          }),
+        }).catch(function () { /* non-fatal: the confirmation UI has already been shown */ });
       }
+
       DownloadModal.render();
     },
     init: function () {
