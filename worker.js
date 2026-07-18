@@ -32,6 +32,18 @@ const WRITING_META = {
 
 // Always resolves to the newest release's asset — no version to bump in code.
 const DOWNLOAD_URL = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian.dmg';
+// The Windows NSIS installer, published to the same release by the meridian
+// repo's windows-release CI job under this stable name.
+const DOWNLOAD_URL_WINDOWS = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian-setup.exe';
+
+// Which release asset a download request resolves to. `?os=windows` selects the
+// installer; anything else (including no param) stays on the macOS DMG, so every
+// existing /dl link keeps working unchanged.
+function downloadTarget(os) {
+  return os === 'windows'
+    ? { url: DOWNLOAD_URL_WINDOWS, asset: 'Meridian-setup.exe', platform: 'windows' }
+    : { url: DOWNLOAD_URL, asset: 'Meridian.dmg', platform: 'macos' };
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -51,12 +63,14 @@ export default {
     }
 
     // Direct file download: log attribution (OS, geo, referrer, source) then redirect to GitHub.
+    // `?os=windows` serves the installer; absent/anything else serves the DMG.
     if (url.pathname === '/dl') {
-      ctx.waitUntil(trackDownload(request, url, env));
+      const target = downloadTarget(url.searchParams.get('os'));
+      ctx.waitUntil(trackDownload(request, url, env, target));
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': DOWNLOAD_URL,
+          'Location': target.url,
           // Never cache the redirect, or repeat downloads skip the Worker and go uncounted.
           'Cache-Control': 'no-store',
         },
@@ -412,7 +426,7 @@ function downloadPage(env, url) {
 // Fire a server-side PostHog event for every download that flows through /dl.
 // No-op until POSTHOG_KEY is configured (wrangler secret / var), so the site is
 // safe to ship before analytics is set up.
-async function trackDownload(request, url, env) {
+async function trackDownload(request, url, env, target = downloadTarget(url.searchParams.get('os'))) {
   const key = env.POSTHOG_KEY;
   if (!key) return;
 
@@ -442,8 +456,8 @@ async function trackDownload(request, url, env) {
     $geoip_city_name: cf.city || null,
     $geoip_subdivision_1_name: cf.region || null,
     $geoip_time_zone: cf.timezone || null,
-    asset: 'Meridian.dmg',
-    platform: 'macos',
+    asset: target.asset,
+    platform: target.platform,
   };
   if (!did) properties.$process_person_profile = false;
 

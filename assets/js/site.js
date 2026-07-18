@@ -36,12 +36,12 @@
       successBody: 'Meridian.dmg is on its way. Drag it to Applications and look for the diamond in your menu bar.',
     },
     windows: {
-      emailTitle: 'Get in line',
-      emailPrompt: 'Windows is on our map. Leave your email and you’re first through the door.',
-      ctaLabel: 'Join the waitlist',
-      emailNote: 'No spam. One email, the day it ships.',
-      successTitle: 'You’re on the list',
-      successBody: 'The moment Meridian crosses over to Windows, your inbox lights up. Until then — we’re building.',
+      emailTitle: 'Almost there',
+      emailPrompt: 'Drop your email and the download starts right away.',
+      ctaLabel: 'Continue → download',
+      emailNote: 'Windows 10/11 · 64-bit',
+      successTitle: 'Download started',
+      successBody: 'Meridian-setup.exe is on its way. Run it, and look for the diamond in your system tray.',
     },
     linux: {
       emailTitle: 'Get in line',
@@ -52,6 +52,12 @@
       successBody: 'Linux is coming. You’re at the front of the queue — we’ll ping you the day it lands.',
     },
   };
+
+  // Which OSes have a real build behind the modal (a download) vs. a waitlist.
+  // macOS and Windows download; Linux is still a waitlist. The one place OS
+  // support changes — flip an entry here and the copy, the trigger, and the
+  // "download again" link all follow.
+  function isDownloadOS(os) { return os === 'mac' || os === 'windows'; }
 
   var $ = function (id) { return document.getElementById(id); };
   var EMAIL_RE = /\S+@\S+\.\S+/;
@@ -310,7 +316,7 @@
             '</button>' +
             '<button class="os-option" data-os="windows">' +
               '<span class="os-option__name">Windows</span>' +
-              '<span class="os-option__meta">waitlist</span>' +
+              '<span class="os-option__meta os-option__meta--accent">10/11 · ready today</span>' +
             '</button>' +
             '<button class="os-option" data-os="linux">' +
               '<span class="os-option__name">Linux</span>' +
@@ -348,8 +354,10 @@
       body.innerHTML =
         '<h3 class="modal-title"><span class="success-check">✓</span> ' + copy.successTitle + '</h3>' +
         '<p class="modal-subtitle">' + copy.successBody + '</p>' +
-        (s.os === 'mac'
-          ? '<div class="success-link"><a href="/dl?ref=landing-modal-again">didn’t start? download again</a></div>'
+        (isDownloadOS(s.os)
+          ? '<div class="success-link"><a href="/dl?ref=landing-modal-again' +
+              (s.os === 'windows' ? '&os=windows' : '') +
+              '">didn’t start? download again</a></div>'
           : '');
     },
     handleBodyClick: function (e) {
@@ -385,14 +393,15 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email,
-          source: DownloadModal.state.os === 'mac' ? 'download' : 'waitlist',
+          source: isDownloadOS(DownloadModal.state.os) ? 'download' : 'waitlist',
           os: DownloadModal.state.os,
           phone: phone,
         }),
       }).catch(function () { /* non-fatal: the confirmation UI has already been shown */ });
 
-      if (DownloadModal.state.os === 'mac') {
-        $('dl-frame').src = '/dl?ref=landing-modal';
+      if (isDownloadOS(DownloadModal.state.os)) {
+        $('dl-frame').src = '/dl?ref=landing-modal' +
+          (DownloadModal.state.os === 'windows' ? '&os=windows' : '');
       }
       DownloadModal.render();
     },
