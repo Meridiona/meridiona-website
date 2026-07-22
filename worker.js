@@ -31,18 +31,20 @@ const WRITING_META = {
 };
 
 // Always resolves to the newest release's asset — no version to bump in code.
-const DOWNLOAD_URL = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian.dmg';
+// Filenames must match the meridian repo's actual CI-published asset names
+// exactly (release.yml), or /dl 404s against a real GitHub redirect.
+const DOWNLOAD_URL = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian-aarch64.dmg';
 // The Windows NSIS installer, published to the same release by the meridian
 // repo's windows-release CI job under this stable name.
-const DOWNLOAD_URL_WINDOWS = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian-setup.exe';
+const DOWNLOAD_URL_WINDOWS = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian-x86_64-setup.exe';
 
 // Which release asset a download request resolves to. `?os=windows` selects the
 // installer; anything else (including no param) stays on the macOS DMG, so every
 // existing /dl link keeps working unchanged.
 function downloadTarget(os) {
   return os === 'windows'
-    ? { url: DOWNLOAD_URL_WINDOWS, asset: 'Meridian-setup.exe', platform: 'windows' }
-    : { url: DOWNLOAD_URL, asset: 'Meridian.dmg', platform: 'macos' };
+    ? { url: DOWNLOAD_URL_WINDOWS, asset: 'Meridian-x86_64-setup.exe', platform: 'windows' }
+    : { url: DOWNLOAD_URL, asset: 'Meridian-aarch64.dmg', platform: 'macos' };
 }
 
 export default {
