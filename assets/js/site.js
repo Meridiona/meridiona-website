@@ -23,6 +23,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const EMAIL_RE = /\S+@\S+\.\S+/;
     const isDownloadOS = (os) => os === 'mac' || os === 'windows';
     const THEME_STORAGE_KEY = 'meridian-theme';
+    const COUNTRY_CODES = [
+      { code: '+1', name: 'US/Canada', ph: '201 555 0123' }, { code: '+44', name: 'UK', ph: '7911 123456' },
+      { code: '+91', name: 'India', ph: '98765 43210' }, { code: '+61', name: 'Australia', ph: '412 345 678' },
+      { code: '+49', name: 'Germany', ph: '1512 3456789' }, { code: '+33', name: 'France', ph: '6 12 34 56 78' },
+      { code: '+81', name: 'Japan', ph: '90 1234 5678' }, { code: '+82', name: 'South Korea', ph: '10 1234 5678' },
+      { code: '+86', name: 'China', ph: '131 2345 6789' }, { code: '+65', name: 'Singapore', ph: '8123 4567' },
+      { code: '+971', name: 'UAE', ph: '50 123 4567' }, { code: '+31', name: 'Netherlands', ph: '6 12345678' },
+      { code: '+34', name: 'Spain', ph: '612 345 678' }, { code: '+39', name: 'Italy', ph: '312 345 6789' },
+      { code: '+46', name: 'Sweden', ph: '70 123 45 67' }, { code: '+41', name: 'Switzerland', ph: '78 123 45 67' },
+      { code: '+52', name: 'Mexico', ph: '55 1234 5678' }, { code: '+55', name: 'Brazil', ph: '11 91234 5678' },
+      { code: '+27', name: 'South Africa', ph: '71 123 4567' }, { code: '+64', name: 'New Zealand', ph: '21 123 4567' },
+      { code: '+63', name: 'Philippines', ph: '917 123 4567' }, { code: '+62', name: 'Indonesia', ph: '812 3456 789' },
+      { code: '+92', name: 'Pakistan', ph: '301 2345678' }, { code: '+880', name: 'Bangladesh', ph: '1712 345678' },
+    ];
+    const COUNTRY_CODE_PLACEHOLDERS = COUNTRY_CODES.reduce((map, c) => { map[c.code] = c.ph; return map; }, {});
 
     // ── theme ──
     const applyTheme = (id) => {
@@ -34,6 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let saved = 'dawn'; try { saved = localStorage.getItem(THEME_STORAGE_KEY) || 'dawn'; } catch (e) {}
     applyTheme(saved);
     $('theme-dots').addEventListener('click', (e) => { const el = e.target.closest('[data-theme-id]'); if (el) applyTheme(el.dataset.themeId); });
+
+    // ── obfuscated mailto links (built at runtime so scrapers see no plaintext address) ──
+    document.querySelectorAll('.js-email-link').forEach((el) => {
+      const addr = el.dataset.user + '@' + el.dataset.domain;
+      el.href = 'mailto:' + addr;
+      if (el.classList.contains('js-email-link--show')) el.textContent = addr;
+    });
 
     // ── cookie consent ──
     const CONSENT_KEY = 'meridian-consent';
@@ -100,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', this._resize);
 
     // ── download modal ──
-    const dm = { os: null, email: '', sent: false };
+    const dm = { os: null, email: '', phoneCode: '+1', phone: '', sent: false };
     const renderDl = () => {
       const body = $('modal-download-body');
       if (!dm.os) {
@@ -112,9 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const c = DL[dm.os];
       if (!dm.sent) {
+        const countryOptions = COUNTRY_CODES.map((cc) =>
+          '<option value="' + cc.code + '"' + (cc.code === dm.phoneCode ? ' selected' : '') + '>' + cc.code + ' ' + cc.name + '</option>').join('');
         body.innerHTML = '<h3 class="modal-title">' + c.emailTitle + '</h3><p class="modal-subtitle">' + c.emailPrompt + '</p>' +
-          '<form id="dl-form" class="email-form"><input id="dl-email" class="email-input" type="email" required placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
-          '<button type="submit" class="btn-primary btn-primary--block">' + c.ctaLabel + '</button></form>' +
+          '<form id="dl-form" class="email-form">' +
+            '<input id="dl-email" class="email-input" type="email" required autofocus placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
+            '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
+            '<div class="phone-row">' +
+              '<select id="dl-phone-code" class="phone-select" aria-label="Country code">' + countryOptions + '</select>' +
+              '<input id="dl-phone" class="phone-input" type="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[dm.phoneCode] || '') + '" value="' + dm.phone + '" aria-label="Phone number (optional)">' +
+            '</div>' +
+            '<button type="submit" class="btn-primary btn-primary--block">' + c.ctaLabel + '</button>' +
+          '</form>' +
           '<div class="form-note">' + c.emailNote + '</div><button id="dl-back" class="btn-text" style="margin-top:12px">← different machine</button>';
         return;
       }
@@ -123,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ? '<div class="success-link"><a href="/dl?ref=landing-modal-again' + (dm.os === 'windows' ? '&os=windows' : '') + '">didn’t start? download again</a></div>'
           : '');
     };
-    const openDl = () => { dm.os = null; dm.email = ''; dm.sent = false; renderDl(); $('modal-download').classList.add('is-open'); };
+    const openDl = () => { dm.os = null; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false; renderDl(); $('modal-download').classList.add('is-open'); };
     const closeDl = () => $('modal-download').classList.remove('is-open');
     $('btn-download-nav').addEventListener('click', openDl);
     if ($('btn-download-faq')) $('btn-download-faq').addEventListener('click', openDl);
@@ -133,15 +164,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const os = e.target.closest('[data-os]'); if (os) { dm.os = os.dataset.os; renderDl(); return; }
       if (e.target.id === 'dl-back') { dm.os = null; renderDl(); }
     });
+    $('modal-download-body').addEventListener('change', (e) => {
+      if (e.target.id !== 'dl-phone-code') return;
+      // Direct DOM update (not a full render()) so the number the user already typed isn't wiped.
+      dm.phoneCode = e.target.value;
+      const input = $('dl-phone');
+      if (input) input.placeholder = COUNTRY_CODE_PLACEHOLDERS[e.target.value] || '';
+    });
     $('modal-download-body').addEventListener('submit', (e) => {
       if (e.target.id !== 'dl-form') return; e.preventDefault();
       const v = $('dl-email').value.trim(); if (!EMAIL_RE.test(v)) return;
-      dm.email = v; dm.sent = true;
+
+      const phoneDigits = ($('dl-phone').value || '').trim();
+      const phoneCode = $('dl-phone-code').value;
+      const phone = phoneDigits ? (phoneCode + ' ' + phoneDigits) : '';
+
+      dm.email = v; dm.phoneCode = phoneCode; dm.phone = phoneDigits; dm.sent = true;
 
       fetch('/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: v, source: isDownloadOS(dm.os) ? 'download' : 'waitlist', os: dm.os }),
+        body: JSON.stringify({ email: v, source: isDownloadOS(dm.os) ? 'download' : 'waitlist', os: dm.os, phone }),
       }).catch(() => { /* non-fatal: the confirmation UI has already been shown */ });
 
       if (isDownloadOS(dm.os)) {
@@ -159,6 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── intro cinematic ──
     if ($('intro-cinema')) {
+    const INTRO_SEEN_KEY = 'meridian-intro-seen';
+    let introSeen = false; try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch (e) {}
+    const markIntroSeen = () => { try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch (e) {} };
     const introEl = $('intro-cinema'), introFrame = $('intro-frame'), introStmt = $('intro-statement'), replayBtn = $('replay-intro');
     const heroTitle = document.querySelector('.hero__title');
     const noteMon = document.querySelector('.hero__note-monitor');
@@ -192,8 +238,24 @@ document.addEventListener('DOMContentLoaded', () => {
       replayBtn.classList.remove('is-visible');
       if (reload) introFrame.src = '/demo.html?t=' + Date.now();
     };
-    const endIntro = () => {
+    const endIntro = (instant) => {
       if (!introActive || introEnding) return; introEnding = true;
+      markIntroSeen();
+      if (instant) {
+        // "Skip intro" — drop straight into the site, no cinematic wind-down,
+        // and no lingering full-screen overlay left silently eating clicks.
+        clearIntroTimers();
+        const d = document.getElementById('intro-dots'); if (d) d.style.display = '';
+        introEl.style.display = 'none';
+        introEl.classList.remove('is-hidden');
+        introStmt.classList.remove('is-on');
+        heroClear();
+        if (noteMon) noteMon.classList.add('is-in');
+        document.documentElement.classList.remove('intro-lock');
+        introActive = false;
+        replayBtn.classList.add('is-visible');
+        return;
+      }
       introFrame.classList.add('is-dim');
       // 1. the statement reveals word by word, line one, then a beat, then line two
       introTimers.push(setTimeout(() => { buildStatement(); introStmt.classList.add('is-on'); }, 460));
@@ -229,11 +291,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.classList.remove('intro-lock'); introActive = false; replayBtn.classList.add('is-visible');
       }, SETTLE + 1250));
     };
-    this._introMsg = (e) => { if (e && e.data && e.data.type === 'meridian-intro-done') endIntro(); };
+    this._introMsg = (e) => { if (e && e.data && e.data.type === 'meridian-intro-done') endIntro(false); };
     window.addEventListener('message', this._introMsg);
-    $('intro-skip').addEventListener('click', endIntro);
+    $('intro-skip').addEventListener('click', () => endIntro(true));
     replayBtn.addEventListener('click', () => startIntro(true));
-    startIntro(false);
+    if (introSeen) {
+      // Returning visitor — the intro already played once; go straight to the
+      // site instead of autoplaying the cinematic again.
+      introEl.style.display = 'none';
+      if (noteMon) noteMon.classList.add('is-in');
+      replayBtn.classList.add('is-visible');
+    } else {
+      startIntro(false);
+    }
     }
 
     // ── why: scroll-jacked stage ──

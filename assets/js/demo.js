@@ -169,7 +169,15 @@ function createDemo(refs, opts) {
   }
 
   // ── actions (ported) ─────────────────────────────────────────────────
-  function resetAll() { replayIntro(); }
+  // Reset just restores the interactive demo's data to its starting state —
+  // it must NOT replay the intro cinematic (that's what "Replay intro" is for).
+  function resetAll() {
+    if (rafId) cancelAnimationFrame(rafId);
+    state = initialState();
+    revealed = {};
+    state.dayTasks.forEach(function (t) { revealed[t.id] = true; });
+    render();
+  }
   function replayIntro() {
     if (rafId) cancelAnimationFrame(rafId);
     if (pendingUserClick) { var pr = pendingUserClick.resolve; pendingUserClick = null; pr(); }

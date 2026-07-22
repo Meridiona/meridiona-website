@@ -8,7 +8,13 @@
   },
   "assets": {
     "directory": ".",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Without this, Cloudflare serves static files (/, /writing/*, /privacy, ...)
+    // straight from the edge and skips fetch() entirely — which was silently
+    // dropping the security headers below on every real page (they only ever
+    // showed up on routes with no matching static file, like /dl and 404s).
+    "run_worker_first": true,
+    "not_found_handling": "404-page"
   },
   "compatibility_flags": [
     "nodejs_compat"
