@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
       introEl.classList.remove('is-hidden');
       introEl.style.display = 'flex'; void introEl.offsetWidth;
       replayBtn.classList.remove('is-visible');
-      if (reload) introFrame.src = '/demo.html?t=' + Date.now();
+      if (reload) introFrame.src = '/demo?t=' + Date.now();
     };
     const endIntro = (instant) => {
       if (!introActive || introEnding) return; introEnding = true;
