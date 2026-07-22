@@ -169,7 +169,7 @@ test('why section present', () => {
   expect(index).toContain('id="why"');
   expect(index).toContain('id="why-scrolly"');
   expect(index).toContain('id="lines-ticker"');
-  expect(index).toContain('Your agents shipped');
+  expect(index).toContain('You took');
 });
 test('faq section is server-rendered (visible to non-JS crawlers) with JS-driven accordion interaction', () => {
   expect(index).toContain('id="faq"');

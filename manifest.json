@@ -1,7 +1,7 @@
 {
   "name": "Meridian",
   "short_name": "Meridian",
-  "description": "The work journal that remembers your day.",
+  "description": "The productivity tool that gives you full visibility into your work — nothing goes unnoticed.",
   "start_url": "/",
   "display": "browser",
   "background_color": "#f7f5fc",
