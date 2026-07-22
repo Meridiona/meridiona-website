@@ -2,6 +2,8 @@
 .git
 .wrangler/
 .wrangler
+v2/
+v2
 .claude/
 .claude
 node_modules/

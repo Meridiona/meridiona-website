@@ -1,0 +1,599 @@
+/*
+ * Meridian landing page — design tokens + component styles.
+ * Shared by index.html. The embedded product demo (demo.html) has its own
+ * stylesheet (assets/css/demo.css) — it renders a fixed-resolution mock of
+ * the actual app UI and intentionally does not share these tokens.
+ */
+
+/* ── reset ────────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+::selection{background:var(--acc);color:#fff}
+input::placeholder{color:var(--mut)}
+a{color:inherit}
+button{font-family:inherit}
+
+/* ── theme tokens ─────────────────────────────────────────────────────── */
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  background:var(--bg);
+  color:var(--ink);
+  transition:background .5s ease,color .5s ease;
+
+  --bg:#f7f5fc;--ink:#18142a;--mut:#6b6584;--line:rgba(24,20,42,.09);
+  --card:#ffffff;--acc:#7c3aed;--acc2:#db2777;
+  --grad:linear-gradient(100deg,#7c3aed,#db2777);
+  --chip:rgba(124,58,237,.08);
+  --navbg:rgba(247,245,252,.72);
+  --shadow:0 24px 80px -24px rgba(60,30,140,.25);
+  --btnink:#ffffff;
+}
+body[data-theme="dusk"]{
+  --bg:#0d0a17;--ink:#f1eefb;--mut:#968dae;--line:rgba(241,238,251,.1);
+  --card:#161226;--acc:#a78bfa;--acc2:#f472b6;
+  --grad:linear-gradient(100deg,#8b5cf6,#ec4899);
+  --chip:rgba(167,139,250,.12);
+  --navbg:rgba(13,10,23,.7);
+  --shadow:0 24px 80px -24px rgba(0,0,0,.7);
+}
+body[data-theme="paper"]{
+  --bg:#faf8f3;--ink:#1d1b16;--mut:#7c766a;--line:rgba(29,27,22,.1);
+  --card:#fffefb;--acc:#4f46e5;--acc2:#6d28d9;
+  --grad:linear-gradient(100deg,#4338ca,#6d28d9);
+  --chip:rgba(79,70,229,.07);
+  --navbg:rgba(250,248,243,.75);
+  --shadow:0 24px 70px -28px rgba(40,35,20,.22);
+}
+
+/* ── keyframes ────────────────────────────────────────────────────────── */
+@keyframes rvIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes heroIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+[data-rv]{animation:rvIn .8s ease both;animation-timeline:view();animation-range:entry 5% entry 42%}
+
+/* ── typography helpers ───────────────────────────────────────────────── */
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+.section-title{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.03em;line-height:1.08;margin:14px 0 0}
+.mono-mut{font-family:'JetBrains Mono',monospace;color:var(--mut)}
+
+/* ── layout primitives ────────────────────────────────────────────────── */
+.section{padding:110px 24px;border-top:1px solid var(--line)}
+.section--flush-bottom{padding-bottom:0}
+.section__inner{max-width:1160px;margin:0 auto;width:100%}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+
+/* ── buttons ───────────────────────────────────────────────────────────── */
+.btn-primary{
+  background:var(--grad);color:var(--btnink);border:none;border-radius:10px;
+  font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+  padding:9px 18px;font-size:14px;
+}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary--lg{padding:14px 28px;font-size:15px;border-radius:12px}
+.btn-primary--block{border-radius:12px;padding:14px;font-size:15px;width:100%}
+
+.btn-ghost{
+  display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);
+  border-radius:9px;background:transparent;color:var(--mut);cursor:pointer;
+  font-size:14px;font-weight:500;font-family:'Instrument Sans',sans-serif;
+}
+.btn-ghost:hover{color:var(--ink);border-color:var(--acc)}
+
+.btn-text{background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;font-family:'Instrument Sans',sans-serif}
+.btn-text:hover{color:var(--ink)}
+
+.icon-close{
+  position:absolute;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+  background:transparent;color:var(--mut);cursor:pointer;font-size:14px;line-height:1;
+}
+.icon-close:hover{color:var(--ink);border-color:var(--ink)}
+
+/* ── nav ───────────────────────────────────────────────────────────────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  background:var(--navbg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+}
+.nav__inner{width:100%;padding:0 36px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.nav__brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}
+.nav__brand-mark{width:36px;height:36px;object-fit:contain;display:inline-block;flex:none}
+.nav__brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.02em}
+.nav__links{display:flex;align-items:center;gap:28px;font-size:14px;font-weight:500}
+.nav__link{color:var(--mut);text-decoration:none}
+.nav__link:hover{color:var(--ink)}
+.nav__link--mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+/* The nav grew past what fits inline on phones (Why/FAQ/Writing/GitHub/Connect/
+   Download). Rather than a hamburger, progressively shed the secondary items —
+   Download (the one action that matters) and the brand always stay. */
+@media (max-width:760px){
+  .nav__inner{padding:0 20px;gap:14px}
+  .nav__links{gap:16px}
+  .nav__link--mono,.btn-ghost{display:none}
+}
+@media (max-width:560px){
+  .nav__link{display:none}
+}
+
+/* ── hero ──────────────────────────────────────────────────────────────── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:76px 24px 12px;position:relative;overflow-x:hidden;
+}
+.hero__glow{
+  position:absolute;top:-180px;left:50%;transform:translateX(-50%);width:900px;height:600px;
+  background:radial-gradient(closest-side,color-mix(in oklab,var(--acc) 16%,transparent),transparent);
+  pointer-events:none;
+}
+.hero__content{
+  position:relative;animation:heroIn .8s ease both;display:flex;flex-direction:column;align-items:center;flex:none;
+  max-width:1160px;margin:0 auto;width:100%;
+}
+.hero__title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,3.6vw,46px);line-height:1.1;letter-spacing:-.03em;margin:0}
+.hero__title-accent{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero__subtitle{max-width:860px;margin:18px auto 0;font-size:clamp(16px,1.6vw,19px);line-height:1.55;color:var(--mut);text-wrap:pretty}
+
+.hero__embed-wrap{position:relative;margin-top:18px;animation:heroIn 1s .15s ease both}
+/* right:11% lands over the demo toolbar's Reset button (it sits ~10% in
+   from the canvas's right edge, just left of the avatar) — a % offset
+   here (not px) keeps it aligned as HeroEmbed rescales the iframe. */
+.hero__embed-annotation{position:absolute;top:-30px;right:11%;z-index:5;display:flex;align-items:flex-start;gap:8px;pointer-events:none}
+.hero__embed-note{font-family:'Caveat',cursive;font-size:19px;color:var(--acc2);transform:rotate(-3deg);white-space:nowrap}
+.hero__embed-frame{position:relative;overflow:hidden;border-radius:18px;border:2px solid #E8ECFC;box-shadow:var(--shadow);background:#E8ECFC}
+.hero__embed-viewport{position:relative;overflow:hidden;border-radius:12px}
+.hero__iframe{border:0;transform-origin:0 0}
+
+.trust-strip{
+  width:100%;padding:10px 0 0;display:flex;align-items:center;justify-content:center;
+  gap:8px 26px;flex-wrap:wrap;flex:none;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mut);
+}
+.trust-strip__item{display:inline-flex;align-items:center;gap:9px}
+.trust-strip__icon{flex:none}
+
+/* ── why: scroll-driven "one answer at a time" stage ──────────────────── */
+/* condensed to 1-2 lines and pinned just under the nav — content keeps
+   moving underneath it as the reader scrolls through the stage below */
+.why__intro{
+  position:sticky;top:64px;z-index:20;background:var(--bg);
+  padding:18px 0;border-bottom:1px solid var(--line);
+}
+.why__intro-row{display:flex;flex-direction:column;gap:8px}
+.why__intro-line{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(17px,2.1vw,26px);color:var(--ink);letter-spacing:-.02em;line-height:1.3}
+.ticker-num{font-variant-numeric:tabular-nums;color:var(--acc);font-weight:800}
+
+.scrolly{position:relative;margin-top:8px}
+
+/* enhanced (JS on): pin the stage and swap one panel at a time */
+.scrolly.is-ready{height:calc(var(--steps,4) * 100vh)}
+.scrolly.is-ready .scrolly__stage{
+  position:sticky;top:calc(64px + var(--intro-h,110px));height:calc(100vh - 64px - var(--intro-h,110px));
+  display:flex;flex-direction:column;justify-content:center;gap:22px;
+  padding:24px 0;
+}
+.scrolly__grid{display:grid;grid-template-columns:clamp(110px,15vw,190px) 1fr;gap:clamp(24px,4vw,56px);align-items:center}
+
+/* progress rail */
+.scrolly__rail{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-left:1px solid var(--line)}
+.scrolly__rail-item{position:relative;padding:14px 0 14px 26px;color:var(--mut);transition:color .35s ease}
+.scrolly__rail-item::before{
+  content:"";position:absolute;left:-5px;top:50%;transform:translateY(-50%);
+  width:9px;height:9px;border-radius:50%;background:var(--line);transition:background .35s ease,transform .35s ease;
+}
+.scrolly__rail-item.is-active{color:var(--ink)}
+.scrolly__rail-item.is-active::before{background:var(--acc);transform:translateY(-50%) scale(1.6)}
+.scrolly__rail-num{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--acc);opacity:.65}
+.scrolly__rail-item.is-active .scrolly__rail-num{opacity:1}
+.scrolly__rail-label{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px}
+
+/* panels — stacked in the same spot, cross-faded */
+.scrolly__panels{position:relative;min-height:min(52vh,380px)}
+.scrolly.is-ready .scrolly__panel{
+  position:absolute;inset:0;opacity:0;transform:translateY(26px);
+  transition:opacity .55s ease,transform .55s ease;pointer-events:none;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.scrolly.is-ready .scrolly__panel.is-active{opacity:1;transform:none;pointer-events:auto}
+.scrolly__panel-index{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.12em;color:var(--acc)}
+.scrolly__panel-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,3.6vw,44px);letter-spacing:-.03em;line-height:1.04;margin:14px 0 0}
+.scrolly__panel-body{font-size:clamp(16px,1.5vw,19px);color:var(--mut);margin:18px 0 0;max-width:460px;line-height:1.6;text-wrap:pretty}
+.scrolly__panel-visual{margin-top:24px}
+
+/* panel visual: shape of your day */
+.daystat-row{display:flex;gap:clamp(20px,3vw,40px);flex-wrap:wrap;margin-bottom:22px}
+.daystat{display:flex;flex-direction:column;gap:3px}
+.daystat__value{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(20px,2.4vw,28px);letter-spacing:-.02em}
+.daystat__label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+
+.dayshape{display:flex;flex-direction:column;gap:11px;max-width:520px}
+.dayshape__row{display:flex;align-items:center;gap:12px}
+.dayshape__label{width:76px;flex:none;font-size:13px;color:var(--mut)}
+.dayshape__track{flex:1;height:9px;border-radius:5px;background:var(--line);overflow:hidden}
+.dayshape__fill{display:block;height:100%;border-radius:5px;width:0%;transform-origin:left}
+.dayshape__fill--coding{background:var(--acc)}
+.dayshape__fill--debugging{background:color-mix(in oklab,var(--acc) 55%,var(--acc2) 45%)}
+.dayshape__fill--review{background:var(--acc2)}
+.dayshape__fill--meetings{background:var(--mut)}
+.dayshape__time{width:58px;flex:none;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut)}
+
+.scrolly.is-ready .dayshape__fill{transition:width .8s cubic-bezier(.22,.61,.36,1)}
+.scrolly.is-ready .scrolly__panel.is-active .dayshape__fill{width:var(--w)}
+.scrolly.is-ready .dayshape__row:nth-child(1) .dayshape__fill{transition-delay:.05s}
+.scrolly.is-ready .dayshape__row:nth-child(2) .dayshape__fill{transition-delay:.16s}
+.scrolly.is-ready .dayshape__row:nth-child(3) .dayshape__fill{transition-delay:.27s}
+.scrolly.is-ready .dayshape__row:nth-child(4) .dayshape__fill{transition-delay:.38s}
+
+.tasklist-head{
+  display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:16px;
+  border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--mut);max-width:520px;
+}
+.tasklist-head__count{font-weight:700;color:var(--acc2);letter-spacing:.02em}
+
+.tasklist{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;max-width:520px}
+.task{display:flex;align-items:center;gap:12px;padding:11px 0;font-size:14.5px;border-top:1px solid var(--line)}
+.task:first-child{border-top:none}
+
+.task__check{
+  width:19px;height:19px;border-radius:6px;flex:none;border:1.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.task--done .task__check{background:#16a34a;border-color:#16a34a}
+.task--done .task__check::after{content:"✓";color:#fff;font-size:11px;font-weight:700;line-height:1}
+.task--active .task__check{border-color:var(--acc)}
+.task--active .task__check::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);animation:taskPulse 1.6s ease-in-out infinite}
+@keyframes taskPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in oklab,var(--acc) 45%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in oklab,var(--acc) 0%,transparent)}}
+
+.task__name{flex:1;color:var(--ink)}
+.task__time{flex:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);margin-right:4px}
+.task--done .task__name{color:var(--mut);text-decoration:line-through;text-decoration-color:var(--line);text-decoration-thickness:1.5px}
+.task__jump{
+  flex:none;background:none;border:none;cursor:pointer;color:var(--acc);
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:4px 0;text-decoration:none;
+}
+.task__jump:hover{text-decoration:underline}
+
+/* shared: task chip repeated on decision/docs panels for narrative continuity */
+.doc-task-chip{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.03em;
+  color:var(--acc);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:5px 12px;
+}
+
+/* docs panel: text left, an actual "doc" card on the right */
+.doc-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:clamp(28px,4vw,52px);align-items:center;margin-top:14px}
+.doc-layout__text .scrolly__panel-body{max-width:none}
+.doc-card{border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.doc-card__head{
+  display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mut);margin-bottom:16px;
+}
+.doc-card__dot{width:8px;height:8px;border-radius:50%;background:var(--acc);flex:none}
+
+/* panel visual: a captured decision */
+.decision-context{margin:14px 0 0;font-size:clamp(16px,1.5vw,19px);color:var(--ink);max-width:480px}
+.decision-compare{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+.decision-option{
+  flex:1 1 220px;border-radius:14px;padding:16px 18px;border:1px solid var(--line);
+  display:flex;flex-direction:column;gap:5px;
+}
+.decision-option--rejected{opacity:.6}
+.decision-option--rejected .decision-option__name{text-decoration:line-through;text-decoration-color:var(--mut);text-decoration-thickness:1.5px}
+.decision-option--chosen{border-color:var(--acc);background:var(--chip)}
+.decision-option__label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.decision-option--chosen .decision-option__label{color:var(--acc)}
+.decision-option__name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16.5px}
+.decision-option__note{font-size:13px;color:var(--mut);line-height:1.5}
+.decision-note{margin:16px 0 0;font-size:14px;color:var(--mut);max-width:480px;line-height:1.6}
+.decision-note__label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-right:8px}
+
+.scrolly.is-ready .decision-option{opacity:0;transform:translateY(10px);transition:opacity .45s ease,transform .45s ease}
+.scrolly.is-ready .scrolly__panel.is-active .decision-option{opacity:1;transform:none}
+.scrolly.is-ready .decision-option--rejected{transition-delay:.1s}
+.scrolly.is-ready .decision-option--chosen{transition-delay:.28s}
+.scrolly.is-ready .decision-note{opacity:0;transform:translateY(8px);transition:opacity .4s ease .5s,transform .4s ease .5s}
+.scrolly.is-ready .scrolly__panel.is-active .decision-note{opacity:1;transform:none}
+
+/* panel visual: docs — before/after architecture diagram + timeline */
+.doc-diagram{display:flex;flex-direction:column;gap:10px;max-width:none}
+.doc-diagram__row{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:12px;border:1px solid var(--line)}
+.doc-diagram__row--after{border-color:var(--acc);background:var(--chip)}
+.doc-diagram__tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);width:36px;flex:none}
+.doc-diagram__row--after .doc-diagram__tag{color:var(--acc)}
+.doc-diagram__node{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.5px;padding:5px 9px;border-radius:8px;background:var(--card);border:1px solid var(--line);white-space:nowrap}
+.doc-diagram__arrow{color:var(--mut);font-family:'JetBrains Mono',monospace;flex:none}
+.doc-diagram__metric{margin-left:auto;flex:none;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;color:var(--mut)}
+.doc-diagram__row--after .doc-diagram__metric{color:var(--acc)}
+
+.scrolly.is-ready .doc-diagram__row{opacity:0;transform:translateX(-10px);transition:opacity .45s ease,transform .45s ease}
+.scrolly.is-ready .scrolly__panel.is-active .doc-diagram__row{opacity:1;transform:none}
+.scrolly.is-ready .doc-diagram__row--before{transition-delay:.08s}
+.scrolly.is-ready .doc-diagram__row--after{transition-delay:.26s}
+
+/* panel visual: self-writing journal */
+.journal{display:flex;flex-direction:column;gap:12px;max-width:520px;margin-top:18px}
+.journal__line{font-size:14px;line-height:1.55;color:var(--ink);padding-left:16px;border-left:2px solid var(--acc)}
+.journal__line code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--chip);padding:1px 5px;border-radius:5px}
+.journal__time{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut);margin-right:12px}
+
+.scrolly.is-ready .journal__line{opacity:0;transform:translateY(10px);transition:opacity .45s ease,transform .45s ease}
+.scrolly.is-ready .scrolly__panel.is-active .journal__line{opacity:1;transform:none}
+.scrolly.is-ready .journal__line:nth-child(1){transition-delay:.44s}
+.scrolly.is-ready .journal__line:nth-child(2){transition-delay:.58s}
+
+/* panel visual: worklog → a single connector fans out to every PM
+   provider (always visible); the Jira branch specifically draws itself and
+   turns blue, then the card confirms with a green accent + status line */
+.worklog-flow{display:flex;align-items:stretch;gap:0;max-width:760px}
+.worklog-draft{flex:1 1 auto;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:14px;padding:18px 20px;transition:border-color .4s ease;align-self:center}
+.worklog-draft__text{margin:0 0 14px;font-size:14.5px;line-height:1.6;color:var(--ink)}
+.worklog-ticket-chip{
+  display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--ink);
+}
+.worklog-ticket-dot{width:8px;height:8px;border-radius:2px;background:#2684FF;flex:none}
+.worklog-draft__status{
+  display:flex;align-items:center;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:#14b8a6;
+}
+.worklog-draft__status-dot{width:7px;height:7px;border-radius:50%;background:#14b8a6;flex:none}
+
+.worklog-connector{flex:0 0 clamp(40px,6vw,64px);position:relative}
+.worklog-connector__svg{width:100%;height:100%;display:block}
+.worklog-connector__line{fill:none;stroke:var(--line);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.worklog-connector__line--jira{stroke-width:4;stroke-dasharray:1 10}
+@keyframes worklogFlow{from{stroke-dashoffset:0}to{stroke-dashoffset:-22}}
+
+.worklog-targets{flex:0 0 auto;display:flex;flex-direction:column;justify-content:space-between;gap:9px}
+.worklog-target{display:flex;align-items:center}
+
+.integration-chip{display:flex;align-items:center;gap:6px;position:relative;padding:6px 4px;border-radius:8px}
+.integration-chip__badge{
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:#14b8a6;background:color-mix(in oklab,#14b8a6 14%,transparent);
+  border-radius:999px;padding:2px 7px;margin-left:2px;
+}
+
+.scrolly.is-ready .worklog-draft{opacity:0;transform:translateY(10px);transition:opacity .45s ease,transform .45s ease,border-color .5s ease}
+.scrolly.is-ready .scrolly__panel.is-active .worklog-draft{opacity:1;transform:none;transition-delay:.05s,.05s,3s}
+.scrolly.is-ready .scrolly__panel.is-active .worklog-draft{border-left-color:#14b8a6}
+.scrolly.is-ready .worklog-draft__status{opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s ease}
+.scrolly.is-ready .scrolly__panel.is-active .worklog-draft__status{opacity:1;transform:none;transition-delay:3.1s}
+
+.scrolly.is-ready .worklog-connector__line--jira{opacity:0;transition:opacity .6s ease}
+.scrolly.is-ready .scrolly__panel.is-active .worklog-connector__line--jira{
+  opacity:1;stroke:#2684FF;transition:opacity .6s ease 1s,stroke .6s ease 1s;
+  animation:worklogFlow 1.1s linear 1.6s infinite;
+}
+
+.scrolly.is-ready .integration-chip{opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease}
+.scrolly.is-ready .scrolly__panel.is-active .integration-chip{opacity:1;transform:none;transition-delay:.15s}
+.scrolly.is-ready .integration-chip__badge{opacity:0;transform:scale(.6);transition:opacity .4s ease,transform .4s cubic-bezier(.34,1.56,.64,1)}
+.scrolly.is-ready .scrolly__panel.is-active .integration-chip--posted .integration-chip__badge{opacity:1;transform:none;transition-delay:2.4s}
+.scrolly.is-ready .integration-chip--posted{transition:background .5s ease 2.2s}
+.scrolly.is-ready .scrolly__panel.is-active .integration-chip--posted{background:color-mix(in oklab,#2684FF 12%,transparent)}
+
+/* fallback (JS off / reduced motion): stack panels, no pinning, nothing hidden */
+.scrolly:not(.is-ready) .scrolly__rail{display:none}
+.scrolly:not(.is-ready) .scrolly__grid{display:block}
+.scrolly:not(.is-ready) .scrolly__panels{display:flex;flex-direction:column;gap:56px;margin-top:48px;min-height:0}
+
+/* respect reduced-motion: keep the one-at-a-time stage, drop the cross-fade */
+@media (prefers-reduced-motion: reduce){
+  .scrolly.is-ready .scrolly__panel,
+  .scrolly.is-ready .dayshape__fill,
+  .scrolly.is-ready .decision-option,
+  .scrolly.is-ready .decision-note,
+  .scrolly.is-ready .doc-diagram__row,
+  .scrolly.is-ready .journal__line,
+  .scrolly.is-ready .worklog-draft,
+  .scrolly.is-ready .worklog-draft__status,
+  .scrolly.is-ready .worklog-connector__line--jira,
+  .scrolly.is-ready .integration-chip,
+  .scrolly.is-ready .integration-chip__badge{transition:none;animation:none}
+}
+
+/* ── testimonials / faq ───────────────────────────────────────────────── */
+.quote-card{padding:22px 24px;background:var(--card);border-radius:0 14px 14px 0;border-left:3px solid var(--acc)}
+.quote-card--alt{border-left-color:var(--acc2)}
+.quote-card__text{margin:0;font-size:15.5px;line-height:1.6}
+.quote-card__attr{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut)}
+
+.faq-layout{margin-top:64px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px}
+.faq-intro__title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(30px,4vw,46px);letter-spacing:-.03em;line-height:1.1;margin:0}
+.faq-intro__body{font-size:15px;color:var(--mut);margin:16px 0 0;max-width:360px;line-height:1.65}
+.faq-list{border-top:1px solid var(--line)}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-item__q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 2px;cursor:pointer}
+.faq-item__q:hover{color:var(--acc)}
+.faq-item__q-text{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16.5px}
+.faq-item__icon{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--acc);flex:none}
+.faq-item__a{margin:0;padding:0 32px 20px 2px;font-size:14.5px;line-height:1.7;color:var(--mut);text-wrap:pretty}
+
+/* ── footer ────────────────────────────────────────────────────────────── */
+.site-footer{border-top:1px solid var(--line);margin-top:80px;padding:48px 0 36px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px 32px}
+@media (max-width:640px){
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+.footer-brand{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.footer-brand__row{display:flex;align-items:center;gap:10px}
+.footer-brand__mark{width:28px;height:28px;object-fit:contain;display:inline-block}
+.footer-brand__name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px}
+.footer-brand__tagline{margin:0;font-size:13.5px;color:var(--mut);line-height:1.6;max-width:260px}
+.social-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.social-square{
+  width:32px;height:32px;border:1px solid var(--line);border-radius:8px;display:inline-flex;
+  align-items:center;justify-content:center;text-decoration:none;color:var(--mut);
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+}
+.social-square:hover{color:var(--ink);border-color:var(--acc)}
+.footer-col{display:flex;flex-direction:column;gap:10px;font-size:13.5px}
+.footer-col__title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
+.footlink{color:var(--mut);text-decoration:none;font-size:13.5px}
+.footlink:hover{color:var(--ink)}
+.footer-bottom{
+  border-top:1px solid var(--line);margin-top:40px;padding-top:20px;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);
+}
+
+/* ── modals (shared shell) ─────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:100;background:rgba(10,7,20,.45);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:24px;
+}
+.modal-overlay.is-open{display:flex}
+.modal-overlay--center{align-items:center;justify-content:center}
+.modal-overlay--top{align-items:flex-start;justify-content:center;padding:90px 24px 24px;overflow:auto}
+.modal-card{
+  background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+  position:relative;animation:modalIn .3s ease both;text-align:center;
+}
+.modal-card--download{width:420px;max-width:100%;border-radius:20px;padding:34px 32px}
+.modal-card--connect{width:480px;max-width:100%;border-radius:22px;padding:34px 32px}
+.modal-mark{width:44px;height:44px;object-fit:contain;display:inline-block}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;letter-spacing:-.02em;margin:18px 0 0}
+.modal-title--connect{font-size:23px;margin:12px 0 0}
+.modal-subtitle{font-size:14px;color:var(--mut);margin:8px 0 0;line-height:1.6}
+
+/* download modal specifics */
+.os-picker{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+.os-option{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;
+  border:1px solid var(--line);border-radius:12px;background:var(--bg);cursor:pointer;color:var(--ink);
+}
+.os-option:hover{border-color:var(--acc)}
+.os-option--primary{border-color:var(--acc);background:var(--chip)}
+.os-option__name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px}
+.os-option__meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut)}
+.os-option__meta--accent{color:var(--acc)}
+
+.email-form{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+.email-input{
+  width:100%;padding:14px 18px;border-radius:12px;border:1px solid var(--line);background:var(--bg);
+  color:var(--ink);font-size:15px;font-family:'Instrument Sans',sans-serif;outline:none;text-align:center;
+}
+.email-input:focus{border-color:var(--acc)}
+.phone-hint{margin:2px 0 0;font-size:12px;color:var(--mut);line-height:1.5;text-align:left}
+.phone-row{display:flex;gap:8px}
+.phone-select{
+  flex:0 0 128px;padding:14px 8px;border-radius:12px;border:1px solid var(--line);background:var(--bg);
+  color:var(--ink);font-size:13px;font-family:'Instrument Sans',sans-serif;outline:none;
+}
+.phone-input{
+  flex:1;padding:14px 18px;border-radius:12px;border:1px solid var(--line);background:var(--bg);
+  color:var(--ink);font-size:15px;font-family:'Instrument Sans',sans-serif;outline:none;
+}
+.phone-select:focus,.phone-input:focus{border-color:var(--acc)}
+.form-note{margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut)}
+.success-check{color:var(--acc)}
+.success-link{margin-top:16px;font-size:13px}
+.success-link a{color:var(--acc);text-decoration:none}
+
+/* connect modal specifics — icon-only, generously spaced, one accent color
+   (var(--acc)) on hover rather than a full-color block per brand */
+.connect-grid{margin-top:28px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.connect-icon{
+  width:52px;height:52px;flex:none;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;transition:border-color .2s ease,color .2s ease,transform .2s ease;
+}
+.connect-icon:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
+.connect-footnote{margin-top:24px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut)}
+
+/* ── theme switcher ────────────────────────────────────────────────────── */
+.theme-switcher{
+  position:fixed;bottom:20px;right:20px;z-index:70;display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--navbg);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow);
+}
+.theme-switcher__label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.theme-dots{display:flex;gap:8px}
+.theme-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;padding:0;border:2px solid var(--line)}
+.theme-dot:hover{transform:scale(1.12)}
+.theme-dot.is-active{border-color:var(--acc)}
+
+.visually-hidden{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+
+/* ── mobile: tap-to-open demo preview ──────────────────────────────────────
+   The inline hero embed stays a scaled-down preview; on phones we lay a tap
+   target over it that opens the real demo full screen (DemoFullscreen). Hidden
+   above 640px so the inline demo stays directly interactive on desktop. */
+.demo-open{display:none}
+@media (max-width:640px){
+  .hero__iframe{pointer-events:none} /* let the whole preview be one tap target */
+  /* A dim scrim over the (tiny, illegible) inline preview with a centered pill
+     that clearly invites the tap. Plain rgba — no color-mix, which renders
+     inconsistently on some mobile browsers. Clipped to the frame's rounded
+     corners by .hero__embed-frame's overflow:hidden. */
+  .demo-open{
+    display:flex;align-items:center;justify-content:center;
+    position:absolute;inset:0;z-index:6;border:0;cursor:pointer;
+    background:rgba(11,8,20,.34);-webkit-tap-highlight-color:transparent;
+  }
+  .demo-open__label{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;letter-spacing:.01em;
+    color:#fff;background:var(--acc);border-radius:999px;padding:11px 20px;
+    box-shadow:0 12px 30px -8px rgba(0,0,0,.55);
+  }
+}
+
+/* ── demo fullscreen overlay (mobile) ──────────────────────────────────────
+   Opens the interactive demo edge-to-edge, laid out in landscape. When the
+   phone is portrait the frame is rotated 90° (in JS) to fill the screen. */
+.demo-fs{display:none;position:fixed;inset:0;z-index:200;background:#0b0814}
+.demo-fs.is-open{display:block}
+.demo-fs__stage{position:absolute;inset:0;overflow:hidden}
+/* Absolutely centred (not flex): the frame's layout box is 1240px — far wider
+   than a phone — and flex-centring an oversized item clips its overflow. JS
+   applies translate(-50%,-50%) + the fit scale/rotate to this anchor. */
+.demo-fs__frame{position:absolute;left:50%;top:50%;border:0;background:#fff;transform-origin:center center;display:block}
+.demo-fs__close{
+  position:fixed;top:14px;right:14px;z-index:2;width:40px;height:40px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.24);background:rgba(20,16,34,.72);color:#fff;
+  font-size:16px;line-height:1;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.demo-fs__hint{
+  display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:2;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.72);
+  background:rgba(20,16,34,.72);border-radius:999px;padding:7px 14px;white-space:nowrap;pointer-events:none;
+}
+.demo-fs.is-portrait .demo-fs__hint{display:block}
+
+/* ── mobile responsive breakpoints ─────────────────────────────────────────
+   The layout is fluid by default (clamp + auto-fit grids); these breakpoints
+   handle the few components that can't reflow with sizing alone — tighter
+   section rhythm, the un-pinned "why" stage (JS drops scrolljacking ≤760px,
+   here we polish the resulting stacked layout), and the worklog flow. */
+@media (max-width:760px){
+  .section{padding:72px 20px}
+  /* top padding must clear the 64px fixed nav (+breathing room) or the title
+     tucks under it; only the bottom/side padding tightens on mobile */
+  .hero{padding:92px 20px 8px}
+
+  /* stacked "why" fallback (no is-ready): give the sticky intro + panels room */
+  .why__intro{position:static;padding:0 0 8px}
+  .scrolly:not(.is-ready) .scrolly__panels{gap:44px;margin-top:32px}
+  .scrolly:not(.is-ready) .task__jump{display:none} /* jump only works with scrolljack on */
+  .scrolly__panel-body,.decision-context,.decision-note{max-width:none}
+
+  /* worklog flow: draft on top, providers below — the row is too wide to fit */
+  .worklog-flow{flex-direction:column;gap:18px;max-width:none}
+  .worklog-connector{display:none} /* the fan-out svg is meaningless once stacked */
+  .worklog-targets{flex-direction:row;flex-wrap:wrap;gap:10px 16px}
+
+  .faq-layout{gap:32px}
+}
+@media (max-width:560px){
+  .section{padding:56px 18px}
+  .hero{padding:88px 18px 8px}
+  .hero__embed-annotation{display:none} /* "go poke around" — replaced by the tap-to-explore target */
+  .doc-diagram__row{flex-wrap:wrap}
+  .doc-diagram__metric{margin-left:0}
+  .decision-compare{gap:10px}
+  .theme-switcher{bottom:14px;right:14px;padding:7px 10px}
+  .theme-switcher__label{display:none} /* keep just the dots on the smallest screens */
+}

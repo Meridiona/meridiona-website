@@ -1,0 +1,8 @@
+/* Minimal print stylesheet: strip chrome and interactive UI, keep readable content. */
+.nav, .theme-switcher, .cookie-consent, .modal-overlay, #dl-frame,
+#intro-cinema, #replay-intro, .demo-open, .hero__embed-wrap {
+  display: none !important;
+}
+body { background: #fff; color: #000; }
+a { color: #000; text-decoration: underline; }
+.legal-page { padding-top: 0; }

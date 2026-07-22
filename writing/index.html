@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Writing — Meridian</title>
 <meta name="description" content="Technical essays and field notes on AI, engineering, and keeping a record of work that moves faster than memory.">
-<meta name="robots" content="noindex">
+<link rel="canonical" href="https://meridiona.com/writing">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Meridian">
+<meta property="og:title" content="Writing — Meridian">
+<meta property="og:description" content="Technical essays and field notes on AI, engineering, and keeping a record of work that moves faster than memory.">
+<meta property="og:url" content="https://meridiona.com/writing">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Writing — Meridian">
+<meta name="twitter:description" content="Technical essays and field notes on AI, engineering, and keeping a record of work that moves faster than memory.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -17,11 +25,12 @@
 <script src="/assets/js/analytics.js"></script>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to content</a>
 
-<nav class="nav">
+<nav class="nav" role="navigation" aria-label="Main">
   <div class="nav__inner">
     <a href="/" class="nav__brand">
-      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian">
+      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="24" height="24">
       <span class="nav__brand-name">Meridian</span>
     </a>
     <div class="nav__links">
@@ -38,7 +47,7 @@
   </div>
 </nav>
 
-<main class="writing-page">
+<main id="main-content" role="main" class="writing-page">
   <div class="writing-page__inner">
 
     <header class="writing-head">
@@ -108,11 +117,11 @@
   </div>
 
   <div class="writing-page__inner writing-page__inner--wide">
-    <footer class="site-footer">
+    <footer class="site-footer" role="contentinfo">
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="footer-brand__row">
-            <img class="footer-brand__mark" src="/assets/images/meridian-mark.png" alt="Meridian">
+            <img class="footer-brand__mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="28" height="28" loading="lazy">
             <span class="footer-brand__name">Meridian</span>
           </div>
           <p class="footer-brand__tagline">The work journal that remembers your day — built in the open, running only on your Mac.</p>
@@ -140,10 +149,11 @@
         </div>
         <div class="footer-col">
           <div class="footer-col__title">Company</div>
-          <a href="#" class="footlink">Contact</a>
-          <a href="#" class="footlink">Privacy policy</a>
-          <a href="#" class="footlink">Terms of use</a>
-          <a href="#" class="footlink">Security</a>
+          <a href="mailto:company@meridiona.com" class="footlink">Contact</a>
+          <a href="/privacy" class="footlink">Privacy policy</a>
+          <a href="/terms" class="footlink">Terms of use</a>
+          <a href="/cookies" class="footlink">Cookie policy</a>
+          <a href="/accessibility" class="footlink">Accessibility</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -155,11 +165,19 @@
   </div>
 </main>
 
+<div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site — nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
+  <div class="cookie-consent__actions">
+    <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
+    <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
+  </div>
+</div>
+
 <!-- ============ DOWNLOAD MODAL ============ -->
 <div id="modal-download" class="modal-overlay modal-overlay--center">
   <div id="modal-download-card" class="modal-card modal-card--download">
     <button id="btn-close-download" class="icon-close" style="top:14px;right:14px">✕</button>
-    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian">
+    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
     <div id="modal-download-body"></div>
   </div>
 </div>

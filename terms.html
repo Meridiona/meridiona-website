@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Use — Meridiona</title>
+<meta name="description" content="The terms governing your use of the Meridian app and meridiona.com, including the MIT license and governing law.">
+<link rel="canonical" href="https://meridiona.com/terms">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/print.css" media="print">
+<script src="/assets/js/analytics.js" async></script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<div class="site" id="site">
+
+<nav class="nav" role="navigation" aria-label="Main">
+  <div class="nav__inner">
+    <a href="/" class="nav__brand">
+      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="24" height="24">
+      <span class="nav__brand-name">Meridian</span>
+    </a>
+    <div class="nav__links">
+      <a href="/#why" class="nav__link">Why</a>
+      <a href="/#faq" class="nav__link">FAQ</a>
+      <a href="/writing" class="nav__link">Writing</a>
+      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="nav__link nav__link--mono">GitHub ↗</a>
+      <button id="btn-connect" title="Connect" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"></circle><circle cx="6" cy="12" r="2.6"></circle><circle cx="18" cy="19" r="2.6"></circle><path d="M8.4 10.7 L15.6 6.3M8.4 13.3 L15.6 17.7"></path></svg>
+        Connect
+      </button>
+      <button id="btn-download-nav" class="btn-primary">Download</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main-content" role="main" class="legal-page">
+  <div class="legal-body">
+    <a href="/" class="backlink">← Back home</a>
+    <h1>Terms of Use</h1>
+    <p class="legal-updated">Last updated: 22 July 2026 · Meridiona</p>
+
+    <p>These terms govern your use of the Meridian desktop app and meridiona.com (together, the "Service"), operated by Meridiona ("we", "us"). By downloading, installing, or using the Service, you agree to these terms.</p>
+
+    <h2>The app</h2>
+    <p>Meridian is provided under the MIT License — the source code is public and you're free to use, modify, and redistribute it under that license's terms. See the <a href="https://github.com/Meridiona/meridian/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE file</a> on GitHub for the exact terms.</p>
+
+    <h2>Acceptable use</h2>
+    <p>You agree not to use the Service to violate any applicable law, to reverse-engineer it for the purpose of harming users, or to interfere with its normal operation (including the meridiona.com website or its download infrastructure).</p>
+
+    <h2>No warranty</h2>
+    <p>The Service is provided "as is", without warranty of any kind, express or implied, to the maximum extent permitted by law. We do not guarantee the Service will be uninterrupted, error-free, or fit for a particular purpose.</p>
+
+    <h2>Limitation of liability</h2>
+    <p>To the maximum extent permitted by law, Meridiona will not be liable for any indirect, incidental, or consequential damages arising from your use of the Service.</p>
+
+    <h2>Third-party integrations</h2>
+    <p>If you connect Meridian to a third-party project-management tool (Jira, Linear, GitHub Projects, Azure DevOps, Trello), your use of that tool remains subject to its own terms — we are not a party to that relationship.</p>
+
+    <h2>Changes to these terms</h2>
+    <p>We may update these terms from time to time. Material changes will be reflected by an updated "last updated" date on this page.</p>
+
+    <h2>Governing law</h2>
+    <p>These terms are governed by the laws of India, and any disputes arising from them will be handled under Indian jurisdiction.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about these terms: <a href="mailto:company@meridiona.com">company@meridiona.com</a>.</p>
+  </div>
+</main>
+
+<div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site — nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
+  <div class="cookie-consent__actions">
+    <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
+    <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
+  </div>
+</div>
+
+<div id="modal-download" class="modal-overlay modal-overlay--center">
+  <div id="modal-download-card" class="modal-card modal-card--download">
+    <button id="btn-close-download" class="icon-close" style="top:14px;right:14px">✕</button>
+    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
+    <div id="modal-download-body"></div>
+  </div>
+</div>
+<iframe id="dl-frame" style="display:none" title="download" aria-hidden="true"></iframe>
+
+<div id="modal-connect" class="modal-overlay modal-overlay--top">
+  <div class="modal-card modal-card--connect">
+    <button id="btn-close-connect" class="icon-close" style="top:16px;right:16px">✕</button>
+    <div style="font-size:34px;line-height:1">👋</div>
+    <h3 class="modal-title modal-title--connect">Let's be friends</h3>
+    <p class="modal-subtitle" style="max-width:340px;margin-left:auto;margin-right:auto">We're a lot more fun over here than in a changelog. Pick your platform:</p>
+    <div class="connect-grid">
+      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="connect-icon" title="GitHub" aria-label="GitHub"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.98 5.24.98 11.52c0 4.96 3.16 9.16 7.55 10.65.55.1.75-.24.75-.53 0-.26-.01-1.13-.01-2.05-3.07.66-3.72-1.31-3.72-1.31-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.67.08-.67 1.11.08 1.7 1.15 1.7 1.15.99 1.7 2.6 1.21 3.23.92.1-.72.39-1.21.7-1.49-2.45-.28-5.03-1.23-5.03-5.47 0-1.21.43-2.19 1.14-2.97-.11-.28-.5-1.42.11-2.95 0 0 .93-.3 3.05 1.13a10.5 10.5 0 0 1 5.55 0c2.12-1.43 3.05-1.13 3.05-1.13.61 1.53.22 2.67.11 2.95.71.78 1.14 1.76 1.14 2.97 0 4.25-2.59 5.19-5.05 5.46.4.35.75 1.02.75 2.07 0 1.49-.01 2.7-.01 3.06 0 .29.2.64.76.53 4.38-1.49 7.54-5.69 7.54-10.65C23.02 5.24 18.27.5 12 .5Z"/></svg></a>
+    </div>
+    <div class="connect-footnote">no spam, just diamonds in your feed ✦</div>
+  </div>
+</div>
+
+<div id="theme-switcher" class="theme-switcher">
+  <span class="theme-switcher__label">theme</span>
+  <div id="theme-dots" class="theme-dots"></div>
+</div>
+</div>
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

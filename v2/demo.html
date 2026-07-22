@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian — product demo</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/demo.css">
+</head>
+<body>
+<div id="desk">
+  <div id="device">
+    <div class="chrome">
+      <div class="dots">
+        <span class="dot" style="background:#FF5F57"></span>
+        <span class="dot" style="background:#FEBC2E"></span>
+        <span class="dot" style="background:#28C840"></span>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center">
+        <div class="pillnav">
+          <img class="mark" src="/assets/images/meridian-mark.png" alt="Meridian">
+          <span class="brand">Meridian</span>
+          <span class="item on">Timeline</span>
+          <span class="item">Chat</span>
+          <span class="item">Integrations</span>
+          <span class="item">Report</span>
+          <span class="gear">⚙ Settings</span>
+        </div>
+      </div>
+      <div style="width:64px"></div>
+    </div>
+
+    <div class="toolbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="arrowbtn">‹</span>
+        <div style="font:700 15px 'Plus Jakarta Sans';color:#211D3D;line-height:1.1">Today</div>
+        <span class="arrowbtn">›</span>
+      </div>
+      <div style="flex:1"></div>
+      <div id="toolbar-actions" style="display:flex;align-items:center;gap:16px"></div>
+    </div>
+
+    <div class="bodyrow">
+      <div id="timeline"></div>
+      <div id="panel"></div>
+    </div>
+
+    <div id="floating-slot"></div>
+    <div id="review-slot"></div>
+  </div>
+</div>
+
+<script src="/assets/js/demo.js" defer></script>
+</body>
+</html>

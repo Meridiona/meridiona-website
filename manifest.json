@@ -1,0 +1,13 @@
+{
+  "name": "Meridian",
+  "short_name": "Meridian",
+  "description": "The work journal that remembers your day.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#f7f5fc",
+  "theme_color": "#7c3aed",
+  "icons": [
+    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

@@ -89,7 +89,10 @@ test('index.html and demo.html have no inline <style>/<script> blocks (externali
   expect(index).toContain('<script src="/assets/js/site.js" defer></script>');
   expect(/<style>/.test(index)).toBe(false);
   expect(index).toContain('<script src=');
-  const inlineScriptsIndex = (index.match(/<script(?![^>]*\bsrc=)[^>]*>/g) || []);
+  // JSON-LD structured-data blocks are inert SEO metadata, not behavior/presentation
+  // logic — they're the one allowed exception to "no inline scripts".
+  const inlineScriptsIndex = (index.match(/<script(?![^>]*\bsrc=)[^>]*>/g) || [])
+    .filter((tag) => !tag.includes('application/ld+json'));
   expect(inlineScriptsIndex.length).toBe(0);
 
   expect(demo).toContain('<link rel="stylesheet" href="/assets/css/demo.css">');
@@ -126,7 +129,7 @@ test('site.js calls /subscribe and /dl the way worker.js expects', () => {
 test('PostHog analytics is wired with a write-only project key', () => {
   const analyticsJs = fs.readFileSync(path.join(ROOT, 'assets/js/analytics.js'), 'utf-8');
   expect(/phc_[A-Za-z0-9]+/.test(analyticsJs)).toBe(true);
-  expect(index).toContain('<script src="/assets/js/analytics.js"></script>');
+  expect(index).toContain('<script src="/assets/js/analytics.js"');
 });
 
 // ─── Group 3: Theming ─────────────────────────────────────────────────────────
@@ -202,26 +205,25 @@ test('footer grid collapses via minmax, not a hardcoded mobile override', () => 
   expect(siteCss).toContain('grid-template-columns:2fr 1fr 1fr 1fr');
 });
 test('hero embed recomputes size on window resize (no layout overflow on small viewports)', () => {
-  expect(siteJs).toContain("window.addEventListener('resize', HeroEmbed.size)");
-  expect(siteJs).toContain('Math.max(260, Math.min(1160');
+  expect(siteJs).toContain("window.addEventListener('resize', this._resize)");
+  expect(siteJs).toContain('Math.max(280, Math.min(1120');
 });
 
 // ─── Group 6: Interactive demo (embedded product) ────────────────────────────
 console.log('\nEmbedded product demo (demo.html)');
-test('demo has the daily timeline, right panel and review modal', () => {
+test('demo has the daily timeline, right panel and per-task approve flow', () => {
   expect(demo).toContain('id="timeline"');
   expect(demo).toContain('id="panel"');
-  expect(demo).toContain('id="review-slot"');
 });
 test('demo has capture/jira toggles and reset wired in demo.js', () => {
   expect(demoJs).toContain("'toggle-capture': toggleCapture");
   expect(demoJs).toContain("'toggle-jira': toggleJira");
   expect(demoJs).toContain("'reset': resetAll");
 });
-test('demo supports swipe-to-approve / swipe-to-dismiss on the review card', () => {
-  expect(demoJs).toContain('pointerdown');
-  expect(demoJs).toContain('approveNow');
-  expect(demoJs).toContain('rejectNow');
+test('demo supports the confirm-then-approve worklog posting flow', () => {
+  expect(demoJs).toContain('confirmPost');
+  expect(demoJs).toContain('approvePost');
+  expect(demoJs).toContain('cancelConfirm');
 });
 
 // ─── Group 7: Script/style tag safety ─────────────────────────────────────────
@@ -235,7 +237,7 @@ test('<script> open/close tags are balanced in demo.html', () => {
 });
 test('demo.css keyframes referenced by demo.js/demo.css are present', () => {
   expect(demoCss).toContain('@keyframes wsBlink');
-  expect(demoCss).toContain('@keyframes wsShimmer');
+  expect(demoCss).toContain('@keyframes msumIn');
 });
 
 // ─── Group 8: Writing section ─────────────────────────────────────────────────
@@ -303,8 +305,8 @@ test('writing index subscribe form is wired to site.js /subscribe handler', () =
   expect(siteJs).toContain("$('subscribe-form')");
 });
 test('site.js modules guard for pages without the hero/faq DOM', () => {
-  expect(siteJs).toContain("if (!$('hero-embed-wrap')) return;");
-  expect(siteJs).toContain('if (!list) return;');
+  expect(siteJs).toContain("const wrap = $('hero-embed-wrap'); if (!wrap) return;");
+  expect(siteJs).toContain("if ($('faq-list')) {");
 });
 test('<script> open/close tags are balanced on every writing page', () => {
   for (const p of allWritingPages) {
