@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const introEl = $('intro-cinema'), introFrame = $('intro-frame'), introStmt = $('intro-statement'), replayBtn = $('replay-intro');
     const heroTitle = document.querySelector('.hero__title');
     const noteMon = document.querySelector('.hero__note-monitor');
-    const heroEls = [document.querySelector('.hero__subtitle'), $('hero-embed-wrap'), document.querySelector('.trust-strip')];
+    const heroEls = [document.querySelector('.hero__subtitle'), document.querySelector('.hero__pointer'), $('hero-embed-wrap'), document.querySelector('.trust-strip')];
     const buildStatement = () => {
       const mk = (text, grad, base) => text.split(' ').map((w, i) => '<span class="intro-word' + (grad ? ' intro-word--grad' : '') + '" style="animation-delay:' + (base + i * 0.2).toFixed(2) + 's">' + w + '</span>').join(' ');
       introStmt.innerHTML =
