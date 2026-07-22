@@ -5,55 +5,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meridian — product demo</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/demo.css">
+<script src="/assets/js/demo.js" defer></script>
 </head>
 <body>
-<div id="desk">
-  <div id="device">
-    <div class="chrome">
-      <div class="dots">
-        <span class="dot" style="background:#FF5F57"></span>
-        <span class="dot" style="background:#FEBC2E"></span>
-        <span class="dot" style="background:#28C840"></span>
-      </div>
-      <div style="flex:1;display:flex;justify-content:center">
-        <div class="pillnav">
-          <img class="mark" src="/assets/images/meridian-mark.png" alt="Meridian">
-          <span class="brand">Meridian</span>
-          <span class="item on">Timeline</span>
-          <span class="item">Chat</span>
-          <span class="item">Integrations</span>
-          <span class="item">Report</span>
-          <span class="gear">⚙ Settings</span>
+<div class="stage">
+  <div class="stage__scaler" id="scaler">
+    <div id="desk">
+      <div id="device">
+        <div class="chrome">
+          <div class="dots">
+            <span class="dot" style="background:#FF5F57"></span>
+            <span class="dot" style="background:#FEBC2E"></span>
+            <span class="dot" style="background:#28C840"></span>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="datenav">
+            <button class="chev">‹</button>
+            <span class="lbl">Today</span>
+            <button class="chev">›</button>
+          </div>
+          <div id="toolbar-left-extra"></div>
+          <div style="flex:1"></div>
+          <div class="navpill">
+            <img class="mark" src="/assets/images/meridian-mark.png" alt="Meridian">
+            <span class="brand">Meridian</span>
+            <button class="item on">Timeline</button>
+            <button class="item">Integrations</button>
+            <button class="item">Report</button>
+            <button class="item">What's New</button>
+            <span class="gear">⚙ Settings</span>
+          </div>
+          <div style="flex:1"></div>
+          <div id="toolbar-actions" class="toolbar-right"></div>
+        </div>
+
+        <div class="bodyrow">
+          <div id="timeline"></div>
+          <div id="panel"></div>
+
+          <div id="mscrim" class="mscrim"></div>
+          <div id="mprivacy" class="mprivacy"></div>
+          <div id="msummary" class="msummary"></div>
+          <div id="mcursor" class="mcursor"><svg class="mcursor__arrow" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3 L5 19 L9 15 L12 21 L14.5 20 L11.5 14 L17 14 Z" fill="#fff" stroke="#211D3D" stroke-width="1.4" stroke-linejoin="round"/></svg><span class="mcursor__ring"></span></div>
+          <div id="mclock" class="mclock mclock--hero"></div>
+          <div id="mquestion" class="mquestion"></div>
+          <div id="mpointer" class="mpointer">
+            <span class="mpointer__note">it's live — poke a task</span>
+            <svg width="42" height="46" viewBox="0 0 38 40" style="overflow:visible">
+              <path d="M4 4 Q26 4 30 30" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"></path>
+              <path d="M22 25 L30 30 L32 21" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </div>
         </div>
       </div>
-      <div style="width:64px"></div>
     </div>
-
-    <div class="toolbar">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="arrowbtn">‹</span>
-        <div style="font:700 15px 'Plus Jakarta Sans';color:#211D3D;line-height:1.1">Today</div>
-        <span class="arrowbtn">›</span>
-      </div>
-      <div style="flex:1"></div>
-      <div id="toolbar-actions" style="display:flex;align-items:center;gap:16px"></div>
-    </div>
-
-    <div class="bodyrow">
-      <div id="timeline"></div>
-      <div id="panel"></div>
-    </div>
-
-    <div id="floating-slot"></div>
-    <div id="review-slot"></div>
   </div>
 </div>
-
-<script src="/assets/js/demo.js" defer></script>
 </body>
 </html>

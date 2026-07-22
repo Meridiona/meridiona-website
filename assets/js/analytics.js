@@ -1,13 +1,16 @@
 /*
  * PostHog product analytics — same project/key as the root site's
- * (../../index.html). Loaded eagerly in <head> (no defer/async wrapper here;
- * PostHog's own snippet handles async script injection internally) so
- * pageviews are captured as early in the page lifecycle as possible.
+ * (../../index.html). The <script> tag itself loads async; PostHog only
+ * actually boots and starts capturing once the visitor has accepted the
+ * cookie consent banner (CookieConsent in site.js) — see CONSENT_KEY below.
  */
 (function () {
   var KEY = 'phc_zaKjKC5K7GoexwGJH9kePAq56PbA2EdcemKMMrthivmD'; // PostHog write-only key (safe in public apps)
   var HOST = 'https://us.i.posthog.com'; // use https://eu.i.posthog.com for EU
+  var CONSENT_KEY = 'meridian-consent';
   if (!KEY) return;
+
+  function boot() {
   !function (t, e) {
     var o, n, p, r;
     e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) {
@@ -31,4 +34,13 @@
     }, e.__SV = 1);
   }(document, window.posthog || []);
   posthog.init(KEY, { api_host: HOST, defaults: '2026-05-30', person_profiles: 'identified_only' });
+  }
+
+  var consent;
+  try { consent = localStorage.getItem(CONSENT_KEY); } catch (e) {}
+  if (consent === 'granted') {
+    boot();
+  } else if (consent !== 'denied') {
+    window.addEventListener('meridian:consent-granted', boot, { once: true });
+  }
 })();

@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>More context made my classifier worse, not better — Meridian</title>
 <meta name="description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.">
-<meta name="robots" content="noindex">
+<link rel="canonical" href="https://meridiona.com/writing/eval-loop">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Meridian">
+<meta property="og:title" content="More context made my classifier worse, not better — Meridian">
+<meta property="og:description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.">
+<meta property="og:url" content="https://meridiona.com/writing/eval-loop">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="More context made my classifier worse, not better — Meridian">
+<meta name="twitter:description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -17,11 +25,12 @@
 <script src="/assets/js/analytics.js"></script>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to content</a>
 
-<nav class="nav">
+<nav class="nav" role="navigation" aria-label="Main">
   <div class="nav__inner">
     <a href="/" class="nav__brand">
-      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian">
+      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="24" height="24">
       <span class="nav__brand-name">Meridian</span>
     </a>
     <div class="nav__links">
@@ -38,7 +47,7 @@
   </div>
 </nav>
 
-<main class="writing-page">
+<main id="main-content" role="main" class="writing-page">
   <div class="writing-page__inner">
 
     <a href="/writing" class="backlink"><span style="color:var(--acc)">←</span> All writing</a>
@@ -176,7 +185,7 @@
   </div>
 
   <div class="writing-page__inner writing-page__inner--wide">
-    <footer class="site-footer">
+    <footer class="site-footer" role="contentinfo">
       <div class="footer-bottom" style="border-top:none;margin-top:0;padding-top:0">
         <span>© 2026 Meridian · MIT License</span>
         <span>made for people who'd rather be coding</span>
@@ -186,11 +195,19 @@
   </div>
 </main>
 
+<div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site — nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
+  <div class="cookie-consent__actions">
+    <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
+    <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
+  </div>
+</div>
+
 <!-- ============ DOWNLOAD MODAL ============ -->
 <div id="modal-download" class="modal-overlay modal-overlay--center">
   <div id="modal-download-card" class="modal-card modal-card--download">
-    <button id="btn-close-download" class="icon-close" style="top:14px;right:14px">✕</button>
-    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian">
+    <button id="btn-close-download" class="icon-close icon-close--download">✕</button>
+    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
     <div id="modal-download-body"></div>
   </div>
 </div>
@@ -198,11 +215,11 @@
 <!-- ============ SOCIAL CONNECT DIALOG ============ -->
 <div id="modal-connect" class="modal-overlay modal-overlay--top">
   <div class="modal-card modal-card--connect">
-    <button id="btn-close-connect" class="icon-close" style="top:16px;right:16px">✕</button>
+    <button id="btn-close-connect" class="icon-close icon-close--connect">✕</button>
 
-    <div style="font-size:34px;line-height:1">👋</div>
+    <div class="connect-emoji">👋</div>
     <h3 class="modal-title modal-title--connect">Let's be friends</h3>
-    <p class="modal-subtitle" style="max-width:340px;margin-left:auto;margin-right:auto">We're a lot more fun over here than in a changelog. Pick your platform:</p>
+    <p class="modal-subtitle modal-subtitle--connect">We're a lot more fun over here than in a changelog. Pick your platform:</p>
 
     <div class="connect-list">
       <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="connect-row connect-row--github">
@@ -257,7 +274,7 @@
   <div id="theme-dots" class="theme-dots"></div>
 </div>
 
-<iframe id="dl-frame" style="display:none" title="download" aria-hidden="true"></iframe>
+<iframe id="dl-frame" class="dl-frame" title="download" aria-hidden="true"></iframe>
 
 <script src="/assets/js/site.js" defer></script>
 </body>

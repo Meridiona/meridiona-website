@@ -48,7 +48,12 @@ function downloadTarget(os) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const response = await handle(request, url, env, ctx);
+    return withSecurityHeaders(response, url);
+  },
+};
 
+async function handle(request, url, env, ctx) {
     // www → apex, 301, preserving path + query — one canonical host.
     if (url.hostname === 'www.meridiona.com') {
       url.hostname = 'meridiona.com';
@@ -167,8 +172,43 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
-  },
-};
+}
+
+// Applies a baseline of security headers to every response this Worker returns
+// (HSTS, CSP, clickjacking/MIME-sniffing protection, etc — see ShipCheck's
+// "Fix Before Launch" security findings). CSP is relaxed with 'unsafe-inline'
+// for style/script only on routes that are known to render inline <style>/
+// <script> (the /download and auth.meridiona.com interstitial pages) — every
+// other route (the static site, /writing/*, /subscribe, /dl) has none, so it
+// gets the strict policy.
+function withSecurityHeaders(response, url) {
+  const needsInlineHtml = url.pathname === '/download' || url.hostname === AUTH_HOSTNAME;
+  const scriptSrc = needsInlineHtml ? "script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com https://*.i.posthog.com"
+    : "script-src 'self' https://us-assets.i.posthog.com https://*.i.posthog.com";
+  const csp = [
+    "default-src 'self'",
+    scriptSrc,
+    // 'unsafe-inline' here (regardless of route) because the static markup uses inline style="..." attributes throughout
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https:",
+    "connect-src 'self' https://*.i.posthog.com https://*.posthog.com",
+    "frame-src 'self'",
+    "frame-ancestors 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ');
+
+  const headers = new Headers(response.headers);
+  headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  headers.set('Content-Security-Policy', csp);
+  headers.set('X-Frame-Options', 'SAMEORIGIN'); // not DENY: index.html and demo.html embed /demo.html in a same-origin <iframe>
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
