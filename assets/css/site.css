@@ -136,10 +136,11 @@ body[data-theme="paper"]{
 .hero__title-accent{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero__subtitle{max-width:860px;margin:18px auto 0;font-size:clamp(16px,1.6vw,19px);line-height:1.55;color:var(--mut);text-wrap:pretty}
 
-.hero__pointer{position:fixed;top:70px;right:70px;z-index:59;pointer-events:none}
-
 .hero__embed-wrap{position:relative;margin-top:18px;animation:heroIn 1s .15s ease both}
-.hero__embed-annotation{position:absolute;top:-30px;right:26px;z-index:5;display:flex;align-items:flex-start;gap:8px;pointer-events:none}
+/* right:11% lands over the demo toolbar's Reset button (it sits ~10% in
+   from the canvas's right edge, just left of the avatar) — a % offset
+   here (not px) keeps it aligned as HeroEmbed rescales the iframe. */
+.hero__embed-annotation{position:absolute;top:-30px;right:11%;z-index:5;display:flex;align-items:flex-start;gap:8px;pointer-events:none}
 .hero__embed-note{font-family:'Caveat',cursive;font-size:19px;color:var(--acc2);transform:rotate(-3deg);white-space:nowrap}
 .hero__embed-frame{position:relative;overflow:hidden;border-radius:18px;border:2px solid #E8ECFC;box-shadow:var(--shadow);background:#E8ECFC}
 .hero__embed-viewport{position:relative;overflow:hidden;border-radius:12px}
@@ -572,7 +573,6 @@ body[data-theme="paper"]{
   /* top padding must clear the 64px fixed nav (+breathing room) or the title
      tucks under it; only the bottom/side padding tightens on mobile */
   .hero{padding:92px 20px 8px}
-  .hero__pointer{display:none} /* decorative arrow points at nav items that shed on mobile */
 
   /* stacked "why" fallback (no is-ready): give the sticky intro + panels room */
   .why__intro{position:static;padding:0 0 8px}
