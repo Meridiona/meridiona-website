@@ -309,7 +309,7 @@ function createDemo(refs, opts) {
     state._lastSummaryView = view;
     if (state.summaryTaskId) { card.className = 'msum__card msum__card--task'; card.innerHTML = summaryTaskBody(); }
     else { card.className = 'msum__card'; card.innerHTML = summaryHomeBody(); }
-    if (changed) { card.style.animation = 'none'; void card.offsetWidth; card.style.animation = 'msumSwap .36s cubic-bezier(.2,.8,.25,1)'; }
+    if (changed) { card.style.animation = 'none'; void card.offsetWidth; card.style.animation = 'msum-swap .36s cubic-bezier(.2,.8,.25,1)'; }
   }
 
   function summaryHomeBody() {
@@ -765,7 +765,7 @@ function createDemo(refs, opts) {
       '<div class="mpriv__head">Your data never has to <span class="mpriv__hl">leave your device.</span></div>' +
       '<div class="mpriv__stage">' +
         '<div class="mpriv__glow"></div>' +
-        '<img class="mpriv__logo" src="assets/images/meridian-mark.png" alt="Meridian">' +
+        '<img class="mpriv__logo" src="/assets/images/meridian-mark.png" alt="Meridian">' +
         '<div class="mpriv__badge mpriv__badge--top">' + privIcon('lock') + 'Local &amp; on-device</div>' +
         '<div class="mpriv__badge mpriv__badge--left">' + privIcon('code') + 'Open source</div>' +
         '<div class="mpriv__badge mpriv__badge--right">' + privIcon('sliders') + 'You control it</div>' +
@@ -850,7 +850,6 @@ function createDemo(refs, opts) {
     aborted = true;
     if (pendingUserClick) { var pr = pendingUserClick.resolve; pendingUserClick = null; pr(); }
     if (rafId) cancelAnimationFrame(rafId);
-    Object.keys(state.worklogs).forEach(function () {});
     state.dayTasks.forEach(function (t) { revealed[t.id] = true; });
     refs.scrim.classList.add('is-off');
     refs.question.classList.remove('is-on');

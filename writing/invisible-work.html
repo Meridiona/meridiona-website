@@ -140,7 +140,7 @@
 <!-- ============ DOWNLOAD MODAL ============ -->
 <div id="modal-download" class="modal-overlay modal-overlay--center">
   <div id="modal-download-card" class="modal-card modal-card--download">
-    <button id="btn-close-download" class="icon-close" style="top:14px;right:14px">✕</button>
+    <button id="btn-close-download" class="icon-close icon-close--download">✕</button>
     <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
     <div id="modal-download-body"></div>
   </div>
@@ -149,11 +149,11 @@
 <!-- ============ SOCIAL CONNECT DIALOG ============ -->
 <div id="modal-connect" class="modal-overlay modal-overlay--top">
   <div class="modal-card modal-card--connect">
-    <button id="btn-close-connect" class="icon-close" style="top:16px;right:16px">✕</button>
+    <button id="btn-close-connect" class="icon-close icon-close--connect">✕</button>
 
-    <div style="font-size:34px;line-height:1">👋</div>
+    <div class="connect-emoji">👋</div>
     <h3 class="modal-title modal-title--connect">Let's be friends</h3>
-    <p class="modal-subtitle" style="max-width:340px;margin-left:auto;margin-right:auto">We're a lot more fun over here than in a changelog. Pick your platform:</p>
+    <p class="modal-subtitle modal-subtitle--connect">We're a lot more fun over here than in a changelog. Pick your platform:</p>
 
     <div class="connect-list">
       <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="connect-row connect-row--github">
@@ -208,7 +208,7 @@
   <div id="theme-dots" class="theme-dots"></div>
 </div>
 
-<iframe id="dl-frame" style="display:none" title="download" aria-hidden="true"></iframe>
+<iframe id="dl-frame" class="dl-frame" title="download" aria-hidden="true"></iframe>
 
 <script src="/assets/js/site.js" defer></script>
 </body>

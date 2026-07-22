@@ -225,7 +225,7 @@
       o.setAttribute('aria-label', 'Meridian interactive demo');
       o.innerHTML =
         '<div class="demo-fs__stage">' +
-          '<iframe class="demo-fs__frame" title="Meridian product demo" src="/new/demo.html"></iframe>' +
+          '<iframe class="demo-fs__frame" title="Meridian product demo" src="/demo.html"></iframe>' +
         '</div>' +
         '<button class="demo-fs__close" aria-label="Close demo">✕</button>' +
         '<div class="demo-fs__hint" aria-hidden="true">rotate your phone for the full view</div>';

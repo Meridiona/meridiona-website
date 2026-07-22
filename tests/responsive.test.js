@@ -236,8 +236,8 @@ test('<script> open/close tags are balanced in demo.html', () => {
   expect((demo.match(/<script[\s>]/g) || []).length).toBe((demo.match(/<\/script>/g) || []).length);
 });
 test('demo.css keyframes referenced by demo.js/demo.css are present', () => {
-  expect(demoCss).toContain('@keyframes wsBlink');
-  expect(demoCss).toContain('@keyframes msumIn');
+  expect(demoCss).toContain('@keyframes ws-blink');
+  expect(demoCss).toContain('@keyframes msum-in');
 });
 
 // ─── Group 8: Writing section ─────────────────────────────────────────────────
