@@ -1,0 +1,22 @@
+# Meridian
+
+> Meridian is a 100% local, open-source productivity tool built by Meridiona. It gives you full visibility into your work — nothing goes unnoticed, everything is logged, entirely on your own device.
+
+Meridian captures the apps and windows you work in, turns that into a private daily journal, and drafts logs you review and approve before anything is ever posted to a project-management tool (Jira, Linear, GitHub Projects, Azure DevOps, or Trello). Nothing leaves your device without your explicit approval. It's not limited to developers — anyone who wants a complete, private record of their workday can use it. The app is MIT-licensed and fully auditable — free, no account required to try it.
+
+## Product
+- [Homepage](https://meridiona.com/): Overview, how it works, FAQ, and download
+- [Product demo](https://meridiona.com/demo): Interactive walkthrough of the app
+
+## Writing
+- [Writing index](https://meridiona.com/writing): Essays on AI, engineering, and work
+- [Your velocity went up. Your visibility went down.](https://meridiona.com/writing/velocity-visibility): Why faster AI-assisted work leaves less of a record behind
+- [More context made my classifier worse, not better](https://meridiona.com/writing/eval-loop): A machine-maintained failure taxonomy for closing the eval loop
+- [The timesheet wasn't lying. It was blind.](https://meridiona.com/writing/invisible-work): What a week of fully-recorded developer activity actually showed
+
+## Company
+- [Privacy Policy](https://meridiona.com/privacy)
+- [Terms of Use](https://meridiona.com/terms)
+- [Cookie Policy](https://meridiona.com/cookies)
+- [Accessibility Statement](https://meridiona.com/accessibility)
+- [GitHub](https://github.com/Meridiona/meridian): Source code, MIT licensed

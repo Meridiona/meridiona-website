@@ -1,0 +1,36 @@
+/* Self-hosted fonts (Latin subset only — the site has no non-Latin content).
+ * These are the same variable-font files Google Fonts serves; downloaded
+ * once and hosted locally so the page doesn't pay for a third-party
+ * DNS lookup + connection to fonts.googleapis.com/fonts.gstatic.com, and so
+ * the critical ones can be preloaded (see the <link rel="preload"> tags).
+ * font-weight is a range because each file is a single variable-font
+ * instance covering all the static weights the site actually uses.
+ */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/space-grotesk.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/instrument-sans.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/caveat.woff2') format('woff2');
+}

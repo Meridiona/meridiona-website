@@ -8,13 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'dusk', label: 'Dusk — dark', sw: 'linear-gradient(135deg,#171226 50%,#8b5cf6 50%)' },
       { id: 'paper', label: 'Paper — warm ink', sw: 'linear-gradient(135deg,#faf8f3 50%,#4f46e5 50%)' },
     ];
-    const FAQ = [
-      { q: 'Does anything leave my Mac?', a: 'No. Capture, analysis, and the journal all run on-device. The only thing that ever leaves your Mac is a worklog you explicitly approved — sent directly to your PM tool.' },
-      { q: 'Is it really open source?', a: 'Yes — MIT-licensed, every line auditable. No tiers, no trial, no card. If you ever want to know how it works, read the code.' },
-      { q: 'What does it capture — and can I exclude apps?', a: 'The apps and windows you work in, to build your journal — nothing you can’t see for yourself. Exclude any app, pause anytime from the menu bar, delete anything.' },
-      { q: 'Which PM tools does it post to?', a: 'Jira, Linear, GitHub Projects, Azure DevOps, and Trello. Connections are read-only until you approve a log — Meridian never writes to your board on its own.' },
-      { q: 'Is it useful without a PM tool?', a: 'Completely. With nothing connected, Meridian is a private, searchable record of your work — your time, your decisions, your day. That alone is the product.' },
-    ];
     const DL = {
       mac: { emailTitle: 'Almost there', emailPrompt: 'Drop your email and the download starts right away.', ctaLabel: 'Continue → download', emailNote: 'macOS 14+ · Apple Silicon (M1 or later)', successTitle: 'Download started', successBody: 'Meridian.dmg is on its way. Drag it to Applications and look for the diamond in your menu bar.' },
       windows: { emailTitle: 'Almost there', emailPrompt: 'Drop your email and the download starts right away.', ctaLabel: 'Continue → download', emailNote: 'Windows 10/11 · 64-bit', successTitle: 'Download started', successBody: 'Meridian-setup.exe is on its way. Run it, and look for the diamond in your system tray.' },
@@ -74,17 +67,25 @@ document.addEventListener('DOMContentLoaded', () => {
       $('cookie-decline').addEventListener('click', () => decideConsent('denied'));
     }
 
-    // ── faq ──
-    if ($('faq-list')) {
-      let faqOpen = -1;
-      const renderFaq = () => {
-        $('faq-list').innerHTML = FAQ.map((f, i) => {
-          const o = faqOpen === i;
-          return '<div class="faq-item"><h3 class="faq-item__q-heading"><button type="button" class="faq-item__q" data-faq-idx="' + i + '" aria-expanded="' + o + '"><span class="faq-item__q-text">' + f.q + '</span><span class="faq-item__icon">' + (o ? '−' : '+') + '</span></button></h3>' + (o ? '<p class="faq-item__a">' + f.a + '</p>' : '') + '</div>';
-        }).join('');
+    // ── faq ── (content is server-rendered in index.html so crawlers that don't
+    // execute JS still see every question/answer; this just wires up the
+    // accordion's expand/collapse interaction on top of it)
+    const faqList = $('faq-list');
+    if (faqList) {
+      const items = [...faqList.querySelectorAll('.faq-item')];
+      const setOpen = (item, open) => {
+        item.classList.toggle('is-open', open);
+        const btn = item.querySelector('[data-faq-idx]');
+        btn.setAttribute('aria-expanded', String(open));
+        item.querySelector('.faq-item__icon').textContent = open ? '−' : '+';
       };
-      renderFaq();
-      $('faq-list').addEventListener('click', (e) => { const el = e.target.closest('[data-faq-idx]'); if (el) { const i = +el.dataset.faqIdx; faqOpen = faqOpen === i ? -1 : i; renderFaq(); } });
+      faqList.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-faq-idx]');
+        if (!btn) return;
+        const item = btn.closest('.faq-item');
+        const opening = !item.classList.contains('is-open');
+        items.forEach((el) => setOpen(el, el === item && opening));
+      });
     }
 
     // ── lines ticker ──
