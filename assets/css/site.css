@@ -65,6 +65,7 @@ body[data-theme="paper"]{
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding:76px 24px 12px;position:relative;overflow-x:hidden}
 .hero__glow{position:absolute;top:-180px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(closest-side,color-mix(in oklab,var(--acc) 16%,transparent),transparent);pointer-events:none}
 .hero__content{position:relative;animation:hero-in .8s ease both;display:flex;flex-direction:column;align-items:center;flex:none;max-width:1160px;margin:0 auto;width:100%}
+.hero__lede{max-width:640px;margin:0 auto 18px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--mut);letter-spacing:.01em}
 .hero__title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,3.6vw,46px);line-height:1.1;letter-spacing:-.03em;margin:0}
 .hero__title-accent{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero__subtitle{max-width:860px;margin:18px auto 0;font-size:clamp(16px,1.6vw,19px);line-height:1.55;color:var(--mut);text-wrap:pretty}
@@ -302,7 +303,8 @@ body[data-theme="paper"]{
 .faq-item__q:hover{color:var(--acc)}
 .faq-item__q-text{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16.5px}
 .faq-item__icon{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--acc);flex:none}
-.faq-item__a{margin:0;padding:0 32px 20px 2px;font-size:14.5px;line-height:1.7;color:var(--mut);text-wrap:pretty}
+.faq-item__a{margin:0;padding:0 32px 20px 2px;font-size:14.5px;line-height:1.7;color:var(--mut);text-wrap:pretty;display:none}
+.faq-item.is-open .faq-item__a{display:block}
 
 .site-footer{border-top:1px solid var(--line);margin-top:80px;padding:48px 0 36px}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px 32px}

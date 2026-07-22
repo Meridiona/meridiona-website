@@ -171,10 +171,13 @@ test('why section present', () => {
   expect(index).toContain('id="lines-ticker"');
   expect(index).toContain('Your agents shipped');
 });
-test('faq section with accordion data driven from site.js', () => {
+test('faq section is server-rendered (visible to non-JS crawlers) with JS-driven accordion interaction', () => {
   expect(index).toContain('id="faq"');
   expect(index).toContain('id="faq-list"');
-  expect(siteJs).toContain('Does anything leave my Mac?');
+  expect(index).toContain('Does anything leave my Mac?');
+  expect((index.match(/class="faq-item"/g) || []).length).toBe(5);
+  expect(siteJs).toContain("$('faq-list')");
+  expect(siteJs).toContain("classList.toggle('is-open'");
 });
 test('footer with product/open-source/company columns', () => {
   expect(index).toContain('Open source');
@@ -309,7 +312,8 @@ test('writing index subscribe form is wired to site.js /subscribe handler', () =
 });
 test('site.js modules guard for pages without the hero/faq DOM', () => {
   expect(siteJs).toContain("const wrap = $('hero-embed-wrap'); if (!wrap) return;");
-  expect(siteJs).toContain("if ($('faq-list')) {");
+  expect(siteJs).toContain("const faqList = $('faq-list');");
+  expect(siteJs).toContain('if (faqList) {');
 });
 test('<script> open/close tags are balanced on every writing page', () => {
   for (const p of allWritingPages) {

@@ -23,10 +23,10 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<!-- Self-hosted fonts (assets/css/fonts.css) — no third-party fonts.googleapis.com/fonts.gstatic.com connection needed. Preload only the two fonts used above the fold; over-preloading hurts more than it helps. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-sans.woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/site.css">
 <link rel="stylesheet" href="/assets/css/print.css" media="print">
 <script type="application/ld+json">
@@ -125,6 +125,7 @@
 <section id="top" class="hero">
   <div class="hero__glow"></div>
   <div class="hero__content">
+    <p class="hero__lede">Meridian is a <strong>100% local, open-source</strong> work journal for developers — it remembers your day and syncs approved worklogs to Jira, Linear, GitHub Projects, Azure DevOps, and Trello.</p>
     <h1 class="hero__title">You did more than you think.<br><span class="hero__title-accent">Don’t let your work go unnoticed.</span></h1>
     <p class="hero__subtitle">The blocker that ate an hour, the task that doubled. Meridian remembers the reasons behind your day, ready to explain.</p>
   </div>
@@ -310,7 +311,28 @@
         <p class="faq-intro__body">Anything an app that watches your screen should answer plainly.</p>
         <button id="btn-download-faq" class="btn-primary btn-primary--lg" style="margin-top:26px">Download for Mac or Windows</button>
       </div>
-      <div class="faq-list"><div id="faq-list"></div></div>
+      <div class="faq-list" id="faq-list">
+        <div class="faq-item">
+          <h3 class="faq-item__q-heading"><button type="button" class="faq-item__q" data-faq-idx="0" aria-expanded="false"><span class="faq-item__q-text">Does anything leave my Mac?</span><span class="faq-item__icon">+</span></button></h3>
+          <p class="faq-item__a">No. Capture, analysis, and the journal all run on-device. The only thing that ever leaves your Mac is a worklog you explicitly approved — sent directly to your PM tool.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-item__q-heading"><button type="button" class="faq-item__q" data-faq-idx="1" aria-expanded="false"><span class="faq-item__q-text">Is it really open source?</span><span class="faq-item__icon">+</span></button></h3>
+          <p class="faq-item__a">Yes — MIT-licensed, every line auditable. No tiers, no trial, no card. If you ever want to know how it works, read the code.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-item__q-heading"><button type="button" class="faq-item__q" data-faq-idx="2" aria-expanded="false"><span class="faq-item__q-text">What does it capture — and can I exclude apps?</span><span class="faq-item__icon">+</span></button></h3>
+          <p class="faq-item__a">The apps and windows you work in, to build your journal — nothing you can’t see for yourself. Exclude any app, pause anytime from the menu bar, delete anything.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-item__q-heading"><button type="button" class="faq-item__q" data-faq-idx="3" aria-expanded="false"><span class="faq-item__q-text">Which PM tools does it post to?</span><span class="faq-item__icon">+</span></button></h3>
+          <p class="faq-item__a">Jira, Linear, GitHub Projects, Azure DevOps, and Trello. Connections are read-only until you approve a log — Meridian never writes to your board on its own.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-item__q-heading"><button type="button" class="faq-item__q" data-faq-idx="4" aria-expanded="false"><span class="faq-item__q-text">Is it useful without a PM tool?</span><span class="faq-item__icon">+</span></button></h3>
+          <p class="faq-item__a">Completely. With nothing connected, Meridian is a private, searchable record of your work — your time, your decisions, your day. That alone is the product.</p>
+        </div>
+      </div>
     </div>
 
     <footer class="site-footer" role="contentinfo">
