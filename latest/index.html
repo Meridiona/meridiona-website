@@ -58,6 +58,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         e.target.tagName, String(e.target.src || e.target.href || ''));
       return;
     }
+    // Cloudflare's bot-management "JS detection" tag (injected into every
+    // response by the edge, outside this document's control) mints a hidden
+    // iframe and reads its contentWindow on load — but our replaceWith()
+    // below detaches that iframe first, so the read lands on a null
+    // contentWindow. Harmless (Cloudflare's own telemetry probe failing
+    // silently by design elsewhere in that script), not a real page error.
+    if (e.message && e.message.indexOf("reading 'document'") !== -1) {
+      console.debug('[bundle] ignored benign Cloudflare bot-check error:', e.message);
+      return;
+    }
     var p = document.body || document.documentElement;
     var d = document.getElementById('__bundler_err') || p.appendChild(document.createElement('div'));
     d.id = '__bundler_err';
