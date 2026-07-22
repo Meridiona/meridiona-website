@@ -6,6 +6,7 @@
 <title>Meridian — the work journal that remembers your day</title>
 <meta name="description" content="Meridian is a 100% local, open-source work journal for developers that remembers your day and syncs your worklog to Jira, Linear and more.">
 <link rel="canonical" href="https://meridiona.com/">
+<meta name="robots" content="index, follow">
 <link rel="sitemap" href="/sitemap.xml">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7c3aed">
@@ -14,11 +15,11 @@
 <meta property="og:title" content="Meridian — the work journal that remembers your day">
 <meta property="og:description" content="Meridian is a 100% local, open-source work journal for developers that remembers your day and syncs your worklog to Jira, Linear and more.">
 <meta property="og:url" content="https://meridiona.com/">
-<meta property="og:image" content="https://meridiona.com/favicon-512.png">
+<meta property="og:image" content="https://meridiona.com/assets/images/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Meridian — the work journal that remembers your day">
 <meta name="twitter:description" content="Meridian is a 100% local, open-source work journal for developers that remembers your day and syncs your worklog to Jira, Linear and more.">
-<meta name="twitter:image" content="https://meridiona.com/favicon-512.png">
+<meta name="twitter:image" content="https://meridiona.com/assets/images/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -51,6 +52,40 @@
   "url": "https://meridiona.com/"
 }
 </script>
+<!-- Mirrors the FAQ array in assets/js/site.js — keep the two in sync if the questions change. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does anything leave my Mac?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Capture, analysis, and the journal all run on-device. The only thing that ever leaves your Mac is a worklog you explicitly approved — sent directly to your PM tool." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it really open source?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — MIT-licensed, every line auditable. No tiers, no trial, no card. If you ever want to know how it works, read the code." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does it capture — and can I exclude apps?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The apps and windows you work in, to build your journal — nothing you can't see for yourself. Exclude any app, pause anytime from the menu bar, delete anything." }
+    },
+    {
+      "@type": "Question",
+      "name": "Which PM tools does it post to?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Jira, Linear, GitHub Projects, Azure DevOps, and Trello. Connections are read-only until you approve a log — Meridian never writes to your board on its own." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it useful without a PM tool?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Completely. With nothing connected, Meridian is a private, searchable record of your work — your time, your decisions, your day. That alone is the product." }
+    }
+  ]
+}
+</script>
 <!-- PostHog product analytics — same project as the root site. Gated on cookie consent (see CookieConsent in site.js); this tag just defines the client, it does not capture anything until consent is granted. -->
 <script src="/assets/js/analytics.js" async></script>
 </head>
@@ -69,7 +104,7 @@
 <nav class="nav" role="navigation" aria-label="Main">
   <div class="nav__inner">
     <a href="#top" class="nav__brand">
-      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="24" height="24">
+      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="24" height="24" loading="eager">
       <span class="nav__brand-name">Meridian</span>
     </a>
     <div class="nav__links">
@@ -101,7 +136,7 @@
 
   <div id="hero-embed-wrap" class="hero__embed-wrap">
     <div class="hero__embed-annotation" aria-hidden="true">
-      <span class="hero__embed-note">mess it up, hit reset</span>
+      <span class="hero__embed-note">reset the demo</span>
       <svg width="32" height="34" viewBox="0 0 38 40" style="overflow:visible;margin-top:10px">
         <path d="M4 4 Q26 4 30 30" fill="none" stroke="var(--acc2)" stroke-width="2" stroke-linecap="round"></path>
         <path d="M22 25 L30 30 L32 21" fill="none" stroke="var(--acc2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -115,7 +150,7 @@
   </div>
 
   <div class="trust-strip">
-    <span class="trust-strip__item"><svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L19 6 V11 C19 15.5 16 19 12 21 C8 19 5 15.5 5 11 V6 Z"></path></svg>100% local — your work never leaves your Mac</span>
+    <span class="trust-strip__item"><svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L19 6 V11 C19 15.5 16 19 12 21 C8 19 5 15.5 5 11 V6 Z"></path></svg><strong>100% local</strong> — your work never leaves your Mac</span>
     <span class="trust-strip__item"><svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7 L3 12 L8 17"></path><path d="M16 7 L21 12 L16 17"></path></svg>Open source — see exactly what it does</span>
     <span class="trust-strip__item"><svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 H11 L20 13 L13 20 L4 11 Z"></path><circle cx="8.5" cy="8.5" r="1.5"></circle></svg>Free</span>
   </div>
@@ -285,7 +320,7 @@
         </div>
         <div class="footer-col"><div class="footer-col__title">Product</div><a href="#why" class="footlink">Why Meridian</a><a href="#faq" class="footlink">FAQ</a><a href="/writing" class="footlink">Writing</a><a href="#" class="footlink">Changelog</a></div>
         <div class="footer-col"><div class="footer-col__title">Open source</div><a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="footlink">GitHub repo</a><a href="https://github.com/Meridiona/meridian#readme" target="_blank" rel="noopener" class="footlink">Docs</a><a href="https://github.com/Meridiona/meridian/issues/new" target="_blank" rel="noopener" class="footlink">Report an issue</a><a href="https://github.com/Meridiona/meridian/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener" class="footlink">Contribute</a></div>
-        <div class="footer-col"><div class="footer-col__title">Company</div><a href="mailto:company@meridiona.com" class="footlink">Contact</a><a href="/privacy" class="footlink">Privacy policy</a><a href="/terms" class="footlink">Terms of use</a><a href="/cookies" class="footlink">Cookie policy</a><a href="/accessibility" class="footlink">Accessibility</a></div>
+        <div class="footer-col"><div class="footer-col__title">Company</div><a href="#" class="footlink js-email-link" data-user="company" data-domain="meridiona.com">Contact</a><a href="/privacy" class="footlink">Privacy policy</a><a href="/terms" class="footlink">Terms of use</a><a href="/cookies" class="footlink">Cookie policy</a><a href="/accessibility" class="footlink">Accessibility</a></div>
       </div>
       <div class="footer-bottom">
         <span>© 2026 Meridian · MIT License</span>
