@@ -195,7 +195,12 @@ function withSecurityHeaders(response, url) {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
     "connect-src 'self' https://*.i.posthog.com https://*.posthog.com",
-    "frame-src 'self'",
+    // The hidden #dl-frame iframe (site.js's download modal) points at /dl,
+    // which 302s to github.com and then to GitHub's release-asset CDN —
+    // frame-src is checked against every hop of that redirect chain, not just
+    // the initial same-origin request, so both hosts must be allowed or the
+    // browser silently kills the download partway through.
+    "frame-src 'self' https://github.com https://*.githubusercontent.com",
     "frame-ancestors 'self'",
     "object-src 'none'",
     "base-uri 'self'",
