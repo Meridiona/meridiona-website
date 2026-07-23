@@ -45,6 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
       { code: '+92', name: 'Pakistan', ph: '301 2345678' }, { code: '+880', name: 'Bangladesh', ph: '1712 345678' },
     ];
     const COUNTRY_CODE_PLACEHOLDERS = COUNTRY_CODES.reduce((map, c) => { map[c.code] = c.ph; return map; }, {});
+    const phoneCodeLabel = (code) => {
+      const cc = COUNTRY_CODES.find((c) => c.code === code);
+      return cc ? cc.code + ' ' + cc.name : code;
+    };
+    // As-you-type US/Canada formatting — (201) 555-0123 — so the number reads
+    // as a real US number instead of a raw digit string; other countries are
+    // left as typed since their formats vary too much to guess.
+    const formatUSPhone = (raw) => {
+      const digits = (raw || '').replace(/\D/g, '').slice(0, 10);
+      if (!digits) return '';
+      if (digits.length < 4) return '(' + digits;
+      if (digits.length < 7) return '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
+      return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+    };
 
     // ── theme ──
     const applyTheme = (id) => {
@@ -139,28 +153,72 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── download modal ──
     // dm.os is auto-detected on open and the real build starts downloading
     // immediately (see fireDownload below) — the email/phone form beneath it
-    // is an optional "get updates" ask, not a gate. "different machine?" falls
-    // back to the manual os-picker for when detection guesses wrong.
+    // is an optional "get updates" ask, not a gate. "see other download
+    // options" falls back to the manual os-picker, both for when detection
+    // guesses wrong and for browsing what's available/coming soon.
     const dm = { os: null, showPicker: false, email: '', phoneCode: '+1', phone: '', sent: false };
     const fireDownload = (ref) => { $('dl-frame').src = '/dl?ref=' + ref + (dm.os === 'windows' ? '&os=windows' : ''); };
     const osPickerHtml = () =>
       '<h3 class="modal-title">Get Meridian</h3><p class="modal-subtitle">What are you running?</p><div class="os-picker">' +
         '<button class="os-option os-option--primary" data-os="mac"><span class="os-option__name">macOS</span><span class="os-option__meta os-option__meta--accent">Apple Silicon · ready today</span></button>' +
         '<button class="os-option" data-os="windows"><span class="os-option__name">Windows</span><span class="os-option__meta os-option__meta--accent">10/11 · ready today</span></button>' +
-        '<button class="os-option" data-os="linux"><span class="os-option__name">Linux</span><span class="os-option__meta">waitlist</span></button></div>';
+        '<button class="os-option" data-os="linux"><span class="os-option__name">Linux</span><span class="os-option__meta">coming soon · join waitlist</span></button></div>';
+    const backLinkHtml = (marginTop) => '<button id="dl-back" class="btn-text" style="margin-top:' + marginTop + 'px">← see other download options</button>';
     const emailFormHtml = (ctaLabel, required) => {
-      const countryOptions = COUNTRY_CODES.map((cc) =>
-        '<option value="' + cc.code + '"' + (cc.code === dm.phoneCode ? ' selected' : '') + '>' + cc.code + ' ' + cc.name + '</option>').join('');
       return '<form id="dl-form" class="email-form">' +
           '<input id="dl-email" class="email-input" type="email"' + (required ? ' required autofocus' : '') + ' placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
           '<p id="dl-email-error" class="form-error" style="display:none">Enter a valid email address to continue.</p>' +
           '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
           '<div class="phone-row">' +
-            '<select id="dl-phone-code" class="phone-select" aria-label="Country code">' + countryOptions + '</select>' +
-            '<input id="dl-phone" class="phone-input" type="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[dm.phoneCode] || '') + '" value="' + dm.phone + '" aria-label="Phone number (optional)">' +
+            '<div class="phone-code" id="dl-phone-code-wrap">' +
+              '<input id="dl-phone-code-input" class="phone-select" type="text" autocomplete="off" spellcheck="false" placeholder="Search" ' +
+                'value="' + phoneCodeLabel(dm.phoneCode) + '" aria-label="Country code" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dl-phone-code-list">' +
+              '<div id="dl-phone-code-list" class="phone-code-list" role="listbox" hidden></div>' +
+            '</div>' +
+            '<input id="dl-phone" class="phone-input" type="tel" inputmode="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[dm.phoneCode] || '') + '" value="' + dm.phone + '" aria-label="Phone number (optional)">' +
           '</div>' +
           '<button type="submit" class="btn-primary btn-primary--block">' + ctaLabel + '</button>' +
         '</form>';
+    };
+    const renderPhoneCodeList = (query) => {
+      const list = $('dl-phone-code-list');
+      if (!list) return;
+      const q = (query || '').trim().toLowerCase();
+      const matches = q
+        ? COUNTRY_CODES.filter((cc) => cc.name.toLowerCase().includes(q) || cc.code.includes(q))
+        : COUNTRY_CODES;
+      list.innerHTML = matches.length
+        ? matches.map((cc) =>
+            '<button type="button" class="phone-code-option' + (cc.code === dm.phoneCode ? ' is-active' : '') + '" data-code="' + cc.code + '" role="option">' +
+              '<span class="phone-code-option__code">' + cc.code + '</span><span class="phone-code-option__name">' + cc.name + '</span>' +
+            '</button>').join('')
+        : '<div class="phone-code-empty">No matches</div>';
+    };
+    const openPhoneCodeList = () => {
+      const list = $('dl-phone-code-list'); const input = $('dl-phone-code-input');
+      if (!list || !input) return;
+      renderPhoneCodeList('');
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+    };
+    const closePhoneCodeList = () => {
+      const list = $('dl-phone-code-list'); const input = $('dl-phone-code-input');
+      if (!list || !input) return;
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+    };
+    const selectPhoneCode = (code) => {
+      dm.phoneCode = code;
+      const codeInput = $('dl-phone-code-input');
+      if (codeInput) codeInput.value = phoneCodeLabel(code);
+      const phoneInput = $('dl-phone');
+      if (phoneInput) {
+        phoneInput.placeholder = COUNTRY_CODE_PLACEHOLDERS[code] || '';
+        phoneInput.value = code === '+1'
+          ? formatUSPhone(phoneInput.value)
+          : phoneInput.value.replace(/[()]/g, '').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+      closePhoneCodeList();
     };
     const renderDl = () => {
       const body = $('modal-download-body');
@@ -170,22 +228,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const againLink = '<div class="success-link"><a href="/dl?ref=landing-modal-again' + (dm.os === 'windows' ? '&os=windows' : '') + '">didn’t start? download again</a></div>';
         if (dm.sent) {
           body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' +
-            '<div class="form-note">You’re on the list for updates too.</div>' + againLink;
+            '<div class="form-note">You’re on the list for updates too.</div>' + againLink + backLinkHtml(16);
           return;
         }
         body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' + againLink +
           '<div class="form-note" style="margin-top:20px">Want a ping for updates/fixes? (optional)</div>' +
           emailFormHtml('Join →', false) +
-          '<button id="dl-back" class="btn-text" style="margin-top:4px">← different machine</button>';
+          backLinkHtml(4);
         return;
       }
       if (!dm.sent) {
         body.innerHTML = '<h3 class="modal-title">' + c.emailTitle + '</h3><p class="modal-subtitle">' + c.emailPrompt + '</p>' +
           emailFormHtml(c.ctaLabel, true) +
-          '<div class="form-note">' + c.emailNote + '</div><button id="dl-back" class="btn-text" style="margin-top:12px">← different machine</button>';
+          '<div class="form-note">' + c.emailNote + '</div>' + backLinkHtml(12);
         return;
       }
-      body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>';
+      body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' + backLinkHtml(16);
     };
     const openDl = () => {
       dm.os = detectOS() || 'other'; dm.showPicker = false; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false;
@@ -208,18 +266,53 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (e.target.id === 'dl-back') { dm.showPicker = true; renderDl(); }
     });
-    $('modal-download-body').addEventListener('change', (e) => {
-      if (e.target.id !== 'dl-phone-code') return;
-      // Direct DOM update (not a full render()) so the number the user already typed isn't wiped.
-      dm.phoneCode = e.target.value;
-      const input = $('dl-phone');
-      if (input) input.placeholder = COUNTRY_CODE_PLACEHOLDERS[e.target.value] || '';
+    // focusin/focusout (not focus/blur, which don't bubble) so the email
+    // placeholder disappears the instant the field is clicked into, not just
+    // once the user starts typing, and the country combobox opens on focus.
+    $('modal-download-body').addEventListener('focusin', (e) => {
+      if (e.target.id === 'dl-email' && !e.target.value) {
+        e.target.dataset.ph = e.target.placeholder;
+        e.target.placeholder = '';
+      }
+      if (e.target.id === 'dl-phone-code-input') { e.target.value = ''; openPhoneCodeList(); }
+    });
+    $('modal-download-body').addEventListener('focusout', (e) => {
+      if (e.target.id === 'dl-email' && !e.target.value && e.target.dataset.ph) {
+        e.target.placeholder = e.target.dataset.ph;
+      }
+      if (e.target.id === 'dl-phone-code-input') {
+        e.target.value = phoneCodeLabel(dm.phoneCode);
+        closePhoneCodeList();
+      }
+    });
+    // mousedown (fires before blur) + preventDefault so clicking an option
+    // selects it instead of the input just losing focus first.
+    $('modal-download-body').addEventListener('mousedown', (e) => {
+      const opt = e.target.closest('.phone-code-option');
+      if (opt) { e.preventDefault(); selectPhoneCode(opt.dataset.code); }
+    });
+    $('modal-download-body').addEventListener('keydown', (e) => {
+      if (e.target.id !== 'dl-phone-code-input') return;
+      if (e.key === 'Escape') { e.target.blur(); return; }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = $('dl-phone-code-list') && $('dl-phone-code-list').querySelector('.phone-code-option');
+        if (first) selectPhoneCode(first.dataset.code);
+      }
     });
     $('modal-download-body').addEventListener('input', (e) => {
-      if (e.target.id !== 'dl-email') return;
-      e.target.classList.remove('email-input--error');
-      const err = $('dl-email-error');
-      if (err) err.style.display = 'none';
+      if (e.target.id === 'dl-email') {
+        e.target.classList.remove('email-input--error');
+        const err = $('dl-email-error');
+        if (err) err.style.display = 'none';
+        return;
+      }
+      if (e.target.id === 'dl-phone-code-input') { renderPhoneCodeList(e.target.value); return; }
+      if (e.target.id === 'dl-phone' && dm.phoneCode === '+1') {
+        const formatted = formatUSPhone(e.target.value);
+        e.target.value = formatted;
+        e.target.setSelectionRange(formatted.length, formatted.length);
+      }
     });
     $('modal-download-body').addEventListener('submit', (e) => {
       if (e.target.id !== 'dl-form') return; e.preventDefault();
@@ -234,10 +327,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const phoneDigits = ($('dl-phone').value || '').trim();
-      const phoneCode = $('dl-phone-code').value;
+      const phoneCode = dm.phoneCode;
       const phone = phoneDigits ? (phoneCode + ' ' + phoneDigits) : '';
 
-      dm.email = v; dm.phoneCode = phoneCode; dm.phone = phoneDigits; dm.sent = true;
+      dm.email = v; dm.phone = phoneDigits; dm.sent = true;
 
       fetch('/subscribe', {
         method: 'POST',
