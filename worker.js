@@ -47,6 +47,9 @@ function downloadTarget(os) {
     : { url: DOWNLOAD_URL, asset: 'Meridian-aarch64.dmg', platform: 'macos' };
 }
 
+// How long the edge caches /api/downloads-count before re-querying Resend.
+const DOWNLOADS_COUNT_CACHE_SECONDS = 300;
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -54,6 +57,47 @@ export default {
     return withSecurityHeaders(response, url);
   },
 };
+
+// Total contacts in the "download" Resend audience. Resend's list-contacts
+// endpoint has no total-count field, only cursor pagination (`has_more` +
+// `after`), so this pages through at 100/request. Capped at 50 pages
+// (5,000 contacts) — a sane ceiling so a runaway audience can't turn one
+// request into an unbounded fan-out; the count would just under-report
+// past that size. Returns null on any failure (missing config, Resend
+// error) so the caller can degrade instead of surfacing a raw exception.
+async function countDownloadContacts(env) {
+  const audienceId = env.RESEND_AUDIENCE_ID_DOWNLOAD;
+  if (!audienceId || !env.RESEND_API_KEY) return null;
+
+  let count = 0;
+  let after = null;
+  for (let page = 0; page < 50; page++) {
+    const contactsUrl = new URL(`https://api.resend.com/audiences/${audienceId}/contacts`);
+    contactsUrl.searchParams.set('limit', '100');
+    if (after) contactsUrl.searchParams.set('after', after);
+
+    let res;
+    try {
+      res = await fetch(contactsUrl, {
+        headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}` },
+      });
+    } catch (err) {
+      console.error('Resend fetch error (downloads-count):', err);
+      return null;
+    }
+    if (!res.ok) {
+      console.error('Resend error (downloads-count):', res.status);
+      return null;
+    }
+
+    const body = await res.json();
+    const data = body.data || [];
+    count += data.length;
+    if (!body.has_more || data.length === 0) break;
+    after = data[data.length - 1].id;
+  }
+  return count;
+}
 
 async function handle(request, url, env, ctx) {
     // www → apex, 301, preserving path + query — one canonical host.
@@ -113,6 +157,27 @@ async function handle(request, url, env, ctx) {
       } catch {
         // fall through to default asset serving
       }
+    }
+
+    // Live count of the "download" Resend audience — powers the Meridian tray's
+    // setup-wizard Welcome screen ("you're the Nth person to give Meridian a
+    // shot"). Server-to-server only (the Rust tray calls this, not a browser),
+    // so no CORS handling needed. Edge-cached for DOWNLOADS_COUNT_CACHE_SECONDS
+    // so a burst of setup-wizard opens doesn't turn into a burst of paginated
+    // Resend calls.
+    if (url.pathname === '/api/downloads-count' && request.method === 'GET') {
+      const cache = caches.default;
+      const cacheKey = new Request(url.toString(), request);
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+
+      const count = await countDownloadContacts(env);
+      if (count === null) return json({ error: 'Unavailable' }, 503);
+
+      const response = json({ count });
+      response.headers.set('Cache-Control', `public, max-age=${DOWNLOADS_COUNT_CACHE_SECONDS}`);
+      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+      return response;
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
