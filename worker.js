@@ -380,7 +380,7 @@ function downloadPage(env, url) {
     Meridian for ${isWindows ? 'Windows' : 'Mac'}
   </span>
   <h1>Your download is starting…</h1>
-  <p class="sub">${isWindows ? 'Windows 10/11' : 'macOS · Apple silicon'} · free</p>
+  <p class="sub">${isWindows ? 'Windows 10/11 · 64-bit' : 'macOS · Apple silicon'} · free</p>
 
   <p class="label">Want to hear about updates?</p>
   <form id="sub-form">
