@@ -170,4 +170,4 @@ There's no hamburger menu; the nav is deliberately minimal (4 items) so it stays
 - Cloudflare observability is enabled (`observability.enabled: true` in `wrangler.jsonc`)
 - Metrics are sent to Cloudflare's analytics dashboard
 - PostHog captures `app_download` server-side (via `/dl`) and `download_page_viewed`/`waitlist_signup` client-side (via `/download`)
-- Resend stores waitlist/download-modal emails via `/subscribe`
+- Resend stores waitlist/download-modal emails via `/subscribe`; a `source: 'download'` signup also gets a short, personal welcome email (`sendDownloadWelcomeEmail` in `worker.js`), sent via `ctx.waitUntil` so it never blocks the signup response

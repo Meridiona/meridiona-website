@@ -47,6 +47,110 @@ function downloadTarget(os) {
     : { url: DOWNLOAD_URL, asset: 'Meridian-aarch64.dmg', platform: 'macos' };
 }
 
+// Sender for the post-download welcome email — override via `wrangler secret
+// put RESEND_FROM_EMAIL` if meridiona.com's Resend domain isn't verified yet
+// under this address.
+const DEFAULT_WELCOME_FROM = 'Meridian <hello@meridiona.com>';
+
+// Turns "sathvik.k99@gmail.com" into "Sathvik" — a light, best-effort personal
+// touch since /subscribe never collects a real name. Falls back to "there"
+// for anything that doesn't look like a name (role inboxes, all-digits, etc).
+export function displayNameFromEmail(email) {
+  const local = email.split('@')[0] || '';
+  const word = local.split(/[.+_-]/).find((part) => /^[a-z]{2,}$/i.test(part));
+  if (!word) return 'there';
+  const name = word.charAt(0).toUpperCase() + word.slice(1);
+  const ROLE_INBOXES = ['admin', 'info', 'contact', 'support', 'hello', 'team', 'sales', 'noreply'];
+  return ROLE_INBOXES.includes(word.toLowerCase()) ? 'there' : name;
+}
+
+// The one-time "you're in" email sent after a real download signup (source
+// 'download' only — waitlist signups haven't actually used the product yet).
+// Kept short on purpose: this lands the moment someone's excited to try
+// Meridian, not a place for a feature tour.
+export function welcomeEmailContent(name) {
+  const subject = 'Welcome. We remember now.';
+  const text = `Hey ${name},
+
+Thanks for grabbing Meridian.
+
+From today, the small stuff, the blocker you fought, the task that quietly doubled, gets remembered for you. No more staring at a calendar wondering where the day went.
+
+We built this because we needed it ourselves. Really glad you're here.
+
+Reply anytime, a real person reads this.
+
+— The Meridiona team`;
+
+  const html = `<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f7f5fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f5fc;padding:40px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background:#ffffff;border-radius:16px;padding:36px 32px;">
+            <tr>
+              <td style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7c3aed;font-weight:600;padding-bottom:18px;">Meridian</td>
+            </tr>
+            <tr>
+              <td style="font-size:22px;line-height:1.35;color:#18142a;font-weight:600;padding-bottom:16px;">
+                Hey ${name}, thanks for downloading Meridian.
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:14px;">
+                From today, the small stuff, the blocker you fought, the task that quietly doubled, gets remembered for you.
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:22px;">
+                We built this because we needed it ourselves. Really glad you're here.
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:13px;line-height:1.6;color:#6b6584;border-top:1px solid rgba(24,20,42,.09);padding-top:18px;">
+                Reply anytime, a real person reads this.<br>— The Meridiona team
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  return { subject, html, text };
+}
+
+// Fire-and-forget: called via ctx.waitUntil so a slow/failed send never
+// delays or fails the /subscribe response the browser is waiting on.
+async function sendDownloadWelcomeEmail(env, email) {
+  if (!env.RESEND_API_KEY) return;
+  const { subject, html, text } = welcomeEmailContent(displayNameFromEmail(email));
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: env.RESEND_FROM_EMAIL || DEFAULT_WELCOME_FROM,
+        to: email,
+        subject,
+        html,
+        text,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error('Resend welcome-email error:', res.status, JSON.stringify(err));
+    }
+  } catch (err) {
+    console.error('Resend welcome-email fetch error:', err);
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -158,7 +262,8 @@ async function handle(request, url, env, ctx) {
 
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          // Already subscribed — treat as success
+          // Already subscribed — treat as success. No welcome email here: they
+          // already got one the first time around.
           if (res.status === 409 || err.name === 'already_exists') {
             return json({ success: true });
           }
@@ -168,6 +273,13 @@ async function handle(request, url, env, ctx) {
       } catch (err) {
         console.error('Resend fetch error:', err);
         return json({ error: 'Something went wrong. Please try again.' }, 500);
+      }
+
+      // Only real downloads get the personal welcome email — waitlist signups
+      // haven't touched the product yet. Sent after the response so a slow
+      // Resend call never holds up the signup UI.
+      if (source === 'download') {
+        ctx.waitUntil(sendDownloadWelcomeEmail(env, email));
       }
 
       return json({ success: true });
