@@ -59,5 +59,28 @@
       "binding": "AUTH_TOKENS",
       "id": "05edf1c41eb842fa8caf7de0536495d9"
     }
+  ],
+  // Single global Durable Object backing the public live worklog/task-update
+  // counter (GET/POST /api/counter*, see worker.js + counter.js). The POST
+  // increment route needs its own bearer-token secret — NOT committed here.
+  // Set it once post-merge with:
+  //   wrangler secret put COUNTER_INCREMENT_SECRET
+  // (mirrors how CLERK_SECRET_KEY / the Resend/PostHog keys are provisioned —
+  // only CLERK_PUBLISHABLE_KEY above is a public, committable value.)
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "COUNTER",
+        "class_name": "Counter"
+      }
+    ]
+  },
+  // Required whenever a new Durable Object class is introduced — tells
+  // Cloudflare this is the first deploy that defines the `Counter` class.
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["Counter"]
+    }
   ]
 }

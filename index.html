@@ -162,6 +162,15 @@
     <span class="trust-strip__item"><svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7 L3 12 L8 17"></path><path d="M16 7 L21 12 L16 17"></path></svg>Open source — see exactly what it does</span>
     <span class="trust-strip__item"><svg class="trust-strip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 H11 L20 13 L13 20 L4 11 Z"></path><circle cx="8.5" cy="8.5" r="1.5"></circle></svg>Free</span>
   </div>
+
+  <!-- Public live counter (worker.js's /api/counter → counter.js's Durable Object). Hidden by
+       default; assets/js/site.js's LiveCounter module reveals it once the first fetch succeeds,
+       and hides it again on any failure — never a broken/static badge. -->
+  <div id="live-counter" class="live-counter" role="status" aria-label="Total worklog updates logged through Meridian">
+    <span class="live-counter__pulse" aria-hidden="true"><span class="live-counter__pulse-core"></span></span>
+    <span class="live-counter__value" id="live-counter-value">0</span>
+    <span class="live-counter__label">updates logged and counting</span>
+  </div>
 </section>
 
 <section id="why" class="section why">

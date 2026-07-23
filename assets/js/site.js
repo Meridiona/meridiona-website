@@ -103,6 +103,52 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 40);
     }
 
+    // ── live worklog/task-update counter ── (worker.js's /api/counter, backed
+    // by counter.js's Durable Object). Fetches on load, smoothly tweens to
+    // the value with requestAnimationFrame, and re-polls periodically so the
+    // badge feels live. Hidden until the first successful fetch, and hidden
+    // again on any failure (unreachable Worker, network blip, blocker) —
+    // this must never surface a JS error or a stuck/broken number.
+    const liveCounter = $('live-counter');
+    const liveCounterValue = $('live-counter-value');
+    if (liveCounter && liveCounterValue) {
+      const POLL_MS = 25000;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let shown = 0;
+      let raf = null;
+      const fmt = (n) => Math.round(n).toLocaleString('en-US');
+      const tweenTo = (target) => {
+        if (raf) cancelAnimationFrame(raf);
+        if (reduceMotion) { shown = target; liveCounterValue.textContent = fmt(shown); return; }
+        const start = shown, delta = target - start;
+        if (!delta) { liveCounterValue.textContent = fmt(target); return; }
+        const duration = Math.min(1600, Math.max(500, Math.abs(delta) * 14));
+        const t0 = performance.now();
+        const step = (now) => {
+          const p = Math.min(1, (now - t0) / duration);
+          const eased = 1 - Math.pow(1 - p, 3);
+          shown = start + delta * eased;
+          liveCounterValue.textContent = fmt(shown);
+          if (p < 1) { raf = requestAnimationFrame(step); }
+          else { shown = target; liveCounterValue.textContent = fmt(target); raf = null; }
+        };
+        raf = requestAnimationFrame(step);
+      };
+      const pollCounter = () => {
+        fetch('/api/counter', { cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : Promise.reject(new Error('bad status'))))
+          .then((data) => {
+            const n = Number(data && data.count);
+            if (!Number.isFinite(n)) throw new Error('bad payload');
+            liveCounter.classList.add('is-visible');
+            tweenTo(n);
+          })
+          .catch(() => { liveCounter.classList.remove('is-visible'); });
+      };
+      pollCounter();
+      this._liveCounterT = setInterval(pollCounter, POLL_MS);
+    }
+
     // ── hero embed sizing ──
     const sizeEmbed = () => {
       const wrap = $('hero-embed-wrap'); if (!wrap) return;

@@ -1,4 +1,7 @@
 import { createClerkClient } from '@clerk/backend';
+// Durable Object class must be exported from the `main` script (this file)
+// for wrangler.jsonc's durable_objects binding to resolve it — see counter.js.
+export { Counter } from './counter.js';
 
 // Google-SSO relay for the Meridian desktop app (tray/src-tauri/src/commands/clerk_signin.rs).
 // Routed by hostname so none of the rest of this file's logic is touched.
@@ -88,6 +91,17 @@ async function handle(request, url, env, ctx) {
     // waitlist signup. Works even when opened cold from a shared link elsewhere.
     if (url.pathname === '/download') {
       return downloadPage(env, url);
+    }
+
+    // Public live counter of worklog/task updates posted through Meridian,
+    // backing the landing page's "N updates logged and counting" badge (see
+    // counter.js). GET is read-only and public; POST increments and is
+    // gated inside the Durable Object by a bearer-token shared secret. Both
+    // are forwarded verbatim to a single global DO instance.
+    if (url.pathname === '/api/counter' || url.pathname === '/api/counter/increment') {
+      const id = env.COUNTER.idFromName('global');
+      const stub = env.COUNTER.get(id);
+      return stub.fetch(request);
     }
 
     const meta = WRITING_META[url.pathname] || WRITING_META[url.pathname.replace(/\/$/, '')];
