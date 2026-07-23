@@ -153,15 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── download modal ──
     // dm.os is auto-detected on open and the real build starts downloading
     // immediately (see fireDownload below) — the email/phone form beneath it
-    // is an optional "get updates" ask, not a gate. "different machine?" falls
-    // back to the manual os-picker for when detection guesses wrong.
+    // is an optional "get updates" ask, not a gate. "see other download
+    // options" falls back to the manual os-picker, both for when detection
+    // guesses wrong and for browsing what's available/coming soon.
     const dm = { os: null, showPicker: false, email: '', phoneCode: '+1', phone: '', sent: false };
     const fireDownload = (ref) => { $('dl-frame').src = '/dl?ref=' + ref + (dm.os === 'windows' ? '&os=windows' : ''); };
     const osPickerHtml = () =>
       '<h3 class="modal-title">Get Meridian</h3><p class="modal-subtitle">What are you running?</p><div class="os-picker">' +
         '<button class="os-option os-option--primary" data-os="mac"><span class="os-option__name">macOS</span><span class="os-option__meta os-option__meta--accent">Apple Silicon · ready today</span></button>' +
         '<button class="os-option" data-os="windows"><span class="os-option__name">Windows</span><span class="os-option__meta os-option__meta--accent">10/11 · ready today</span></button>' +
-        '<button class="os-option" data-os="linux"><span class="os-option__name">Linux</span><span class="os-option__meta">waitlist</span></button></div>';
+        '<button class="os-option" data-os="linux"><span class="os-option__name">Linux</span><span class="os-option__meta">coming soon · join waitlist</span></button></div>';
+    const backLinkHtml = (marginTop) => '<button id="dl-back" class="btn-text" style="margin-top:' + marginTop + 'px">← see other download options</button>';
     const emailFormHtml = (ctaLabel, required) => {
       return '<form id="dl-form" class="email-form">' +
           '<input id="dl-email" class="email-input" type="email"' + (required ? ' required autofocus' : '') + ' placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
@@ -226,22 +228,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const againLink = '<div class="success-link"><a href="/dl?ref=landing-modal-again' + (dm.os === 'windows' ? '&os=windows' : '') + '">didn’t start? download again</a></div>';
         if (dm.sent) {
           body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' +
-            '<div class="form-note">You’re on the list for updates too.</div>' + againLink;
+            '<div class="form-note">You’re on the list for updates too.</div>' + againLink + backLinkHtml(16);
           return;
         }
         body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' + againLink +
           '<div class="form-note" style="margin-top:20px">Want a ping for updates/fixes? (optional)</div>' +
           emailFormHtml('Join →', false) +
-          '<button id="dl-back" class="btn-text" style="margin-top:4px">← different machine</button>';
+          backLinkHtml(4);
         return;
       }
       if (!dm.sent) {
         body.innerHTML = '<h3 class="modal-title">' + c.emailTitle + '</h3><p class="modal-subtitle">' + c.emailPrompt + '</p>' +
           emailFormHtml(c.ctaLabel, true) +
-          '<div class="form-note">' + c.emailNote + '</div><button id="dl-back" class="btn-text" style="margin-top:12px">← different machine</button>';
+          '<div class="form-note">' + c.emailNote + '</div>' + backLinkHtml(12);
         return;
       }
-      body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>';
+      body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' + backLinkHtml(16);
     };
     const openDl = () => {
       dm.os = detectOS() || 'other'; dm.showPicker = false; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false;
