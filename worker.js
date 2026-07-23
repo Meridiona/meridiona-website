@@ -69,7 +69,7 @@ export function displayNameFromEmail(email) {
 // Deliberately a thank-you, not a pitch: they already have the product, so
 // this isn't the place to re-explain what it does.
 export function welcomeEmailContent(name) {
-  const subject = 'Thank you for giving Meridian a shot';
+  const subject = "We won't let your work go unnoticed - Meridian";
   const text = `Hey ${name},
 
 Thank you, genuinely, for taking the time to download Meridian and try it out.
