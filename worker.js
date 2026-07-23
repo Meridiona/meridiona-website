@@ -66,17 +66,17 @@ export function displayNameFromEmail(email) {
 
 // The one-time "you're in" email sent after a real download signup (source
 // 'download' only — waitlist signups haven't actually used the product yet).
-// Kept short on purpose: this lands the moment someone's excited to try
-// Meridian, not a place for a feature tour.
+// Deliberately a thank-you, not a pitch: they already have the product, so
+// this isn't the place to re-explain what it does.
 export function welcomeEmailContent(name) {
-  const subject = "We won't let your work go unnoticed.";
+  const subject = 'Thank you for giving Meridian a shot';
   const text = `Hey ${name},
 
-Today already had more in it than you'll remember by Friday.
+Thank you, genuinely, for taking the time to download Meridian and try it out.
 
-That's the gap Meridian sits in, the quiet blocker, the task that crept from thirty minutes to three, the context you'd otherwise lose. It stays, so you don't have to hold it all yourself.
+Out of everything competing for your attention today, you gave us a shot. That's not lost on us.
 
-Really glad you're trying this with us.
+We hope it ends up making a real difference in your day, and in your life.
 
 Reply anytime, a real person reads this.
 
@@ -94,17 +94,17 @@ Reply anytime, a real person reads this.
             </tr>
             <tr>
               <td style="font-size:22px;line-height:1.35;color:#18142a;font-weight:600;padding-bottom:16px;">
-                Hey ${name}, today already had more in it than you'll remember by Friday.
+                Hey ${name}, thank you for giving Meridian a shot.
               </td>
             </tr>
             <tr>
               <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:14px;">
-                That's the gap Meridian sits in, the quiet blocker, the task that crept from thirty minutes to three. It stays, so you don't have to hold it all yourself.
+                Out of everything competing for your attention today, you took the time to try something we built. That's not lost on us.
               </td>
             </tr>
             <tr>
               <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:22px;">
-                Really glad you're trying this with us.
+                We hope it ends up making a real difference in your day, and in your life.
               </td>
             </tr>
             <tr>
