@@ -72,15 +72,15 @@ export function welcomeEmailContent(name) {
   const subject = "We won't let your work go unnoticed.";
   const text = `Hey ${name},
 
-You did more than you think today. Most of it never got written down.
+Today already had more in it than you'll remember by Friday.
 
-That's what Meridian's for. From now on, we won't let your work go unnoticed, not the blocker you fought, not the task that quietly doubled. All of it, remembered for you.
+That's the gap Meridian sits in, the quiet blocker, the task that crept from thirty minutes to three, the context you'd otherwise lose. It stays, so you don't have to hold it all yourself.
 
-Glad you're here.
+Really glad you're trying this with us.
 
 Reply anytime, a real person reads this.
 
-— The Meridiona team`;
+— The Meridian team`;
 
   const html = `<!doctype html>
 <html>
@@ -94,22 +94,22 @@ Reply anytime, a real person reads this.
             </tr>
             <tr>
               <td style="font-size:22px;line-height:1.35;color:#18142a;font-weight:600;padding-bottom:16px;">
-                Hey ${name}, you did more than you think today.
+                Hey ${name}, today already had more in it than you'll remember by Friday.
               </td>
             </tr>
             <tr>
               <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:14px;">
-                Most of it never got written down. That's what Meridian's for: from now on, we won't let your work go unnoticed.
+                That's the gap Meridian sits in, the quiet blocker, the task that crept from thirty minutes to three. It stays, so you don't have to hold it all yourself.
               </td>
             </tr>
             <tr>
               <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:22px;">
-                Glad you're here.
+                Really glad you're trying this with us.
               </td>
             </tr>
             <tr>
               <td style="font-size:13px;line-height:1.6;color:#6b6584;border-top:1px solid rgba(24,20,42,.09);padding-top:18px;">
-                Reply anytime, a real person reads this.<br>— The Meridiona team
+                Reply anytime, a real person reads this.<br>— The Meridian team
               </td>
             </tr>
           </table>
