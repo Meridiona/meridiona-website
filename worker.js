@@ -50,7 +50,7 @@ function downloadTarget(os) {
 // Sender for the post-download welcome email — override via `wrangler secret
 // put RESEND_FROM_EMAIL` if meridiona.com's Resend domain isn't verified yet
 // under this address.
-const DEFAULT_WELCOME_FROM = 'Meridian <hello@meridiona.com>';
+const DEFAULT_WELCOME_FROM = 'Meridian <company@meridiona.com>';
 
 // Turns "sathvik.k99@gmail.com" into "Sathvik" — a light, best-effort personal
 // touch since /subscribe never collects a real name. Falls back to "there"
@@ -69,14 +69,14 @@ export function displayNameFromEmail(email) {
 // Kept short on purpose: this lands the moment someone's excited to try
 // Meridian, not a place for a feature tour.
 export function welcomeEmailContent(name) {
-  const subject = 'Welcome. We remember now.';
+  const subject = "We won't let your work go unnoticed.";
   const text = `Hey ${name},
 
-Thanks for grabbing Meridian.
+You did more than you think today. Most of it never got written down.
 
-From today, the small stuff, the blocker you fought, the task that quietly doubled, gets remembered for you. No more staring at a calendar wondering where the day went.
+That's what Meridian's for. From now on, we won't let your work go unnoticed, not the blocker you fought, not the task that quietly doubled. All of it, remembered for you.
 
-We built this because we needed it ourselves. Really glad you're here.
+Glad you're here.
 
 Reply anytime, a real person reads this.
 
@@ -94,17 +94,17 @@ Reply anytime, a real person reads this.
             </tr>
             <tr>
               <td style="font-size:22px;line-height:1.35;color:#18142a;font-weight:600;padding-bottom:16px;">
-                Hey ${name}, thanks for downloading Meridian.
+                Hey ${name}, you did more than you think today.
               </td>
             </tr>
             <tr>
               <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:14px;">
-                From today, the small stuff, the blocker you fought, the task that quietly doubled, gets remembered for you.
+                Most of it never got written down. That's what Meridian's for: from now on, we won't let your work go unnoticed.
               </td>
             </tr>
             <tr>
               <td style="font-size:15px;line-height:1.6;color:#403a54;padding-bottom:22px;">
-                We built this because we needed it ourselves. Really glad you're here.
+                Glad you're here.
               </td>
             </tr>
             <tr>
