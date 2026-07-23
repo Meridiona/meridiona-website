@@ -9,12 +9,26 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'paper', label: 'Paper — warm ink', sw: 'linear-gradient(135deg,#faf8f3 50%,#4f46e5 50%)' },
     ];
     const DL = {
-      mac: { emailTitle: 'Almost there', emailPrompt: 'Drop your email and the download starts right away.', ctaLabel: 'Continue → download', emailNote: 'macOS 14+ · Apple Silicon (M1 or later)', successTitle: 'Download started', successBody: 'Meridian.dmg is on its way. Drag it to Applications and look for the diamond in your menu bar.' },
-      windows: { emailTitle: 'Almost there', emailPrompt: 'Drop your email and the download starts right away.', ctaLabel: 'Continue → download', emailNote: 'Windows 10/11 · 64-bit', successTitle: 'Download started', successBody: 'Meridian-setup.exe is on its way. Run it, and look for the diamond in your system tray.' },
+      mac: { emailNote: 'macOS 14+ · Apple Silicon (M1 or later)', successTitle: 'Download started', successBody: 'Meridian.dmg is on its way. Drag it to Applications and look for the diamond in your menu bar.' },
+      windows: { emailNote: 'Windows 10/11 · 64-bit', successTitle: 'Download started', successBody: 'Meridian-setup.exe is on its way. Run it, and look for the diamond in your system tray.' },
       linux: { emailTitle: 'Get in line', emailPrompt: 'Meridian doesn’t speak penguin yet. Leave your email — you’ll be the first ping when it does.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'Linux is coming. You’re at the front of the queue — we’ll ping you the day it lands.' },
+      other: { emailTitle: 'Get in line', emailPrompt: 'We don’t have a build for your device yet. Leave your email — you’ll be the first to know when we do.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'We’ll ping you the day Meridian lands on your platform.' },
     };
     const EMAIL_RE = /\S+@\S+\.\S+/;
     const isDownloadOS = (os) => os === 'mac' || os === 'windows';
+    // Best-effort client detection so the right build starts downloading without
+    // asking — mobile checked first since Android UAs also match /Linux/ and
+    // iPadOS reports platform "MacIntel" like a real Mac.
+    const detectOS = () => {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      if (/Android/i.test(ua)) return null;
+      if (/iPhone|iPad|iPod/i.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return null;
+      if (/Mac/i.test(platform)) return 'mac';
+      if (/Win/i.test(platform)) return 'windows';
+      if (/Linux/i.test(platform)) return 'linux';
+      return null;
+    };
     const THEME_STORAGE_KEY = 'meridian-theme';
     const COUNTRY_CODES = [
       { code: '+1', name: 'US/Canada', ph: '201 555 0123' }, { code: '+44', name: 'UK', ph: '7911 123456' },
@@ -123,47 +137,76 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', this._resize);
 
     // ── download modal ──
-    const dm = { os: null, email: '', phoneCode: '+1', phone: '', sent: false };
+    // dm.os is auto-detected on open and the real build starts downloading
+    // immediately (see fireDownload below) — the email/phone form beneath it
+    // is an optional "get updates" ask, not a gate. "different machine?" falls
+    // back to the manual os-picker for when detection guesses wrong.
+    const dm = { os: null, showPicker: false, email: '', phoneCode: '+1', phone: '', sent: false };
+    const fireDownload = (ref) => { $('dl-frame').src = '/dl?ref=' + ref + (dm.os === 'windows' ? '&os=windows' : ''); };
+    const osPickerHtml = () =>
+      '<h3 class="modal-title">Get Meridian</h3><p class="modal-subtitle">What are you running?</p><div class="os-picker">' +
+        '<button class="os-option os-option--primary" data-os="mac"><span class="os-option__name">macOS</span><span class="os-option__meta os-option__meta--accent">Apple Silicon · ready today</span></button>' +
+        '<button class="os-option" data-os="windows"><span class="os-option__name">Windows</span><span class="os-option__meta os-option__meta--accent">10/11 · ready today</span></button>' +
+        '<button class="os-option" data-os="linux"><span class="os-option__name">Linux</span><span class="os-option__meta">waitlist</span></button></div>';
+    const emailFormHtml = (ctaLabel, required) => {
+      const countryOptions = COUNTRY_CODES.map((cc) =>
+        '<option value="' + cc.code + '"' + (cc.code === dm.phoneCode ? ' selected' : '') + '>' + cc.code + ' ' + cc.name + '</option>').join('');
+      return '<form id="dl-form" class="email-form">' +
+          '<input id="dl-email" class="email-input" type="email"' + (required ? ' required autofocus' : '') + ' placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
+          '<p id="dl-email-error" class="form-error" style="display:none">Enter a valid email address to continue.</p>' +
+          '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
+          '<div class="phone-row">' +
+            '<select id="dl-phone-code" class="phone-select" aria-label="Country code">' + countryOptions + '</select>' +
+            '<input id="dl-phone" class="phone-input" type="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[dm.phoneCode] || '') + '" value="' + dm.phone + '" aria-label="Phone number (optional)">' +
+          '</div>' +
+          '<button type="submit" class="btn-primary btn-primary--block">' + ctaLabel + '</button>' +
+        '</form>';
+    };
     const renderDl = () => {
       const body = $('modal-download-body');
-      if (!dm.os) {
-        body.innerHTML = '<h3 class="modal-title">Get Meridian</h3><p class="modal-subtitle">First — what are you running?</p><div class="os-picker">' +
-          '<button class="os-option os-option--primary" data-os="mac"><span class="os-option__name">macOS</span><span class="os-option__meta os-option__meta--accent">Apple Silicon · ready today</span></button>' +
-          '<button class="os-option" data-os="windows"><span class="os-option__name">Windows</span><span class="os-option__meta os-option__meta--accent">10/11 · ready today</span></button>' +
-          '<button class="os-option" data-os="linux"><span class="os-option__name">Linux</span><span class="os-option__meta">waitlist</span></button></div>';
+      if (dm.showPicker) { body.innerHTML = osPickerHtml(); return; }
+      const c = DL[dm.os];
+      if (isDownloadOS(dm.os)) {
+        const againLink = '<div class="success-link"><a href="/dl?ref=landing-modal-again' + (dm.os === 'windows' ? '&os=windows' : '') + '">didn’t start? download again</a></div>';
+        if (dm.sent) {
+          body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' +
+            '<div class="form-note">You’re on the list for updates too.</div>' + againLink;
+          return;
+        }
+        body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' + againLink +
+          '<div class="form-note" style="margin-top:20px">Want a ping for updates/fixes? (optional)</div>' +
+          emailFormHtml('Join →', false) +
+          '<button id="dl-back" class="btn-text" style="margin-top:4px">← different machine</button>';
         return;
       }
-      const c = DL[dm.os];
       if (!dm.sent) {
-        const countryOptions = COUNTRY_CODES.map((cc) =>
-          '<option value="' + cc.code + '"' + (cc.code === dm.phoneCode ? ' selected' : '') + '>' + cc.code + ' ' + cc.name + '</option>').join('');
         body.innerHTML = '<h3 class="modal-title">' + c.emailTitle + '</h3><p class="modal-subtitle">' + c.emailPrompt + '</p>' +
-          '<form id="dl-form" class="email-form">' +
-            '<input id="dl-email" class="email-input" type="email" required autofocus placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
-            '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
-            '<div class="phone-row">' +
-              '<select id="dl-phone-code" class="phone-select" aria-label="Country code">' + countryOptions + '</select>' +
-              '<input id="dl-phone" class="phone-input" type="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[dm.phoneCode] || '') + '" value="' + dm.phone + '" aria-label="Phone number (optional)">' +
-            '</div>' +
-            '<button type="submit" class="btn-primary btn-primary--block">' + c.ctaLabel + '</button>' +
-          '</form>' +
+          emailFormHtml(c.ctaLabel, true) +
           '<div class="form-note">' + c.emailNote + '</div><button id="dl-back" class="btn-text" style="margin-top:12px">← different machine</button>';
         return;
       }
-      body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' +
-        (isDownloadOS(dm.os)
-          ? '<div class="success-link"><a href="/dl?ref=landing-modal-again' + (dm.os === 'windows' ? '&os=windows' : '') + '">didn’t start? download again</a></div>'
-          : '');
+      body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>';
     };
-    const openDl = () => { dm.os = null; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false; renderDl(); $('modal-download').classList.add('is-open'); };
+    const openDl = () => {
+      dm.os = detectOS() || 'other'; dm.showPicker = false; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false;
+      renderDl();
+      $('modal-download').classList.add('is-open');
+      if (isDownloadOS(dm.os)) fireDownload('landing-modal-auto');
+    };
     const closeDl = () => $('modal-download').classList.remove('is-open');
     $('btn-download-nav').addEventListener('click', openDl);
     if ($('btn-download-faq')) $('btn-download-faq').addEventListener('click', openDl);
     $('btn-close-download').addEventListener('click', closeDl);
     $('modal-download').addEventListener('click', (e) => { if (e.target.id === 'modal-download') closeDl(); });
     $('modal-download-body').addEventListener('click', (e) => {
-      const os = e.target.closest('[data-os]'); if (os) { dm.os = os.dataset.os; renderDl(); return; }
-      if (e.target.id === 'dl-back') { dm.os = null; renderDl(); }
+      const os = e.target.closest('[data-os]');
+      if (os) {
+        dm.os = os.dataset.os; dm.showPicker = false; dm.sent = false;
+        renderDl();
+        if (isDownloadOS(dm.os)) fireDownload('landing-modal-manual');
+        return;
+      }
+      if (e.target.id === 'dl-back') { dm.showPicker = true; renderDl(); }
     });
     $('modal-download-body').addEventListener('change', (e) => {
       if (e.target.id !== 'dl-phone-code') return;
@@ -172,9 +215,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const input = $('dl-phone');
       if (input) input.placeholder = COUNTRY_CODE_PLACEHOLDERS[e.target.value] || '';
     });
+    $('modal-download-body').addEventListener('input', (e) => {
+      if (e.target.id !== 'dl-email') return;
+      e.target.classList.remove('email-input--error');
+      const err = $('dl-email-error');
+      if (err) err.style.display = 'none';
+    });
     $('modal-download-body').addEventListener('submit', (e) => {
       if (e.target.id !== 'dl-form') return; e.preventDefault();
-      const v = $('dl-email').value.trim(); if (!EMAIL_RE.test(v)) return;
+      const input = $('dl-email');
+      const v = input.value.trim();
+      if (!EMAIL_RE.test(v)) {
+        input.classList.add('email-input--error');
+        const err = $('dl-email-error');
+        if (err) err.style.display = 'block';
+        input.focus();
+        return;
+      }
 
       const phoneDigits = ($('dl-phone').value || '').trim();
       const phoneCode = $('dl-phone-code').value;
@@ -188,9 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email: v, source: isDownloadOS(dm.os) ? 'download' : 'waitlist', os: dm.os, phone }),
       }).catch(() => { /* non-fatal: the confirmation UI has already been shown */ });
 
-      if (isDownloadOS(dm.os)) {
-        $('dl-frame').src = '/dl?ref=landing-modal' + (dm.os === 'windows' ? '&os=windows' : '');
-      }
+      // The download itself already fired on open/pick for mac/windows (fireDownload) —
+      // this form only ever gates the waitlist signup for unsupported platforms.
       renderDl();
     });
 
