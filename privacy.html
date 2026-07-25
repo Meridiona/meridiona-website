@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy Policy — Meridiona</title>
-<meta name="description" content="How Meridiona collects, uses, and protects data across the Meridian app and meridiona.com — and what never leaves your device.">
+<title>Privacy Policy & Data Handling — Meridiona</title>
+<meta name="description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it — the full data handling policy behind the local-first app and meridiona.com.">
 <link rel="canonical" href="https://meridiona.com/privacy">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Meridian">
-<meta property="og:title" content="Privacy Policy — Meridiona">
-<meta property="og:description" content="How Meridiona collects, uses, and protects data across the Meridian app and meridiona.com — and what never leaves your device.">
+<meta property="og:title" content="Privacy Policy & Data Handling — Meridiona">
+<meta property="og:description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it — the full data handling policy behind the local-first app and meridiona.com.">
 <meta property="og:url" content="https://meridiona.com/privacy">
 <meta property="og:image" content="https://meridiona.com/assets/images/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Privacy Policy — Meridiona">
-<meta name="twitter:description" content="How Meridiona collects, uses, and protects data across the Meridian app and meridiona.com — and what never leaves your device.">
+<meta name="twitter:title" content="Privacy Policy & Data Handling — Meridiona">
+<meta name="twitter:description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it — the full data handling policy behind the local-first app and meridiona.com.">
 <meta name="twitter:image" content="https://meridiona.com/assets/images/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
@@ -54,36 +54,95 @@
 <main id="main-content" role="main" class="legal-page">
   <div class="legal-body">
     <a href="/" class="backlink">← Back home</a>
-    <h1>Privacy Policy</h1>
-    <p class="legal-updated">Last updated: 22 July 2026 · Meridiona</p>
+    <h1>Privacy Policy & Data Handling</h1>
+    <p class="legal-updated">Last updated: July 25, 2026 · Meridiona</p>
+    <p class="legal-scope">Applies to Meridian, the Meridiona LLP developer-productivity tool — version 1.75.0 and above.</p>
 
-    <p>Meridiona ("we", "us") operates the Meridian desktop app and the meridiona.com website. This page explains what data we collect, why, and how you can control it.</p>
+    <p>This Privacy Policy describes what data Meridian collects, how it is processed and stored, who can access it, and how it can be deleted. It supplements, and does not replace, any Non-Disclosure Agreement between Meridiona LLP ("<strong>Meridiona</strong>," "<strong>we</strong>") and the organization that has authorized its employees to use Meridian ("<strong>Customer</strong>," "<strong>you</strong>"), and Meridiona's Terms of Use.</p>
 
-    <h2>The Meridian app is local-first</h2>
-    <p>Meridian's core product — capturing your day, analyzing your activity, and building your work journal — runs entirely on your own Mac or Windows machine. That data is never uploaded to our servers. The only thing that ever leaves your device is a worklog entry you explicitly review and approve for posting to a project-management tool you've connected (Jira, Linear, GitHub Projects, Azure DevOps, or Trello), and it goes directly from your machine to that tool.</p>
+    <hr>
 
-    <h2>Signing in to the app</h2>
-    <p>If you connect a project-management tool, Meridian uses Google sign-in (via Clerk, our authentication provider) to establish that connection. We receive your email address and account identifier from Clerk to authenticate the session — we do not receive your Google password, and we don't use this sign-in for anything beyond authorizing the app.</p>
+    <h2>1. What Meridian is</h2>
+    <p>Meridian is a local-first daemon that observes a developer's screen activity (window titles, on-screen text via OCR/accessibility APIs, and coding-agent session transcripts) and normalizes it into structured activity sessions, stored in a SQLite database on the user's own machine. Meridian is open source under the MIT License; the source code itself is not confidential, but the activity data it generates is.</p>
 
-    <h2>This website</h2>
-    <p>meridiona.com uses two third-party services:</p>
+    <h2>2. What data Meridian collects</h2>
+    <div class="legal-table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Examples</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Window &amp; app activity</td><td>Active application name, window titles, timestamps, session durations</td><td>In-process screen capture on the user's device</td></tr>
+          <tr><td>On-screen text</td><td>Text extracted via OCR and macOS Accessibility APIs from the visible screen, browser URLs</td><td>In-process capture (<code>capture_frames</code> table)</td></tr>
+          <tr><td>Input signals</td><td>UI events (clicks, key activity) used to detect idle vs. active periods — no keystroke content is logged</td><td>In-process capture (<code>capture_ui_events</code> table)</td></tr>
+          <tr><td>Coding-agent sessions</td><td>Conversation transcripts and summaries from Claude Code, Codex, GitHub Copilot, and Cursor sessions on the user's machine</td><td>Local session-store files (e.g., <code>~/.claude/projects/</code>, <code>~/.codex/sessions/</code>)</td></tr>
+          <tr><td>Integration data</td><td>Ticket titles, status, and metadata from connected tools (e.g., Jira, Linear, GitHub), if the user connects them</td><td>Direct API calls from the user's device to the connected service, using the user's own credentials</td></tr>
+          <tr><td>Diagnostic/telemetry data</td><td>Application logs and error traces (structured, with any sensitive field values redacted where feasible)</td><td>Local telemetry spool on the user's device</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Meridian does <strong>not</strong> capture audio, and does not log raw keystroke content.</p>
+
+    <h2>3. Where data is stored</h2>
+    <p>All activity data is stored <strong>locally</strong>, in a SQLite database on the individual employee's own machine (<code>~/.meridian/meridian.db</code>). Meridiona does not operate a central server that stores customer activity data by default. There is no daemon-side network listener and no account/authentication system — Meridian does not transmit activity data off the device as part of normal operation.</p>
+    <p>Diagnostic logs and traces are likewise captured to a local spool on the device (<code>~/.meridian/telemetry/</code>) and are retained there subject to the retention periods in Section 5.</p>
+
+    <h2>4. When data leaves the device</h2>
+    <p>Data leaves the employee's device only in the following specific cases:</p>
+    <ol>
+      <li><strong>Worklog summarization via a third-party AI provider.</strong> To generate work-log drafts and session summaries, Meridian sends relevant session text (e.g., extracted window/OCR text, coding-agent summaries) to the large-language-model provider <strong>the user configures</strong> (e.g., an Anthropic, OpenAI, or other provider account/API key supplied by the user or Customer). Meridian does not operate its own hosted model for this purpose; the user's chosen provider processes this data under that provider's own terms. Customer should ensure any provider it authorizes has data-handling terms it is comfortable with.</li>
+      <li><strong>Connected integrations.</strong> If a user connects a third-party tool (e.g., Jira, Linear, GitHub), Meridian exchanges data directly with that service via the credentials the user supplies, subject to that service's own terms.</li>
+      <li><strong>Diagnostics export (manual, user-initiated only).</strong> A user or IT admin can manually export a diagnostics bundle (logs and crash data) via the "Export Diagnostics" feature to share with Meridiona support when troubleshooting an issue. This is not automatic.</li>
+      <li><strong>Opt-in error reporting to Meridiona (if enabled for your deployment).</strong> Some Meridian builds support an opt-in mechanism that ships redacted, error-only diagnostic logs to a central Meridiona observability system, to help us fix bugs. This is off unless separately enabled and consented to, sends error/log data only (not full activity data), and is redacted before leaving the device. Contact us to confirm whether this applies to the build your organization has deployed.</li>
+    </ol>
+    <p>Meridiona does not sell activity data, and does not share it with advertisers or data brokers.</p>
+
+    <h2>5. Retention</h2>
     <ul>
-      <li><strong>PostHog</strong> — privacy-friendly product analytics (page views, button clicks) so we can see how people use the site. This only runs after you accept the cookie banner; declining or ignoring it means nothing is captured. We do not sell this data or share it with ad networks.</li>
+      <li><strong>Activity data (<code>app_sessions</code>, etc.):</strong> retained locally on the device until the user or Customer deletes it; there is no automatic expiry.</li>
+      <li><strong>Raw capture frames</strong> (screen/OCR/UI-event records already processed into sessions): pruned automatically after <strong>30 days</strong> by default (configurable), once consumed by the processing pipeline.</li>
+      <li><strong>Diagnostic telemetry (logs/traces):</strong> retained locally for <strong>7 days</strong> by default (configurable), whether pending or already exported.</li>
+    </ul>
+    <p>Retention windows above reflect current default configuration and may be adjusted; Customer may request Meridiona confirm the values in effect for the version it deploys.</p>
+
+    <h2>6. Who can access the data</h2>
+    <ul>
+      <li><strong>The employee</strong> whose activity is captured has full access to their own local database and can inspect, export, or delete it directly.</li>
+      <li><strong>Customer</strong>, as the employer authorizing use of the tool, is responsible for determining its own internal policies on who within the organization may view dashboards, reports, or exports derived from this data, consistent with Customer's own employment and privacy policies and applicable law in its jurisdiction.</li>
+      <li><strong>Meridiona</strong> does not have standing access to Customer activity data, because it is stored locally and not transmitted to Meridiona by default. Meridiona personnel may access data only if a user affirmatively shares a diagnostics export for support purposes (Section 4.3), or as otherwise agreed in writing.</li>
+      <li><strong>Third-party AI/integration providers</strong> the user configures receive only the data described in Section 4, under that provider's own terms.</li>
+    </ul>
+
+    <h2>7. Security measures</h2>
+    <ul>
+      <li>Activity data is stored in a local, unauthenticated SQLite database scoped to the individual employee's own user account and file-system permissions on their device — the same trust boundary as any other local application data.</li>
+      <li>Meridian's daemon does not open any network port or run an HTTP server; there is no remote attack surface for the activity database itself.</li>
+      <li>Data sent to third-party AI or integration providers travels over TLS to that provider's API, using credentials the user controls.</li>
+      <li>Diagnostic logs are redacted where feasible before being written to the local spool or exported.</li>
+    </ul>
+
+    <h2>8. Deletion requests</h2>
+    <p>Customer (or an individual employee) may request deletion of Meridian's locally stored data at any time by:</p>
+    <ul>
+      <li>Uninstalling Meridian and removing the <code>~/.meridian</code> directory on the employee's device (which deletes the SQLite database and telemetry spool in full), or</li>
+      <li>Requesting Meridiona's assistance if data was shared with Meridiona directly (e.g., via a diagnostics export), in which case Meridiona will delete the shared copy within <strong>30 days</strong> of request, absent a legal obligation to retain it.</li>
+    </ul>
+    <p>Because activity data lives on the employee's own device by default, most deletion requests can be fulfilled directly by Customer or the employee without needing to contact Meridiona.</p>
+
+    <h2>9. Children's data</h2>
+    <p>Meridian is a workplace productivity tool not directed at children, and is not knowingly used to collect data from individuals under 18.</p>
+
+    <h2>10. Changes to this policy</h2>
+    <p>Meridiona may update this Privacy Policy as Meridian's functionality changes (e.g., new integrations, new telemetry). Material changes affecting Customer data handling will be communicated to Customer's designated contact.</p>
+
+    <h2>11. This website (meridiona.com)</h2>
+    <p>Separately from the Meridian app described above, meridiona.com — the marketing site you're reading now — uses two third-party services:</p>
+    <ul>
+      <li><strong>PostHog</strong> — privacy-friendly product analytics (page views, button clicks) so we can see how people use the site. This only runs after you accept the cookie banner; declining or ignoring it means nothing is captured. See our <a href="/cookies">Cookie policy</a> for details.</li>
       <li><strong>Resend</strong> — if you submit your email (and optionally a phone number) through a download or waitlist form, we store it with Resend to send you release notes and updates. You can unsubscribe from any email we send.</li>
     </ul>
+    <p>We don't sell personal data, and we don't run cross-site ad tracking on this site.</p>
 
-    <h2>What we don't do</h2>
-    <p>We don't sell personal data. We don't run cross-site ad tracking. We don't read the contents of your work journal — it never reaches us in the first place.</p>
-
-    <h2>Your choices</h2>
-    <ul>
-      <li>Decline or revoke analytics consent any time by clearing your browser's local storage for this site, or contact us and we'll do it for you.</li>
-      <li>Ask us to delete any email/phone number you've given us via a signup form.</li>
-      <li>Uninstall Meridian at any time — since your journal data lives only on your device, uninstalling removes it (back up first if you want to keep it).</li>
-    </ul>
-
-    <h2>Contact</h2>
-    <p>Questions about this policy or your data: <a href="#" class="js-email-link js-email-link--show" data-user="company" data-domain="meridiona.com"></a>.</p>
+    <h2>12. Contact</h2>
+    <p>Questions about this Privacy Policy or data handling can be directed to: <a href="#" class="js-email-link js-email-link--show" data-user="company" data-domain="meridiona.com"></a>.</p>
   </div>
 </main>
 
