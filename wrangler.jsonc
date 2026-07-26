@@ -19,6 +19,11 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  // Lets Workers Builds generate a branch/commit preview URL (<branch>-meridiona-website.<subdomain>.workers.dev)
+  // and post it as a PR comment. Also requires "Builds for non-production branches"
+  // to be turned on under the Worker's Settings > Build > Branch control in the
+  // Cloudflare dashboard — that toggle lives outside this repo.
+  "preview_urls": true,
   // Clerk publishable key for the Google-SSO relay (auth.meridiona.com) — a
   // public identifier, safe to commit (unlike CLERK_SECRET_KEY, which is a
   // `wrangler secret put` value, never checked in). authenticateRequest()
