@@ -28,19 +28,31 @@ function createDemo(refs, opts) {
   var APP_COLORS = {
     'Claude Code': '#D97757', 'VS Code': '#4F8FEF', 'Jira': '#2684FF', 'Slack': '#4A154B',
     'Zoom': '#2D8CFF', 'iTerm': '#25A06A', 'GitHub': '#24292F', 'Postman': '#FF6C37',
-    'Google Chrome': '#4285F4', 'System Settings': '#6E6E76',
+    'Google Chrome': '#4285F4', 'System Settings': '#6E6E76', 'Microsoft Teams': '#5059C9',
   };
   var BRAND_ICONS = {
     'Claude Code': { viewBox: '0 0 24 24', hex: '#D97757',
       path: 'M21 10.5h3v3h-3v3h-1.5v3H18v-3h-1.5v3H15v-3H9v3H7.5v-3H6v3H4.5v-3H3v-3H0v-3h3v-6h18Zm-15 0h1.5v-3H6Zm10.5 0H18v-3h-1.5z' },
-    'Google Chrome': { viewBox: '0 0 24 24', hex: '#4285F4',
-      path: 'M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 16.364a4.364 4.364 0 1 1 0-8.728 4.364 4.364 0 0 1 0 8.728Z' },
+    'Google Chrome': { viewBox: '0 0 256 256', hex: '#4285F4', multi: true,
+      inner: '<path d="M128.002654,199.216326 C167.337748,199.216326 199.224237,167.328341 199.224237,127.993248 C199.224237,88.658154 167.337748,56.7701695 128.002654,56.7701695 C88.66756,56.7701695 56.781071,88.658154 56.781071,127.993248 C56.781071,167.328341 88.66756,199.216326 128.002654,199.216326 Z" fill="#FFFFFF"/><path d="M35.890016,92.996518 C30.576952,83.7939923 24.3316171,74.1352001 17.1540112,64.0201413 C5.91689083,83.47748 0,105.549915 0,128.020125 C0,150.490334 5.91420317,172.562769 17.1499797,192.020108 C28.3857563,211.477446 44.546676,227.635678 64.0067024,238.86608 C83.4667287,250.096481 105.541852,256.006653 128.010717,256.001571 C139.791711,239.477878 147.790451,227.56439 152.006937,220.261105 C160.105922,206.233028 170.580388,186.149338 183.430335,160.010037 L183.430335,159.995255 C177.81715,169.729972 169.739377,177.814463 160.010037,183.435711 C140.208035,194.876125 115.80601,194.879711 96.0006467,183.445118 C86.2698509,177.826524 78.189991,169.74481 72.5736292,160.012725 C55.1202938,127.463816 42.8924227,105.12508 35.890016,92.996518 Z" fill="#229342"/><path d="M128.008029,255.995986 C150.476894,255.999935 172.550674,250.08573 192.009357,238.852641 C211.468039,227.619552 227.626271,211.459977 238.85936,191.999951 C250.091893,172.54016 256.003521,150.466219 256,127.99728 C255.995901,105.528414 250.076323,83.4559788 238.836515,63.9999839 C214.588793,61.6102423 196.693555,60.4153715 185.1508,60.4153715 C172.062912,60.4153715 153.012186,61.6102423 127.998622,63.9999839 L127.985184,64.0093907 C139.221488,64.0040515 150.261129,66.957349 159.993911,72.5722861 C169.727283,78.1881586 177.809087,86.2659308 183.428991,95.9966159 C194.866596,115.80088 194.866084,140.203566 183.427647,160.007349 L128.008029,255.995986 Z" fill="#FBC116"/><path d="M128.002654,178.677204 C155.986605,178.677204 178.671827,155.99198 178.671827,128.006687 C178.671827,100.021392 155.986605,77.3375132 128.002654,77.3375132 C100.018703,77.3375132 77.333481,100.022736 77.333481,128.006687 C77.333481,155.990637 100.018703,178.677204 128.002654,178.677204 Z" fill="#1A73E8"/><path d="M128.002654,64.0040154 L238.840546,64.0040154 C227.608801,44.543989 211.451913,28.3830694 191.993231,17.1472928 C172.535124,5.9122784 150.461968,-0.0017050572 127.993247,1.42108511e-14 C105.524382,1.42108511e-14 83.4519466,5.9182354 63.9959517,17.1566997 C44.5392458,28.3945112 28.3842362,44.5569363 17.1553551,64.0187975 L72.5749731,160.008693 L72.5897552,160.016756 C61.1454971,140.216334 61.1378125,115.813649 72.5695977,96.0060227 C78.1854702,86.2739938 86.2672739,78.1921901 95.997959,72.5749737 C105.728644,66.9577574 116.768221,63.9999839 128.005342,64.0026715 L128.002654,64.0040154 Z" fill="#E33B2E"/>' },
     GitHub: { viewBox: '0 0 24 24', hex: '#24292F',
       path: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.755-1.333-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12' },
     'System Settings': { viewBox: '0 0 24 24', hex: '#6E6E76', stroke: true,
       inner: '<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/>' },
-    Slack: { viewBox: '0 0 448 512', hex: '#4A154B',
-      path: 'M94.12 315.1c0 25.9-21.16 47.06-47.06 47.06S0 341 0 315.1c0-25.9 21.16-47.06 47.06-47.06h47.06v47.06zm23.72 0c0-25.9 21.16-47.06 47.06-47.06s47.06 21.16 47.06 47.06v117.84c0 25.9-21.16 47.06-47.06 47.06s-47.06-21.16-47.06-47.06V315.1zm47.06-188.98c-25.9 0-47.06-21.16-47.06-47.06S139 32 164.9 32s47.06 21.16 47.06 47.06v47.06H164.9zm0 23.72c25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06H47.06C21.16 243.96 0 222.8 0 196.9s21.16-47.06 47.06-47.06H164.9zm188.98 47.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06h-47.06V196.9zm-23.72 0c0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06V79.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06V196.9zM283.1 385.88c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06v-47.06h47.06zm0-23.72c-25.9 0-47.06-21.16-47.06-47.06 0-25.9 21.16-47.06 47.06-47.06h117.84c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06H283.1z' },
+    Slack: { viewBox: '0 0 256 256', hex: '#4A154B', multi: true,
+      inner: '<path d="M53.8412698,161.320635 C53.8412698,176.152381 41.8539683,188.139683 27.0222222,188.139683 C12.1904762,188.139683 0.203174603,176.152381 0.203174603,161.320635 C0.203174603,146.488889 12.1904762,134.501587 27.0222222,134.501587 L53.8412698,134.501587 L53.8412698,161.320635 Z M67.2507937,161.320635 C67.2507937,146.488889 79.2380952,134.501587 94.0698413,134.501587 C108.901587,134.501587 120.888889,146.488889 120.888889,161.320635 L120.888889,228.368254 C120.888889,243.2 108.901587,255.187302 94.0698413,255.187302 C79.2380952,255.187302 67.2507937,243.2 67.2507937,228.368254 L67.2507937,161.320635 Z" fill="#E01E5A"/><path d="M94.0698413,53.6380952 C79.2380952,53.6380952 67.2507937,41.6507937 67.2507937,26.8190476 C67.2507937,11.9873016 79.2380952,0 94.0698413,0 C108.901587,0 120.888889,11.9873016 120.888889,26.8190476 L120.888889,53.6380952 L94.0698413,53.6380952 Z M94.0698413,67.2507937 C108.901587,67.2507937 120.888889,79.2380952 120.888889,94.0698413 C120.888889,108.901587 108.901587,120.888889 94.0698413,120.888889 L26.8190476,120.888889 C11.9873016,120.888889 0,108.901587 0,94.0698413 C0,79.2380952 11.9873016,67.2507937 26.8190476,67.2507937 L94.0698413,67.2507937 Z" fill="#36C5F0"/><path d="M201.549206,94.0698413 C201.549206,79.2380952 213.536508,67.2507937 228.368254,67.2507937 C243.2,67.2507937 255.187302,79.2380952 255.187302,94.0698413 C255.187302,108.901587 243.2,120.888889 228.368254,120.888889 L201.549206,120.888889 L201.549206,94.0698413 Z M188.139683,94.0698413 C188.139683,108.901587 176.152381,120.888889 161.320635,120.888889 C146.488889,120.888889 134.501587,108.901587 134.501587,94.0698413 L134.501587,26.8190476 C134.501587,11.9873016 146.488889,0 161.320635,0 C176.152381,0 188.139683,11.9873016 188.139683,26.8190476 L188.139683,94.0698413 Z" fill="#2EB67D"/><path d="M161.320635,201.549206 C176.152381,201.549206 188.139683,213.536508 188.139683,228.368254 C188.139683,243.2 176.152381,255.187302 161.320635,255.187302 C146.488889,255.187302 134.501587,243.2 134.501587,228.368254 L134.501587,201.549206 L161.320635,201.549206 Z M161.320635,188.139683 C146.488889,188.139683 134.501587,176.152381 134.501587,161.320635 C134.501587,146.488889 146.488889,134.501587 161.320635,134.501587 L228.571429,134.501587 C243.403175,134.501587 255.390476,146.488889 255.390476,161.320635 C255.390476,176.152381 243.403175,188.139683 228.571429,188.139683 L161.320635,188.139683 Z" fill="#ECB22E"/>' },
+    'Microsoft Teams': { viewBox: '0 0 256 239', hex: '#5059C9', multi: true,
+      inner: '<path d="M178.562984,89.3023389 L244.688409,89.3023389 C250.935667,89.3023389 256,94.3666717 256,100.61393 L256,160.8454 C256,183.805692 237.387095,202.418597 214.426804,202.418597 L214.230281,202.418597 C191.269989,202.421813 172.654443,183.81155 172.651112,160.851258 L172.651112,95.2142112 C172.651112,91.9491339 175.298022,89.3023389 178.562984,89.3023389 Z" fill="#5059C9"/><circle fill="#5059C9" cx="223.255847" cy="50.6046204" r="26.7907017"/><circle fill="#7B83EB" cx="139.906959" cy="38.6977185" r="38.6977185"/><path d="M191.505908,89.3023389 L82.3545595,89.3023389 C76.1817292,89.4551005 71.2986428,94.5778961 71.4418711,100.750956 L71.4418711,169.448288 C70.5798595,206.492276 99.8873366,237.23307 136.930291,238.139647 C173.973246,237.23307 203.280608,206.492276 202.418711,169.448288 L202.418711,100.750956 C202.56171,94.5778961 197.678739,89.4551005 191.505908,89.3023389 Z" fill="#7B83EB"/><polygon fill="#FFFFFF" points="94.2080524 95.1248514 72.3884185 95.1248514 72.3884185 154.540713 58.4871168 154.540713 58.4871168 95.1248514 36.768788 95.1248514 36.768788 83.5989345 94.2080524 83.5989345"/>' },
+    Zoom: { viewBox: '0 0 24 24', hex: '#0B5CFF',
+      path: 'M5.033 14.649H.743a.74.74 0 0 1-.686-.458.74.74 0 0 1 .16-.808L3.19 10.41H1.06A1.06 1.06 0 0 1 0 9.35h3.957c.301 0 .57.18.686.458a.74.74 0 0 1-.161.808L1.51 13.59h2.464c.585 0 1.06.475 1.06 1.06zM24 11.338c0-1.14-.927-2.066-2.066-2.066-.61 0-1.158.265-1.537.686a2.061 2.061 0 0 0-1.536-.686c-1.14 0-2.066.926-2.066 2.066v3.311a1.06 1.06 0 0 0 1.06-1.06v-2.251a1.004 1.004 0 0 1 2.013 0v2.251c0 .586.474 1.06 1.06 1.06v-3.311a1.004 1.004 0 0 1 2.012 0v2.251c0 .586.475 1.06 1.06 1.06zM16.265 12a2.728 2.728 0 1 1-5.457 0 2.728 2.728 0 0 1 5.457 0zm-1.06 0a1.669 1.669 0 1 0-3.338 0 1.669 1.669 0 0 0 3.338 0zm-4.82 0a2.728 2.728 0 1 1-5.458 0 2.728 2.728 0 0 1 5.457 0zm-1.06 0a1.669 1.669 0 1 0-3.338 0 1.669 1.669 0 0 0 3.338 0z' },
+    Jira: { viewBox: '0 0 24 24', hex: '#2684FF',
+      path: 'M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.005-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0Z' },
+    'VS Code': { viewBox: '0 0 24 24', hex: '#007ACC',
+      path: 'M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z' },
+    iTerm: { viewBox: '0 0 24 24', hex: '#000000',
+      path: 'M24 5.359v13.282A5.36 5.36 0 0 1 18.641 24H5.359A5.36 5.36 0 0 1 0 18.641V5.359A5.36 5.36 0 0 1 5.359 0h13.282A5.36 5.36 0 0 1 24 5.359m-.932-.233A4.196 4.196 0 0 0 18.874.932H5.126A4.196 4.196 0 0 0 .932 5.126v13.748a4.196 4.196 0 0 0 4.194 4.194h13.748a4.196 4.196 0 0 0 4.194-4.194zm-.816.233v13.282a3.613 3.613 0 0 1-3.611 3.611H5.359a3.613 3.613 0 0 1-3.611-3.611V5.359a3.613 3.613 0 0 1 3.611-3.611h13.282a3.613 3.613 0 0 1 3.611 3.611M8.854 4.194v6.495h.962V4.194zM5.483 9.493v1.085h.597V9.48q.283-.037.508-.133.373-.165.575-.448.208-.284.208-.649a.9.9 0 0 0-.171-.568 1.4 1.4 0 0 0-.426-.388 3 3 0 0 0-.544-.261 32 32 0 0 0-.545-.209 1.8 1.8 0 0 1-.426-.216q-.164-.12-.164-.284 0-.223.179-.351.18-.126.485-.127.344 0 .575.105.239.105.5.298l.433-.5a2.3 2.3 0 0 0-.605-.433 1.6 1.6 0 0 0-.582-.159v-.968h-.597v.978a2 2 0 0 0-.477.127 1.2 1.2 0 0 0-.545.411q-.194.268-.194.634 0 .335.164.56.164.224.418.38a4 4 0 0 0 .552.262q.291.104.545.209.261.104.425.238a.39.39 0 0 1 .165.321q0 .225-.187.359-.18.134-.537.134-.381 0-.717-.134a4.4 4.4 0 0 1-.649-.351l-.388.589q.209.173.477.306.276.135.575.217.191.046.373.064' },
+    Postman: { viewBox: '0 0 24 24', hex: '#FF6C37',
+      path: 'M13.527.099C6.955-.744.942 3.9.099 10.473c-.843 6.572 3.8 12.584 10.373 13.428 6.573.843 12.587-3.801 13.428-10.374C24.744 6.955 20.101.943 13.527.099zm2.471 7.485a.855.855 0 0 0-.593.25l-4.453 4.453-.307-.307-.643-.643c4.389-4.376 5.18-4.418 5.996-3.753zm-4.863 4.861l4.44-4.44a.62.62 0 1 1 .847.903l-4.699 4.125-.588-.588zm.33.694l-1.1.238a.06.06 0 0 1-.067-.032.06.06 0 0 1 .01-.073l.645-.645.512.512zm-2.803-.459l1.172-1.172.879.878-1.979.426a.074.074 0 0 1-.085-.039.072.072 0 0 1 .013-.093zm-3.646 6.058a.076.076 0 0 1-.069-.083.077.077 0 0 1 .022-.046h.002l.946-.946 1.222 1.222-2.123-.147zm2.425-1.256a.228.228 0 0 0-.117.256l.203.865a.125.125 0 0 1-.211.117h-.003l-.934-.934-.294-.295 3.762-3.758 1.82-.393.874.874c-1.255 1.102-2.971 2.201-5.1 3.268zm5.279-3.428h-.002l-.839-.839 4.699-4.125a.952.952 0 0 0 .119-.127c-.148 1.345-2.029 3.245-3.977 5.091zm3.657-6.46l-.003-.002a1.822 1.822 0 0 1 2.459-2.684l-1.61 1.613a.119.119 0 0 0 0 .169l1.247 1.247a1.817 1.817 0 0 1-2.093-.343zm2.578 0a1.714 1.714 0 0 1-.271.218h-.001l-1.207-1.207 1.533-1.533c.661.72.637 1.832-.054 2.522zM18.855 6.05a.143.143 0 0 0-.053.157.416.416 0 0 1-.053.45.14.14 0 0 0 .023.197.141.141 0 0 0 .084.03.14.14 0 0 0 .106-.05.691.691 0 0 0 .087-.751.138.138 0 0 0-.194-.033z' },
   };
   var CAT_HEX = { coding: '#3B6FE0', meeting: '#D97706', code_review: '#7C3AED', communication: '#0891B2', research: '#4F46E5' };
   var CAT_LABEL = { coding: 'Coding', meeting: 'Meeting', code_review: 'Code review', communication: 'Comms', research: 'Research' };
@@ -74,7 +86,7 @@ function createDemo(refs, opts) {
         apps: ['Slack', 'GitHub'], ticket: null, status: 'tracked',
         summary: ['Caught up on 14 messages that piled up overnight across the team.', 'Read through everything to see what needed a reply first.'] },
       { id: 'd2', title: 'Team standup & planning the week ahead', hue: 2, segments: [[45, 90]], cat: 'meeting',
-        apps: ['Zoom', 'Jira'], ticket: { key: 'MER-501', type: 'Task', title: 'Sprint planning & board grooming' }, status: 'posted',
+        apps: ['Microsoft Teams', 'Jira'], ticket: { key: 'MER-501', type: 'Task', title: 'Sprint planning & board grooming' }, status: 'posted',
         summary: ["Updated the team on yesterday's progress fixing a login bug.", "Reviewed the task list and estimated what's next."] },
       { id: 'd3', title: 'Fixing a bug that randomly logged people out', hue: 0, segments: [[100, 155], [165, 215]], cat: 'coding',
         apps: ['VS Code', 'iTerm'], ticket: { key: 'MER-482', type: 'Bug', title: 'Fix token-refresh race condition in auth' }, status: 'pending',
@@ -113,6 +125,7 @@ function createDemo(refs, opts) {
   var pendingUserClick = null;
   var doneFired = false;
   function fireDone() { if (doneFired) return; doneFired = true; if (opts.onDone) { try { opts.onDone(); } catch (e) {} } }
+  function sfx(name) { if (window.MeridianAudio) window.MeridianAudio.play(name); }
 
   // ── formatting / geometry helpers (ported verbatim) ──────────────────
   function esc(s) {
@@ -141,7 +154,9 @@ function createDemo(refs, opts) {
     var b = BRAND_ICONS[name];
     if (!b) return '<span class="app-ico" style="background:' + hexToRgba(appColor(name), 0.14) + ';width:' + size + 'px;height:' + size + 'px"><span style="color:' + appColor(name) + ';font:700 9px -apple-system,BlinkMacSystemFont,\'SF Pro Text\',system-ui,sans-serif">' + esc(name.slice(0, 1)) + '</span></span>';
     var inner = Math.round(size * 0.58);
-    var svg = b.stroke
+    var svg = b.multi
+      ? '<svg width="' + inner + '" height="' + inner + '" viewBox="' + b.viewBox + '">' + b.inner + '</svg>'
+      : b.stroke
       ? '<svg width="' + inner + '" height="' + inner + '" viewBox="' + b.viewBox + '" fill="none" stroke="' + b.hex + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + b.inner + '</svg>'
       : '<svg width="' + inner + '" height="' + inner + '" viewBox="' + b.viewBox + '" fill="' + b.hex + '"><path d="' + b.path + '"/></svg>';
     return '<span class="app-ico" style="background:' + hexToRgba(b.hex, 0.12) + ';width:' + size + 'px;height:' + size + 'px">' + svg + '</span>';
@@ -189,6 +204,8 @@ function createDemo(refs, opts) {
     refs.pointer.classList.remove('is-on');
     refs.question.classList.remove('is-on');
     refs.clock.className = 'mclock mclock--hero';
+    refs.root.classList.remove('intro-clean');
+    camera('scale(1)', 0);
     refs.scrim.classList.remove('is-off');
     runIntro();
   }
@@ -296,7 +313,7 @@ function createDemo(refs, opts) {
     refs.cursor.style.transitionDuration = (dur || 900) + 'ms';
     refs.cursor.style.transform = 'translate(' + x + 'px,' + y + 'px)';
   }
-  function cursorClick() { refs.cursor.classList.remove('is-click'); void refs.cursor.offsetWidth; refs.cursor.classList.add('is-click'); }
+  function cursorClick() { sfx('click'); refs.cursor.classList.remove('is-click'); void refs.cursor.offsetWidth; refs.cursor.classList.add('is-click'); }
   // pause the auto-demo until the user clicks the highlighted element (with a
   // safety fallback that auto-advances if they never do).
   function waitForUserClick(selector, fallbackMs) {
@@ -329,10 +346,10 @@ function createDemo(refs, opts) {
       var linked = t.link && t.done;
       var posted = t.link ? wl(t.link).posted : false;
       var nudged = state.nudgeTaskId === t.id;
-      var sub = posted ? 'Synced to Jira' : (t.done ? 'Done · ready to post' : 'Rolls to tomorrow');
+      var sub = posted ? 'Synced to Jira' : (t.done ? 'Done · ready to post' : 'Carried over to tomorrow');
       return '<button class="msum-row' + (nudged ? ' msum-row--nudge' : '') + '" ' + (linked ? 'data-action="summary-select-task" data-task-id="' + t.link + '"' : 'data-action="noop"') + '>' +
         '<span class="msum-check' + (t.done ? ' is-done' : '') + '">' + (t.done ? '✓' : '') + '</span>' +
-        '<span class="msum-row__main"><span class="msum-row__t"' + (t.done ? ' style="color:#9C97AE;text-decoration:line-through;text-decoration-color:#D8D4E4"' : '') + '>' + esc(t.text) + '</span><span class="msum-row__s">' + sub + '</span></span>' +
+        '<span class="msum-row__main"><span class="msum-row__t"' + (t.done ? ' style="color:#9C97AE;text-decoration:line-through;text-decoration-color:#D8D4E4"' : ' style="color:#C2410C"') + '>' + esc(t.text) + '</span><span class="msum-row__s">' + sub + '</span></span>' +
         (nudged ? '<span class="msum-nudge">Click to post →</span>' : (linked ? (posted ? '<span class="msum-row__pill">' + jiraIcon(10) + '✓</span>' : '<span class="msum-row__chev">›</span>') : (t.ref ? '<span class="msum-row__ref">' + t.ref + '</span>' : ''))) +
         '</button>';
     }).join('');
@@ -373,7 +390,7 @@ function createDemo(refs, opts) {
     else if (w.summaryPosting) footer = '<button class="msum-tk-post" disabled style="background:' + accent + '">Posting to Jira…</button>';
     else footer = '<button class="msum-tk-post" data-action="summary-post" data-task-id="' + t.id + '" style="background:' + accent + '">Post to Jira</button>';
     return '<button class="msum-back" data-action="summary-back">‹ Back to summary</button>' +
-      '<div class="msum-tk-hd"><span class="msum-tk-dot" style="background:' + accent + '"></span><div><div class="msum-tk-eyebrow">TASK · ' + fmtDur(taskMinutes(t)) + ' · ' + fmtClock(lo) + ' – ' + fmtClock(hi) + '</div><div class="msum-tk-title">' + esc(t.title) + '</div></div></div>' +
+      '<div class="msum-tk-hd"><span class="msum-tk-dot" style="background:' + accent + '"></span><div><div class="msum-tk-eyebrow">WORKLOG UPDATE · ' + fmtDur(taskMinutes(t)) + ' · ' + fmtClock(lo) + ' – ' + fmtClock(hi) + '</div><div class="msum-tk-title">' + esc(t.title) + '</div></div></div>' +
       '<div class="msum-tk-sec"><div class="msum-tk-lbl">What you did</div><ul class="msum-tk-ul">' + t.summary.map(function (x) { return '<li><span style="color:' + accent + '">·</span>' + esc(x) + '</li>'; }).join('') + '</ul></div>' +
       (t.ticket ? '<div class="msum-tk-sec"><div class="msum-tk-lbl">Update to post</div><div class="msum-tk-ticket"><span class="msum-tk-key">' + jiraIcon(12) + t.ticket.key + '</span><span class="msum-tk-ttitle">' + esc(t.ticket.title) + '</span></div><div class="msum-tk-update">' + esc(summaryUpdateText(t)) + '</div></div>' : '') +
       '<div class="msum-tk-foot">' + footer + '</div>';
@@ -629,7 +646,7 @@ function createDemo(refs, opts) {
   function lerp(a, b, t) { return a + (b - a) * t; }
   function mixRgb(c0, c1, t) { return 'rgb(' + Math.round(lerp(c0[0], c1[0], t)) + ',' + Math.round(lerp(c0[1], c1[1], t)) + ',' + Math.round(lerp(c0[2], c1[2], t)) + ')'; }
   function dayColor(frac) {
-    var amber = [245, 158, 11], violet = [124, 58, 237], indigo = [49, 46, 129];
+    var amber = [245, 158, 11], violet = [139, 92, 246], indigo = [99, 102, 241];
     return frac < 0.5 ? mixRgb(amber, violet, frac / 0.5) : mixRgb(violet, indigo, (frac - 0.5) / 0.5);
   }
   function updateClock(minFrom9) {
@@ -677,6 +694,8 @@ function createDemo(refs, opts) {
     nl.innerHTML = '<span class="tl-nowline__t">9:00 AM</span><span class="tl-nowline__rule"></span>';
     nl.style.top = '0px';
     scale.appendChild(nl);
+    var sl = document.createElement('div'); sl.className = 'tl-spine-lit'; sl.style.height = '0px';
+    scale.appendChild(sl);
     setHead(0, 0);
     refs.panel.innerHTML =
       '<div class="mpanel-replay"><div class="mpanel-replay__top"><span class="mpanel-wait__dot"></span>Rebuilding your day&hellip;</div></div>';
@@ -699,9 +718,15 @@ function createDemo(refs, opts) {
     if (!scale) return;
     var nl = scale.querySelector('.tl-nowline');
     if (nl) { nl.style.top = (m * PXPM) + 'px'; var t = nl.querySelector('.tl-nowline__t'); if (t) t.textContent = fmtClock(Math.max(0, Math.round(m))); }
+    var lit = Math.min(Math.max(0, m), 480);
+    var sl = scale.querySelector('.tl-spine-lit');
+    if (sl) sl.style.top = (lit * PXPM) + 'px';   // glow blob pinned to the now-line (no transition = in sync)
     scale.querySelectorAll('.tl-hourline').forEach(function (hl) {
       var top = parseFloat(hl.style.top) || 0;
-      if (top / PXPM <= m + 1) hl.classList.remove('is-pre');
+      var hm = Math.round(top / PXPM);
+      if (hm <= m + 1) hl.classList.remove('is-pre');
+      var d = hl.querySelector('.hl-dot');
+      if (d) { if (hm <= 480 && Math.abs(lit - hm) < 24) d.classList.add('is-lit'); else d.classList.remove('is-lit'); }
     });
     state.dayTasks.forEach(function (t) {
       if (revealed[t.id]) return;
@@ -716,32 +741,32 @@ function createDemo(refs, opts) {
   }
 
   // ── overlays ─────────────────────────────────────────────────────────
-  function mqWords(text, hl, base, step, grad) {
+  function mqWords(text, hl, base, step, grad, pop) {
     base = base || 0; step = step || 0.16;
     return text.split(' ').map(function (w, i) {
       var isHl = hl && hl.indexOf(i) >= 0;
-      var cls = 'mqw' + (isHl ? ' mq__hl' : (grad ? ' mqw--head' : ''));
+      var cls = 'mqw' + (pop ? ' mqw--q' : '') + (isHl ? ' mq__hl' : (grad ? ' mqw--head' : ''));
       return '<span class="' + cls + '" style="animation-delay:' + (base + i * step).toFixed(2) + 's">' + w + '</span>';
     }).join(' ');
   }
   function showCaption() {
-    refs.question.className = 'mquestion mq--bottom';
+    refs.question.style.opacity = ''; refs.question.style.transition = '';
+    refs.question.className = 'mquestion mq--underclock mq--instant';
     refs.question.innerHTML =
-      '<div class="mq__eyebrow">a full day</div>' +
-      '<div class="mq__head">' + mqWords('You did a lot today', [3], 0, 0.17, true) + '</div>' +
-      '<div class="mq__sub">' + mqWords('Nine hours. Barely looked up.', null, 0.95, 0.09) + '</div>';
+      '<div class="mq__head">' + mqWords('You did a lot today', [3], 0.1, 0.2, true, true) + '</div>' +
+      '<div class="mq__sub">' + mqWords('Nine hours. Barely looked up.', null, 1.15, 0.11, false, true) + '</div>';
     void refs.question.offsetWidth;
     refs.question.classList.add('is-on');
   }
   function showQuestion() {
-    refs.question.className = 'mquestion';
+    refs.question.style.opacity = ''; refs.question.style.transition = '';
+    refs.question.className = 'mquestion mq--bottom mq--instant';
     refs.question.innerHTML =
       '<div class="mq__eyebrow">rewind the day</div>' +
-      '<div class="mq__head">' + mqWords('But… what did you actually do?', [5], 0, 0.19, true) + '</div>' +
-      '<div class="mq__sub">' + mqWords('By tonight, it’s all a blur.', null, 1.35, 0.09) + '</div>';
+      '<div class="mq__head">' + mqWords('But… what did you actually do?', [5], 0.15, 0.22, true, true) + '</div>' +
+      '<div class="mq__sub">' + mqWords('By evening, it’s all a blur.', null, 1.75, 0.11, false, true) + '</div>';
     void refs.question.offsetWidth;
     refs.question.classList.add('is-on');
-    refs.clock.classList.add('mclock--side');
   }
   function hideQuestion() { refs.question.classList.remove('is-on'); }
 
@@ -752,11 +777,13 @@ function createDemo(refs, opts) {
     var nl = refs.timeline.querySelector('.tl-nowline'); if (nl) nl.remove();
     renderTimeline();
     refs.clock.className = 'mclock mclock--gone';
+    camera('scale(1)', 1200);
     renderPanel();
     refs.panel.animate([{ opacity: 0, transform: 'translateX(14px)' }, { opacity: 1, transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.2,.8,.25,1)' });
     await sleep(950); if (aborted) return;
     await runSummaryDemo(); if (aborted) return;
     await sleep(400); if (aborted) return;
+    await runPrivacyScene(); if (aborted) return;
     fireDone();
   }
 
@@ -778,7 +805,7 @@ function createDemo(refs, opts) {
         '<div class="mpriv__badge mpriv__badge--left">' + privIcon('code') + 'Open source</div>' +
         '<div class="mpriv__badge mpriv__badge--right">' + privIcon('sliders') + 'You control it</div>' +
       '</div>' +
-      '<div class="mpriv__foot">Meridian runs entirely on your Mac — <b>nothing is uploaded, nothing phones home.</b></div>';
+      '<div class="mpriv__foot">Meridian runs entirely on your device — <b>nothing is uploaded, nothing phones home.</b></div>';
     void refs.privacy.offsetWidth;
     refs.privacy.classList.add('is-on');
     await sleep(780); if (aborted) return;
@@ -803,54 +830,63 @@ function createDemo(refs, opts) {
 
   async function runSummaryDemo() {
     showCursor();
-    await sleep(500); if (aborted) return;
+    await sleep(450); if (aborted) return;
     var pill = refs.toolbarLeftExtra.querySelector('.sumpill');
-    cursorTo(pill, 1150);
-    await sleep(1300); if (aborted) return;
+    camera('scale(1.1) translate(30px,26px)', 1300);   // zoom in on the Daily-summary pill
+    cursorTo(pill, 1050);
     if (pill) pill.classList.add('sumpill--hot');
+    await sleep(1150); if (aborted) return;
     cursorClick();
-    await sleep(300); if (aborted) return;
-    setSummaryCaption('Your day, wrapped into one summary — built automatically at 6 PM');
+    await sleep(260); if (aborted) return;
+    setSummaryCaption('This is your Daily Summary — your whole day, built automatically at 6 PM');
     openSummary();
+    camera('scale(1)', 850);                            // zoom back out to reveal the summary
     if (pill) setTimeout(function () { pill.classList.remove('sumpill--hot'); }, 600);
-    await sleep(4200); if (aborted) return;
-    setSummaryCaption('Here’s your plan — 2 of 3 done. Try it: click a finished task to post it.');
+    await sleep(2400); if (aborted) return;
+    setSummaryCaption('2 of 3 done. Click a finished task to post it to Jira.');
     var card0 = document.getElementById('msum-card'); if (card0) card0.scrollTop = 0;
     state.nudgeTaskId = 'c2'; renderSummary();
-    await sleep(1100); if (aborted) return;
-    cursorTo(document.querySelector('.msum-row[data-task-id="d5"]'), 1150);
-    await sleep(1400); if (aborted) return;
-    // hand control to the user — wait for them to click the highlighted task
-    await waitForUserClick('.msum-row[data-task-id="d5"]'); if (aborted) return;
+    await sleep(700); if (aborted) return;
+    camera('scale(1.05) translate(0,-20px)', 1000);     // ease in on the task about to be clicked
+    cursorTo(document.querySelector('.msum-row[data-task-id="d5"]'), 1000);
+    await sleep(900); if (aborted) return;
+    // hand control to the user — fast fallback so it never stalls
+    await waitForUserClick('.msum-row[data-task-id="d5"]', 3200); if (aborted) return;
     cursorClick();
-    await sleep(300); if (aborted) return;
+    await sleep(260); if (aborted) return;
     state.nudgeTaskId = null;
     summarySelectTask('d5');
-    setSummaryCaption('Meridian already wrote the update — now post it straight to Jira.');
-    await sleep(2200); if (aborted) return;
+    setSummaryCaption('This is the worklog update Meridian wrote for that task — post it straight to Jira.');
+    await sleep(1500); if (aborted) return;
     // auto-click the "Post to Jira" button for them
-    cursorTo(refs.summary.querySelector('.msum-tk-post'), 1100);
-    await sleep(1400); if (aborted) return;
+    camera('scale(1.06) translate(0,-20px)', 900);      // zoom in on the Post-to-Jira click
+    cursorTo(refs.summary.querySelector('.msum-tk-post'), 950);
+    await sleep(950); if (aborted) return;
     cursorClick();
     summaryPost('d5');
+    sfx('posted');
     setSummaryCaption('Posting to Jira…');
-    await sleep(1500); if (aborted) return;
+    await sleep(1150); if (aborted) return;
     setSummaryCaption('Logged to Jira ✓ — posted for you, no ticket-hunting.');
-    await sleep(2200); if (aborted) return;
+    await sleep(1400); if (aborted) return;
     // back to the daily summary, reveal the standup update
+    camera('scale(1)', 850);                            // zoom out before returning to the summary
     summaryBack();
     var cb = document.getElementById('msum-card'); if (cb) cb.scrollTop = cb.scrollHeight;
     setSummaryCaption('Your standup update is written and ready to share.');
-    await sleep(2700); if (aborted) return;
+    await sleep(1700); if (aborted) return;
     // cursor to Copy → click → Copied
-    cursorTo(refs.summary.querySelector('.msum-standup__copy'), 1150);
-    await sleep(1500); if (aborted) return;
+    camera('scale(1.06) translate(-34px,-18px)', 1050); // zoom in on the standup card (right side)
+    cursorTo(refs.summary.querySelector('.msum-standup__copy'), 1000);
+    await sleep(1100); if (aborted) return;
     cursorClick();
     copyStandup();
+    sfx('posted');
     setSummaryCaption('Copied — paste it straight into Slack or standup.');
-    await sleep(2500); if (aborted) return;
+    await sleep(1600); if (aborted) return;
+    camera('scale(1)', 950);                             // zoom back out
     hideCursor();
-    await sleep(700); if (aborted) return;
+    await sleep(650); if (aborted) return;
   }
 
   function skip() {
@@ -866,6 +902,12 @@ function createDemo(refs, opts) {
     if (refs.cursor) refs.cursor.classList.remove('is-on');
     state.nudgeTaskId = null;
     var nl = refs.timeline.querySelector('.tl-nowline'); if (nl) nl.remove();
+    clearDay();
+    blackout(false);
+    refs.root.classList.remove('intro-clean');
+    if (document.body) document.body.classList.remove('intro');
+    try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+    camera('scale(1)', 0);
     renderTimeline();
     refs.clock.className = 'mclock mclock--gone';
     renderPanel();
@@ -874,43 +916,176 @@ function createDemo(refs, opts) {
     fireDone();
   }
 
+  // ── intro "a day in the life" scene ─────────────────────────────────
+  // App-activity chips surface in time order behind the clock as it sweeps the
+  // day; the background warms in the morning and dims toward evening, ending on
+  // a "logged off" beat — so the viewer feels a full, blurry day go by.
+  var DAY_MOMENTS = [
+    { at: 12,  app: 'Slack',         label: 'Slack catch-up',        x: 232, y: '25%' },
+    { at: 80,  app: 'Microsoft Teams', label: 'Team standup',        x: 946, y: '21%' },
+    { at: 165, app: 'Claude Code',   label: 'Heads-down coding',     x: 196, y: '56%' },
+    { at: 250, app: 'GitHub',        label: 'Reviewing a PR',        x: 980, y: '58%' },
+    { at: 345, app: 'Claude Code',   label: 'Shipping a fix',        x: 244, y: '39%' },
+    { at: 440, app: 'Google Chrome', label: 'A talk in the background', x: 912, y: '45%' },
+  ];
+  function dayLayer() { return refs.root.querySelector('.mday'); }
+  function clearDay() { var l = dayLayer(); if (l) l.remove(); }
+  function setupDay() {
+    var body = refs.root.querySelector('.bodyrow'); if (!body) return;
+    clearDay();
+    DAY_MOMENTS.forEach(function (mo) { mo._done = false; });
+    var layer = document.createElement('div');
+    layer.className = 'mday';
+    layer.innerHTML = '<div class="mday-glow"></div><div class="mday-vig"></div><div class="mday-off"></div>';
+    body.appendChild(layer);
+  }
+  function spawnMoment(mo) {
+    var layer = dayLayer(); if (!layer) return;
+    var chip = document.createElement('div');
+    chip.className = 'mday-chip';
+    chip.style.left = mo.x + 'px';
+    chip.style.top = mo.y;
+    chip.style.setProperty('--tx', mo.x >= 620 ? '12px' : '-12px');
+    chip.innerHTML = appGlyph(mo.app, 26) + '<span class="mday-chip__t">' + esc(mo.label) + '</span>';
+    layer.appendChild(chip);
+    void chip.offsetWidth;
+    chip.classList.add('is-in');
+    setTimeout(function () {
+      if (!chip.parentNode) return;
+      chip.classList.remove('is-in'); chip.classList.add('is-out');
+      setTimeout(function () { if (chip.parentNode) chip.remove(); }, 650);
+    }, 2000);
+  }
+  function paintDay(m) {
+    var frac = Math.max(0, Math.min(1, m / 540));
+    var layer = dayLayer(); if (!layer) return;
+    var glow = layer.querySelector('.mday-glow'), vig = layer.querySelector('.mday-vig');
+    if (glow) {
+      var warm = (0.42 * (1 - frac)).toFixed(3);
+      glow.style.background = 'radial-gradient(circle at 50% 38%, rgba(245,158,11,' + warm + '), rgba(245,158,11,0) 52%)';
+      glow.style.opacity = '1';
+    }
+    if (vig) vig.style.opacity = Math.max(0, (frac - 0.45) / 0.55).toFixed(3);
+    for (var k = 0; k < DAY_MOMENTS.length; k++) {
+      var mo = DAY_MOMENTS[k];
+      if (!mo._done && m >= mo.at) { mo._done = true; spawnMoment(mo); }
+    }
+  }
+  function dayLogOff(on) { var l = dayLayer(); if (!l) return; var off = l.querySelector('.mday-off'); if (off) off.style.opacity = on ? '1' : '0'; }
+  function showLaptop() {
+    var l = dayLayer(); if (!l) return;
+    var lap = l.querySelector('.mday-laptop');
+    if (!lap) { lap = document.createElement('div'); lap.className = 'mday-laptop'; lap.innerHTML = '<div class="lap-screen"></div><div class="lap-base"></div>'; l.appendChild(lap); }
+    void lap.offsetWidth; lap.classList.add('is-in');
+  }
+  function closeLaptop() { var l = dayLayer(); if (!l) return; var lap = l.querySelector('.mday-laptop'); if (lap) lap.classList.add('is-closed'); }
+  function hideLaptop() { var l = dayLayer(); if (!l) return; var lap = l.querySelector('.mday-laptop'); if (lap) lap.classList.remove('is-in'); }
+  function showTired() {
+    var l = dayLayer(); if (!l) return;
+    var t = l.querySelector('.mday-tired');
+    if (!t) { t = document.createElement('div'); t.className = 'mday-tired'; t.textContent = '\uD83D\uDE2E\u200D\uD83D\uDCA8'; l.appendChild(t); }
+    void t.offsetWidth; t.classList.add('is-in');
+  }
+  function tiredCloses() { var l = dayLayer(); if (!l) return; var t = l.querySelector('.mday-tired'); if (t) t.classList.add('is-close'); }
+  function hideTired() { var l = dayLayer(); if (!l) return; var t = l.querySelector('.mday-tired'); if (t) t.classList.remove('is-in'); }
+  function blackout(on) {    refs.root.classList.toggle('is-black', on);
+    refs.scrim.classList.toggle('is-black', on);
+    if (document.body) document.body.classList.toggle('blackout', on);
+    try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'meridian-blackout', on: on }, '*'); } catch (e) {}
+  }
+
   // ── intro sequence ─────────────────────────────────────────────────────
+  // camera: an extra transform on #desk that composes with the fit-scaler, used
+  // for product-demo style push-ins / pull-outs during the intro.
+  function camera(transform, dur) {
+    var d = document.getElementById('desk'); if (!d) return;
+    d.style.transitionDuration = (dur == null ? 1300 : dur) + 'ms';
+    d.style.transform = transform || 'none';
+  }
+
   async function runIntro() {
     renderToolbar();
     buildSkeleton();
     buildClock();
     updateClock(0);
-    refs.scrim.classList.remove('is-off');
+    blackout(false);
+    refs.root.classList.add('intro-clean');   // device blends into the dark stage — no chrome/border
+    if (document.body) document.body.classList.add('intro');
+    refs.scrim.classList.remove('is-off');     // opaque cover on
     refs.clock.className = 'mclock mclock--hero';
-    await sleep(900); if (aborted) return;
-    // clockwise sweep 9 AM → 9 PM; a positive line rises just after ticking begins
-    var sweep = tween(0, 540, 5400, function (m) { updateClock(m); });
+    camera('scale(1)', 0);
+    setupDay();
+    await sleep(700); if (aborted) return;
+    // ── teaser: the day plays out — app moments surface as the clock sweeps 9 → 5,
+    //    the light warms then dims toward evening, with a slow cinematic push-in
+    camera('scale(1.045)', 8600);
+    var capShown = false;
+    await tween(0, 540, 6400, function (m) {
+      updateClock(m); paintDay(m);
+      if (!capShown && m >= 480) { capShown = true; showCaption(); }  // ~5pm, without stopping the tick
+    }); if (aborted) return;
+    await sleep(650); if (aborted) return;
+    // ── the timer goes, the laptop comes in; the caption then shrinks, rises, and
+    //    disappears into the laptop screen. Lid folds, laptop leaves, blank holds,
+    //    then the question types in.
+    refs.clock.style.transition = 'opacity .5s ease';
+    refs.clock.style.opacity = '0';                // let the timer go
+    var dld = dayLayer();                           // lift the evening darkening so no black rect shows yet
+    if (dld) dld.querySelectorAll('.mday-vig,.mday-off,.mday-glow').forEach(function (el) { el.style.transition = 'opacity .6s ease'; el.style.opacity = '0'; });
+    showLaptop();                                   // open, empty glowing screen
     await sleep(950); if (aborted) return;
-    showCaption();
-    await sweep; if (aborted) return;
-    await sleep(1300); if (aborted) return;
-    hideQuestion();
-    await sleep(760); if (aborted) return;
-    // anticlockwise rewind + slide-right happen together; the question rises up smoothly
+    refs.question.classList.remove('mq--instant');
+    refs.question.classList.add('mq--intoscreen');  // become smaller, rise, fade into the screen
+    await sleep(1150); if (aborted) return;
+    hideQuestion();                                 // fully gone before the lid moves
+    closeLaptop();                                  // lid folds down on a blank screen
+    await sleep(1000); if (aborted) return;
+    hideLaptop();                                   // laptop fades away
+    // ── blank screen, then the question types in word by word
+    blackout(true);
+    var dl = dayLayer(); if (dl) { dl.style.transition = 'opacity .6s ease'; dl.style.opacity = '0'; }
+    await sleep(1500); if (aborted) return;
+    clearDay();
+    // ── reset: clock back at centre (hidden)
+    refs.clock.style.transition = 'none';
+    refs.clock.className = 'mclock mclock--hero';
+    refs.clock.style.opacity = '0';
+    void refs.clock.offsetWidth;
+    refs.clock.style.transition = '';
+    camera('scale(1)', 0);
+    // ── the question types in word by word on the black screen; the clock eases
+    //    back in and reverses
     showQuestion();
-    await sleep(520); if (aborted) return;
-    await tween(540, 0, 3600, function (m) { updateClock(m); }); if (aborted) return;
-    await sleep(1600); if (aborted) return;
+    await sleep(700); if (aborted) return;
+    refs.clock.style.opacity = '';
+    await sleep(560); if (aborted) return;
+    await tween(540, 0, 3400, function (m) { updateClock(m); }); if (aborted) return;
+    await sleep(1500); if (aborted) return;
     hideQuestion();
     await sleep(760); if (aborted) return;
-    // dock clock over the (empty) panel, clear the scrim, then replay the day
-    refs.clock.className = 'mclock mclock--dock';
+    // ── the UI arrives: cover fades, device gains its frame, camera settles from a
+    //    slight zoom-in, and the clock glides to the right of the UI
+    refs.root.classList.remove('intro-clean');
+    if (document.body) document.body.classList.remove('intro');
+    try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+    blackout(false);
     refs.scrim.classList.add('is-off');
-    await sleep(950); if (aborted) return;
-    // stepped build: advance one hour at a time so the clock visibly ticks
-    // 9→10→11… and each row drops in as its hour is reached.
+    refs.clock.className = 'mclock mclock--dock';
+    camera('scale(1.06)', 0);
+    void document.getElementById('desk').offsetWidth;
+    camera('scale(1)', 1400);
+    await sleep(1300); if (aborted) return;
+    // ── build: the day replays hour by hour — ease in a little while it ticks,
+    //    then pull back out as it reaches 6 PM
     var stops = [60, 120, 180, 240, 300, 360, 420, 480, 540, 552];
     var prev = 0;
     for (var i = 0; i < stops.length; i++) {
-      await tween(prev, stops[i], 900, function (m) { updateClock(Math.min(m, 540)); advanceNow(m); });
+      if (i === 1) camera('scale(1.06) translate(48px,-4px)', 3000);
+      if (i === 8) camera('scale(1)', 1700);
+      await tween(prev, stops[i], 820, function (m) { updateClock(Math.min(m, 540)); advanceNow(m); });
       if (aborted) return;
       prev = stops[i];
-      await sleep(360); if (aborted) return;
+      await sleep(300); if (aborted) return;
     }
     await finishAndHandoff();
   }
@@ -918,6 +1093,12 @@ function createDemo(refs, opts) {
   function startLive() {
     renderToolbar();
     render();
+    clearDay();
+    blackout(false);
+    refs.root.classList.remove('intro-clean');
+    if (document.body) document.body.classList.remove('intro');
+    try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+    camera('scale(1)', 0);
     refs.scrim.classList.add('is-off');
     refs.clock.className = 'mclock mclock--gone';
     refs.pointer.classList.add('is-on');
@@ -935,7 +1116,9 @@ if (typeof window !== 'undefined') window.createDemo = createDemo;
   var g = function (id) { return document.getElementById(id); };
   function fit() {
     var s = g('scaler'); if (!s) return;
-    var scale = Math.min(window.innerWidth / 1240, window.innerHeight / 720);
+    var b = document.body;
+    var pad = (b && b.classList.contains('cinema-embed') && !b.classList.contains('intro')) ? 40 : 0;
+    var scale = Math.min((window.innerWidth - pad * 2) / 1240, (window.innerHeight - pad * 2) / 720);
     s.style.transform = 'scale(' + scale + ')';
   }
   function boot() {
@@ -959,6 +1142,7 @@ if (typeof window !== 'undefined') window.createDemo = createDemo;
     };
     var params = new URLSearchParams(location.search);
     var live = params.has('live');
+    try { if (window.self !== window.top && !live && document.body) document.body.classList.add('cinema-embed'); } catch (e) {}
     var opts = {
       autoplay: !live,
       onDone: function () {

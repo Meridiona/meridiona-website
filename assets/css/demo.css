@@ -7,13 +7,33 @@ a{color:#6D28D9}a:hover{color:#8B5CF6}
 
 /* ── stage (scales the fixed 1240×720 device to fit) ─────────────────── */
 .stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  background:radial-gradient(130% 120% at 50% 8%,#211A44 0%,#160F31 55%,#0D0922 100%)}
+  background:radial-gradient(130% 120% at 50% 6%,#FBF9FF 0%,#F1ECFB 52%,#E7DFF7 100%)}
 .stage__scaler{position:relative;width:1240px;height:720px;transform-origin:center center}
 
-#desk{position:relative;width:1240px;height:720px}
+#desk{position:relative;width:1240px;height:720px;transform-origin:50% 50%;transition:transform 1.3s cubic-bezier(.4,0,.2,1);will-change:transform}
 #device{width:1240px;height:720px;border-radius:16px;overflow:hidden;position:relative;display:flex;flex-direction:column;
   background:linear-gradient(165deg,#FCFBFF 0%,#EEE9FC 48%,#DCD3F3 78%,#CFC2ED 100%);
-  box-shadow:0 50px 120px -30px rgba(20,10,50,.75),0 0 0 1px rgba(255,255,255,.06)}
+  box-shadow:0 50px 120px -30px rgba(20,10,50,.75),0 0 0 1px rgba(255,255,255,.06);
+  transition:background .6s ease,box-shadow .7s ease,border-radius .7s ease}
+/* intro: device + cover + stage all one flat colour so nothing reads as a card */
+#device.intro-clean{border-radius:0;box-shadow:none;background:transparent}
+#device.intro-clean.is-black{background:transparent}
+body.blackout .stage{background:radial-gradient(120% 120% at 50% 45%,#FBF9FF 0%,#EEE8FA 60%,#E3DAF5 100%)!important}
+/* during the clock phases the dashboard chrome is fully hidden so no hairline/border
+   can peek around the cover; it fades back in on reveal */
+.chrome,.toolbar,#timeline,#panel{transition:opacity .5s ease}
+#device.intro-clean .chrome,#device.intro-clean .toolbar,#device.intro-clean #timeline,#device.intro-clean #panel{opacity:0}
+body.intro .stage{background:radial-gradient(130% 120% at 50% 6%,#FBF9FF 0%,#F1ECFB 52%,#E7DFF7 100%)}
+/* embedded in the site's intro cinema: let the host's single background show through
+   so there aren't two stacked backgrounds during the clock intro */
+body.cinema-embed .stage{background:transparent}
+body.cinema-embed .mscrim{background:transparent!important}
+body.cinema-embed .mscrim.is-black{background:transparent!important}
+body.cinema-embed.blackout .stage{background:transparent!important}
+/* once the dashboard UI reveals, it sits as a card with a comfortable, tinted frame
+   (the fit-scaler leaves a 40px margin when embedded+revealed; this tints that gap) */
+body.cinema-embed:not(.intro) .stage{background:linear-gradient(160deg,#EDE7FB 0%,#E5DCF7 100%)}
+body.cinema-embed:not(.intro) #device{border-radius:20px;box-shadow:0 40px 90px -30px rgba(70,45,140,.4),0 0 0 1px rgba(255,255,255,.5)}
 
 .chrome{height:32px;flex:none;display:flex;align-items:center;gap:10px;padding:0 14px;
   background:linear-gradient(180deg,#FCFBFF,#F0EAFC);border-bottom:1px solid #E7E1F8}
@@ -67,7 +87,8 @@ a{color:#6D28D9}a:hover{color:#8B5CF6}
   font:600 10.5px/1 ui-monospace,'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;
   letter-spacing:0;color:#ACA6CE;transform:translateY(-50%)}
 .tl-hourline .hl-dot{width:9px;height:9px;flex:none;border-radius:99px;background:#FAF8FF;
-  border:2px solid rgba(172,166,206,.55);box-shadow:0 0 0 3px #FAF8FF;transform:translateY(-50%);z-index:1}
+  border:2px solid rgba(172,166,206,.55);box-shadow:0 0 0 3px #FAF8FF;transform:translateY(-50%);z-index:3;transition:box-shadow .4s ease,border-color .4s ease,background .4s ease}
+.tl-hourline .hl-dot.is-lit{background:#8B5CF6;border-color:#8B5CF6;box-shadow:0 0 0 3px #FAF8FF,0 0 12px 2px rgba(139,92,246,.85)}
 .tl-hourline .hl-rule{flex:1;height:1px;background:#E4DDF7;opacity:.5;transform:translateY(-50%);margin-left:28px}
 .tl-lanes{position:absolute;left:74px;right:14px;top:0;bottom:0}
 .tl-band{position:absolute;border-radius:14px;padding:9px 12px 9px 20px;overflow:hidden;cursor:pointer;
@@ -93,6 +114,9 @@ a{color:#6D28D9}a:hover{color:#8B5CF6}
   box-shadow:0 8px 20px -6px rgba(40,22,90,.65);white-space:nowrap;pointer-events:none}
 
 /* ── now-line (build phase) ──────────────────────────────────────────── */
+.tl-spine-lit{position:absolute;left:50.5px;width:22px;height:22px;border-radius:50%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  background:radial-gradient(circle,rgba(168,85,247,.95),rgba(139,92,246,.55) 42%,rgba(139,92,246,0) 72%);
+  filter:blur(.5px)}
 .tl-nowline{position:absolute;left:6px;right:14px;height:0;z-index:6;pointer-events:none}
 .tl-nowline__rule{position:absolute;left:66px;right:0;top:0;height:2px;transform:translateY(-1px);
   background:linear-gradient(90deg,#8B5CF6 0%,rgba(139,92,246,.55) 55%,rgba(139,92,246,0) 100%);border-radius:2px}
@@ -235,16 +259,57 @@ a{color:#6D28D9}a:hover{color:#8B5CF6}
 
 /* ── intro overlays ──────────────────────────────────────────────────── */
 .mscrim{position:absolute;left:0;right:0;top:-84px;bottom:0;z-index:46;
-  background:radial-gradient(120% 120% at 50% 26%,rgba(30,18,64,.64),rgba(11,6,24,.87));
-  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);transition:opacity .7s ease;pointer-events:none}
+  background:radial-gradient(130% 120% at 50% 6%,#FBF9FF 0%,#F1ECFB 52%,#E7DFF7 100%);
+  transition:opacity .7s ease;pointer-events:none}
 .mscrim.is-off{opacity:0}
+body.intro .mscrim{background:transparent}
+.mscrim.is-black{background:radial-gradient(120% 120% at 50% 45%,#FBF9FF 0%,#EEE8FA 60%,#E3DAF5 100%)}
+
+/* ── intro "a day in the life" scene (behind the clock) ─────────────────── */
+.mday{position:absolute;left:0;right:0;top:-84px;bottom:0;z-index:47;pointer-events:none;overflow:hidden}
+.mday-glow{position:absolute;inset:0;opacity:0;transition:opacity .8s ease}
+.mday-vig{position:absolute;inset:0;opacity:0;background:radial-gradient(circle 420px at 50% 40%,rgba(80,58,150,.28) 0%,transparent 100%);transition:opacity 1s ease}
+.mday-off{position:absolute;inset:0;opacity:0;background:radial-gradient(circle 460px at 50% 42%,rgba(70,52,140,.26) 0%,transparent 100%);transition:opacity .9s ease}
+.mday-chip{position:absolute;display:inline-flex;align-items:center;gap:9px;padding:9px 15px 9px 10px;border-radius:14px;
+  background:rgba(255,255,255,.9);border:1px solid rgba(139,92,246,.28);
+  box-shadow:0 16px 38px -16px rgba(90,60,170,.45),inset 0 1px 0 rgba(255,255,255,.8);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  color:#37306A;font:700 13.5px -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;white-space:nowrap;
+  opacity:0;transform:translate(var(--tx,0),10px) scale(.9);will-change:transform,opacity}
+.mday-chip.is-in{opacity:1;transform:translate(0,0) scale(1);transition:opacity .5s ease,transform .6s cubic-bezier(.2,.85,.25,1)}
+.mday-chip.is-out{opacity:0;transform:translate(var(--tx,0),-12px) scale(.96);filter:blur(2px);transition:opacity .6s ease,transform .6s ease,filter .6s ease}
+.mday-chip .app-ico{width:26px;height:26px;flex:none}
+.mday-chip__t{line-height:1}
+.mday-laptop{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);perspective:1000px;opacity:0;transition:opacity .5s ease}
+.mday-laptop.is-in{opacity:1}
+.mday-laptop .lap-screen{position:relative;width:360px;height:224px;margin:0 auto;border-radius:15px 15px 4px 4px;
+  background:linear-gradient(160deg,#241B4A,#130B2A);border:3px solid #3A2E66;
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.35),inset 0 0 48px rgba(139,92,246,.16),0 22px 54px -18px rgba(0,0,0,.82);
+  transform-origin:bottom center;transform:rotateX(0deg);backface-visibility:hidden;transition:transform 1.15s cubic-bezier(.5,0,.2,1)}
+.mday-laptop .lap-screen::before{content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#4B3B7A;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4)}
+.mday-laptop.is-closed .lap-screen{transform:rotateX(-90deg);box-shadow:inset 0 0 6px rgba(139,92,246,.06)}
+.mday-laptop .lap-base{position:relative;width:436px;height:15px;margin:0 auto;border-radius:2px 2px 13px 13px;
+  background:linear-gradient(180deg,#8577B5,#41356C);box-shadow:0 20px 40px -12px rgba(0,0,0,.8)}
+.mday-laptop .lap-base::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:78px;height:5px;border-radius:0 0 9px 9px;background:rgba(0,0,0,.3)}
+.mday-tired{position:absolute;left:50%;top:25%;transform:translate(-50%,-50%) scale(.6);font-size:74px;line-height:1;
+  opacity:0;filter:drop-shadow(0 10px 22px rgba(0,0,0,.55));transition:opacity .6s ease,transform .7s cubic-bezier(.2,.85,.25,1)}
+.mday-tired.is-in{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.mday-tired.is-close{transform:translate(-50%,-18%) scale(.86);opacity:.92}
+.mday-vidwrap{position:absolute;inset:0;z-index:47;opacity:0;transition:opacity .85s cubic-bezier(.4,0,.2,1)}
+.mday-vidwrap.is-in{opacity:1}
+.mday-vidwrap.is-dim{opacity:0;transition:opacity .8s ease}
+.mday-vid-back{position:absolute;inset:0;background:#0B0618}
+.mday-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0B0618}
+.mday-vid-tint{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,4,22,.5),rgba(8,4,22,.12) 38%,rgba(8,4,22,.8))}
 
 .mclock{position:absolute;z-index:48;display:flex;flex-direction:column;align-items:center;gap:11px;
-  transition:transform 2.9s cubic-bezier(.4,0,.2,1),opacity .55s ease;will-change:transform;pointer-events:none}
+  transition:left 2.1s cubic-bezier(.4,0,.2,1),top 2.1s cubic-bezier(.4,0,.2,1),transform 2.1s cubic-bezier(.4,0,.2,1),opacity .55s ease;will-change:transform,left,top;pointer-events:none}
 .mclock--hero{left:50%;top:38%;transform:translate(-50%,-50%) scale(1)}
 .mclock--side{left:87%;top:17%;transform:translate(-50%,-50%) scale(.52)}
 .mclock--dock{left:1058px;top:132px;transform:translate(-50%,-50%) scale(.5)}
 .mclock--gone{left:1058px;top:200px;opacity:0;transform:translate(-50%,-50%) scale(.42);pointer-events:none}
+.mclock--min{left:50%;top:46%;transform:translate(-50%,-50%) scale(.4);
+  transition:left 1s cubic-bezier(.4,0,.2,1),top 1s cubic-bezier(.4,0,.2,1),transform 1s cubic-bezier(.4,0,.2,1),opacity .5s ease}
 .mclock__dial{filter:drop-shadow(0 26px 54px rgba(30,16,80,.5))}
 .mclock__read{display:flex;align-items:baseline;gap:7px;background:#2A2153;border-radius:999px;padding:8px 18px;
   box-shadow:0 12px 30px -8px rgba(30,16,80,.6)}
@@ -254,17 +319,27 @@ a{color:#6D28D9}a:hover{color:#8B5CF6}
 
 .mquestion{position:absolute;left:0;right:0;top:-84px;bottom:0;z-index:49;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:0 80px 40px;
-  opacity:0;transition:opacity .6s ease;pointer-events:none}
+  opacity:0;transition:opacity .6s ease,transform .85s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.mquestion.mq--shrink{transform:scale(.3) translateY(-6px)}
+.mquestion.mq--underclock{justify-content:center;transform:translateY(250px)}
+.mquestion.mq--underclock .mq__eyebrow{font-size:11px}
+.mquestion.mq--underclock .mq__head{font-size:42px;margin-top:10px}
+.mquestion.mq--underclock .mq__sub{font-size:16px;margin-top:10px}
+.mquestion.mq--intoscreen{transform:scale(.17) translateY(-44px);opacity:0;transition:transform 1.15s cubic-bezier(.5,0,.2,1),opacity 1.15s ease}
 .mquestion.is-on{opacity:1}
-.mqw{display:inline-block;opacity:0;transform:translateY(24px);filter:blur(7px);animation:mq-word-in .74s cubic-bezier(.2,.8,.25,1) both}
-@keyframes mq-word-in{from{opacity:0;transform:translateY(24px);filter:blur(7px)}to{opacity:1;transform:none;filter:blur(0)}}
+.mquestion.mq--lift{opacity:0;transform:translateY(-30px)}
+.mquestion.mq--instant{transition:none}
+.mqw{display:inline-block;opacity:0;transform:translateY(32px) scale(.92);filter:blur(10px);animation:mq-word-in .9s cubic-bezier(.16,1,.3,1) both}
+@keyframes mq-word-in{0%{opacity:0;transform:translateY(32px) scale(.92);filter:blur(10px)}55%{opacity:1;filter:blur(0)}100%{opacity:1;transform:none;filter:blur(0)}}
+.mqw.mqw--q{transform:none;filter:none;animation-name:mq-pop;animation-duration:.32s;animation-timing-function:cubic-bezier(.2,.7,.3,1)}
+@keyframes mq-pop{0%{opacity:0;transform:scale(.82)}100%{opacity:1;transform:none}}
 .mquestion.mq--bottom{justify-content:flex-end;padding-bottom:64px}
-.mq__eyebrow{font:700 12px ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;letter-spacing:.2em;text-transform:uppercase;color:#C6B9F2}
-.mq__head{font:800 60px/1.12 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#fff;letter-spacing:-.03em;margin-top:16px;text-wrap:balance;filter:drop-shadow(0 3px 14px rgba(8,3,26,.5))}
-.mqw--head{color:#fff}
+.mq__eyebrow{font:700 12px ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;letter-spacing:.2em;text-transform:uppercase;color:#8B7BC7}
+.mq__head{font:800 60px/1.12 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#211A44;letter-spacing:-.03em;margin-top:16px;text-wrap:balance;filter:drop-shadow(0 3px 14px rgba(120,90,200,.14))}
+.mqw--head{color:#211A44}
 .mq__hl{background:linear-gradient(100deg,#8B5CF6,#A855F7);color:#fff;padding:2px 12px;border-radius:10px;box-decoration-break:clone;-webkit-box-decoration-break:clone;box-shadow:0 10px 26px -8px rgba(139,92,246,.7)}
-.mq__sub{font:500 21px/1.6 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#CBBFEA;max-width:600px;margin:20px auto 0}
-.mq__foot{display:inline-flex;align-items:center;gap:9px;margin-top:24px;font:700 13.5px -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#fff;background:rgba(139,92,246,.20);border:1px solid rgba(139,92,246,.5);border-radius:999px;padding:10px 18px}
+.mq__sub{font:500 21px/1.6 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#6B5F94;max-width:600px;margin:20px auto 0}
+.mq__foot{display:inline-flex;align-items:center;gap:9px;margin-top:24px;font:700 13.5px -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#6D28D9;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4);border-radius:999px;padding:10px 18px}
 .mq__foot-dot{width:7px;height:7px;border-radius:99px;background:#8B5CF6;box-shadow:0 0 0 4px rgba(139,92,246,.25);animation:ws-blink 1.4s infinite}
 
 .mpointer{position:absolute;z-index:42;left:404px;top:150px;opacity:0;transform:translateY(6px);
@@ -274,12 +349,12 @@ a{color:#6D28D9}a:hover{color:#8B5CF6}
 .mpointer svg{display:block;margin:2px 0 0 42px}
 
 /* ── daily summary overlay ─────────────────────────────────────────────── */
-.sumpill{cursor:pointer;font-family:inherit}
-.sumpill--hot{box-shadow:0 0 0 3px rgba(139,92,246,.9),0 8px 20px -6px rgba(139,92,246,.6);border-color:#8B5CF6!important}
+.sumpill{cursor:pointer;font-family:inherit;transition:transform .25s ease,box-shadow .25s ease,background .25s ease,color .25s ease}
+.sumpill--hot{transform:scale(1.14);background:#F1ECFE!important;color:#6D28D9!important;box-shadow:0 0 0 2px #8B5CF6,0 0 0 6px rgba(139,92,246,.3),0 12px 28px -6px rgba(139,92,246,.75)!important;border-color:#8B5CF6!important}
 .msummary{position:absolute;left:0;right:0;top:-84px;bottom:0;z-index:60;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s ease}
 .msummary.is-on{opacity:1;pointer-events:auto}
 .msum__scrim{position:absolute;inset:0;background:rgba(18,11,40,.52);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
-.msum__cap{position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:3;max-width:640px;text-align:center;display:flex;align-items:center;gap:10px;font:800 14.5px -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;letter-spacing:-.01em;color:#fff;background:linear-gradient(100deg,#7C3AED,#B13BE6);padding:11px 22px 11px 20px;border-radius:999px;box-shadow:0 18px 42px -10px rgba(124,58,237,.85),0 0 0 4px rgba(124,58,237,.16);animation:cap-glow 2.2s ease-in-out infinite}
+.msum__cap{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:3;max-width:640px;text-align:center;display:flex;align-items:center;gap:10px;font:800 14.5px -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;letter-spacing:-.01em;color:#fff;background:linear-gradient(100deg,#7C3AED,#B13BE6);padding:11px 22px 11px 20px;border-radius:999px;box-shadow:0 18px 42px -10px rgba(124,58,237,.85),0 0 0 4px rgba(124,58,237,.16);animation:cap-glow 2.2s ease-in-out infinite}
 .msum__cap::before{content:'';display:block;width:8px;height:8px;flex:none;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35);animation:ws-blink 1.15s infinite}
 @keyframes cap-glow{0%,100%{box-shadow:0 18px 42px -10px rgba(124,58,237,.85),0 0 0 4px rgba(124,58,237,.16)}50%{box-shadow:0 20px 50px -8px rgba(160,80,240,.98),0 0 0 9px rgba(124,58,237,.04)}}
 @keyframes cap-pop{0%{transform:translateX(-50%) translateY(-8px) scale(.82);opacity:0}60%{transform:translateX(-50%) translateY(0) scale(1.05);opacity:1}100%{transform:translateX(-50%) scale(1)}}
