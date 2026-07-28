@@ -119,6 +119,20 @@ body[data-theme="paper"]{
 .trust-strip__item{display:inline-flex;align-items:center;gap:9px}
 .trust-strip__icon{flex:none}
 
+/* Public live worklog/task-update counter (worker.js's /api/counter DO).
+   Hidden by default and only unhidden by JS on a successful fetch — see
+   assets/js/site.js's LiveCounter module — so a blocked/unreachable Worker
+   never leaves a broken or stale badge visible. */
+.live-counter{display:none;align-items:center;gap:12px;margin:26px auto 0;padding:10px 20px 10px 15px;width:fit-content;flex:none;border-radius:999px;border:1px solid var(--line);background:var(--chip);box-shadow:0 18px 44px -28px rgba(60,30,140,.4);animation:hero-in .7s ease both}
+.live-counter.is-visible{display:inline-flex}
+.live-counter__pulse{position:relative;width:9px;height:9px;flex:none}
+.live-counter__pulse-core{position:absolute;inset:0;border-radius:50%;background:var(--acc2);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc2) 18%,transparent)}
+.live-counter__pulse::before{content:'';position:absolute;inset:0;border-radius:50%;background:var(--acc2);animation:live-counter-pulse 2.4s ease-out infinite}
+@keyframes live-counter-pulse{0%{opacity:.55;transform:scale(1)}100%{opacity:0;transform:scale(2.8)}}
+.live-counter__value{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.live-counter__label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+@media (prefers-reduced-motion:reduce){.live-counter{animation:none}.live-counter__pulse::before{animation:none;opacity:.35}}
+
 .why__intro{position:sticky;top:64px;z-index:20;background:var(--bg);padding:18px 0;border-bottom:1px solid var(--line)}
 .why__intro-row{display:flex;flex-direction:column;gap:8px}
 .why__intro-line{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(17px,2.1vw,26px);color:var(--ink);letter-spacing:-.02em;line-height:1.3}
@@ -378,7 +392,7 @@ body[data-theme="paper"]{
 .theme-dot:hover{transform:scale(1.12)}
 .theme-dot.is-active{border-color:var(--acc)}
 @media (max-width:760px){.section{padding:72px 20px}.hero{padding:92px 20px 8px}.hero__pointer{display:none}.hero__note-monitor{display:none}.why__intro{position:static;padding:0 0 8px}.scrolly:not(.is-ready) .scrolly__panels{gap:44px;margin-top:32px}.scrolly__panel-body,.decision-context,.decision-note{max-width:none}.worklog-flow{flex-direction:column;gap:18px;max-width:none}.worklog-connector{display:none}.worklog-targets{flex-direction:row;flex-wrap:wrap;gap:10px 16px}.faq-layout{gap:32px}}
-@media (max-width:560px){.section{padding:56px 18px}.hero{padding:88px 18px 8px}.hero__embed-annotation{display:none}.doc-diagram__row{flex-wrap:wrap}.doc-diagram__metric{margin-left:0}.decision-compare{gap:10px}.theme-switcher{bottom:14px;left:14px;padding:7px 10px}.theme-switcher__label{display:none}}
+@media (max-width:560px){.section{padding:56px 18px}.hero{padding:88px 18px 8px}.hero__embed-annotation{display:none}.doc-diagram__row{flex-wrap:wrap}.doc-diagram__metric{margin-left:0}.decision-compare{gap:10px}.theme-switcher{bottom:14px;left:14px;padding:7px 10px}.theme-switcher__label{display:none}.live-counter{gap:9px;padding:9px 16px 9px 13px;margin-top:20px}.live-counter__value{font-size:16px}.live-counter__label{font-size:10px}}
 
 .skip-link{position:absolute;top:-48px;left:12px;z-index:100;padding:10px 18px;border-radius:8px;background:var(--ink);color:var(--bg);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;text-decoration:none;transition:top .15s ease}
 .skip-link:focus{top:12px}
