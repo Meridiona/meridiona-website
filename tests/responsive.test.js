@@ -116,15 +116,31 @@ test('exactly one </head> tag (canonical link injection point)', () => {
   const matches = index.match(/<\/head>/g) || [];
   expect(matches.length).toBe(1);
 });
-test('worker.js still serves /subscribe, /dl, /download and ASSETS fallback', () => {
+test('worker.js still serves /subscribe, /waitlist, /dl, /download and ASSETS fallback', () => {
   expect(worker).toContain("url.pathname === '/dl'");
   expect(worker).toContain("url.pathname === '/download'");
   expect(worker).toContain("url.pathname === '/subscribe'");
+  expect(worker).toContain("url.pathname === '/waitlist'");
   expect(worker).toContain('env.ASSETS.fetch(request)');
 });
-test('site.js calls /subscribe and /dl the way worker.js expects', () => {
+test('site.js calls /subscribe, /waitlist and /dl the way worker.js expects', () => {
   expect(siteJs).toContain("fetch('/subscribe'");
+  expect(siteJs).toContain("fetch('/waitlist'");
   expect(siteJs).toContain('/dl?ref=');
+});
+test('/waitlist validates every field the form sends and writes them to Resend properties', () => {
+  // The form posts these five keys; worker.js must read all of them or a field
+  // silently stops being collected.
+  ['body.name', 'body.email', 'body.profession', 'body.professionOther', 'body.phone', 'body.linkedin', 'body.comment']
+    .forEach((k) => expect(worker).toContain(k));
+  expect(worker).toContain('PROFESSIONS.includes(profession)');
+  // Custom Contact Properties, not the old first_name/last_name smuggling.
+  expect(worker).toContain('signup_source');
+  expect(worker).toContain("'https://api.resend.com/contacts'");
+});
+test('/waitlist emails the team inbox on every signup', () => {
+  expect(worker).toContain('https://api.resend.com/emails');
+  expect(worker).toContain('WAITLIST_NOTIFY_TO');
 });
 test('PostHog analytics is wired with a write-only project key', () => {
   const analyticsJs = fs.readFileSync(path.join(ROOT, 'assets/js/analytics.js'), 'utf-8');
@@ -188,6 +204,25 @@ test('download modal with mac/windows/linux picker (rendered by site.js)', () =>
   expect(siteJs).toContain("data-os=\"mac\"");
   expect(siteJs).toContain("data-os=\"windows\"");
   expect(siteJs).toContain("data-os=\"linux\"");
+});
+test('waitlist CTA above the footer opens a server-rendered signup form', () => {
+  expect(index).toContain('id="waitlist"');
+  expect(index).toContain('data-waitlist-open');
+  expect(index).toContain('id="modal-waitlist"');
+  // Form markup lives in the HTML (crawlable, works before site.js runs) rather
+  // than being innerHTML'd like the download modal's body.
+  ['wl-name', 'wl-email', 'wl-profession', 'wl-linkedin', 'wl-comment', 'wl-phone-slot', 'wl-done']
+    .forEach((id) => expect(index).toContain(`id="${id}"`));
+  ['pm', 'investor', 'dev', 'founder', 'other']
+    .forEach((p) => expect(index).toContain(`data-profession="${p}"`));
+  expect(siteJs).toContain("$('wl-form')");
+});
+test('waitlist and download modals share one country-code field implementation', () => {
+  expect(siteJs).toContain('phoneCodeField(');
+  expect(siteJs).toContain("phoneCodeField('dl'");
+  expect(siteJs).toContain("phoneCodeField('wl'");
+  // One definition, two instantiations — no duplicated combobox.
+  expect((siteJs.match(/const phoneCodeField = /g) || []).length).toBe(1);
 });
 test('social connect modal', () => {
   expect(index).toContain('id="modal-connect"');

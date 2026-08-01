@@ -30,6 +30,24 @@ const WRITING_META = {
   },
 };
 
+// The product waitlist (the "Join the waitlist" section above the footer on
+// index.html). Distinct from /subscribe's `source: 'waitlist'`, which only ever
+// meant "ping me when my OS ships" — this one collects a real lead profile.
+const PROFESSIONS = ['pm', 'investor', 'dev', 'founder', 'other'];
+// Resend Contact Properties must be registered once before they can be set on a
+// contact (POST https://api.resend.com/contact-properties, type "string") —
+// unregistered keys are rejected outright. These are the keys this Worker sets;
+// see README/`docs` for the one-time curl. resendContact() degrades gracefully
+// if they're missing rather than dropping a signup.
+const WAITLIST_PROPERTIES = ['profession', 'profession_other', 'phone', 'linkedin', 'comment', 'signup_source', 'os'];
+// The free-text "anything else?" box. Capped well under any property-size limit;
+// the notification email carries the same text, so nothing is lost either way.
+const COMMENT_MAX = 500;
+const WAITLIST_NOTIFY_TO = 'company@meridiona.com';
+// Must be on a domain verified for sending in Resend, or /emails 403s.
+const WAITLIST_NOTIFY_FROM = 'Meridian Waitlist <waitlist@meridiona.com>';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // Always resolves to the newest release's asset — no version to bump in code.
 // Filenames must match the meridian repo's actual CI-published asset names
 // exactly (release.yml), or /dl 404s against a real GitHub redirect.
@@ -116,61 +134,11 @@ async function handle(request, url, env, ctx) {
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
-      let email, source, os, phone;
-      try {
-        const body = await request.json();
-        email = (body.email || '').trim().toLowerCase();
-        // 'download' = already has (or is getting) the Mac build; 'waitlist' = waiting on an
-        // unreleased OS. Anything else/missing falls back to the shared audience below.
-        source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
-        os = ['mac', 'windows', 'linux'].includes(body.os) ? body.os : null;
-        // Optional; a malformed value is dropped rather than failing the whole signup.
-        phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 32) : '';
-      } catch {
-        return json({ error: 'Invalid request.' }, 400);
-      }
+      return handleSubscribe(request, env);
+    }
 
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return json({ error: 'Please enter a valid email address.' }, 400);
-      }
-
-      const audienceId =
-        (source === 'download' && env.RESEND_AUDIENCE_ID_DOWNLOAD) ||
-        (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
-        env.RESEND_AUDIENCE_ID;
-
-      // Resend contacts only have email/first_name/last_name/properties, and "properties"
-      // rejects unregistered keys (see the os-tag revert above) - so last_name carries the
-      // OS tag and first_name carries the optional phone number, both just along for the ride.
-      const contact = { email, unsubscribed: false };
-      if (os) contact.last_name = os.charAt(0).toUpperCase() + os.slice(1);
-      if (/^[+\d][\d\s()-]{4,30}$/.test(phone)) contact.first_name = phone;
-
-      try {
-        const res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(contact),
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          // Already subscribed — treat as success
-          if (res.status === 409 || err.name === 'already_exists') {
-            return json({ success: true });
-          }
-          console.error('Resend error:', res.status, JSON.stringify(err));
-          return json({ error: 'Something went wrong. Please try again.' }, 500);
-        }
-      } catch (err) {
-        console.error('Resend fetch error:', err);
-        return json({ error: 'Something went wrong. Please try again.' }, 500);
-      }
-
-      return json({ success: true });
+    if (url.pathname === '/waitlist' && request.method === 'POST') {
+      return handleWaitlist(request, env);
     }
 
     return env.ASSETS.fetch(request);
@@ -222,6 +190,244 @@ function json(data, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+// Trims an untrusted string field to a sane maximum. Over-long input is cut
+// rather than rejected — a pasted LinkedIn URL with tracking junk on the end
+// shouldn't cost someone their signup.
+function field(value, max) {
+  return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+// The "ping me about updates" email capture behind the download modal and the
+// /download interstitial. Fire-and-forget by design on the client side: the
+// download has already started by the time this is called, so site.js doesn't
+// wait on the result.
+// Exported for tests/waitlist.test.js, which drives it against a stubbed fetch.
+export async function handleSubscribe(request, env) {
+  let email, source, os, phone;
+  try {
+    const body = await request.json();
+    email = (body.email || '').trim().toLowerCase();
+    // 'download' = already has (or is getting) the Mac build; 'waitlist' = waiting on an
+    // unreleased OS. Anything else/missing falls back to the shared audience below.
+    source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
+    os = ['mac', 'windows', 'linux'].includes(body.os) ? body.os : null;
+    // Optional; a malformed value is dropped rather than failing the whole signup.
+    phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 32) : '';
+  } catch {
+    return json({ error: 'Invalid request.' }, 400);
+  }
+
+  if (!email || !EMAIL_RE.test(email)) {
+    return json({ error: 'Please enter a valid email address.' }, 400);
+  }
+
+  const segmentId =
+    (source === 'download' && env.RESEND_AUDIENCE_ID_DOWNLOAD) ||
+    (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
+    env.RESEND_AUDIENCE_ID;
+
+  // OS and phone used to be smuggled through last_name/first_name because
+  // Resend had nowhere else to put them. Resend's Nov-2025 contacts release
+  // added real Contact Properties (see WAITLIST_PROPERTIES), so they now go
+  // where they belong — which also stops a /waitlist signup from clobbering
+  // a real name with a phone number, contacts being global by email.
+  const properties = { signup_source: source || 'download-modal' };
+  if (os) properties.os = os;
+  if (/^[+\d][\d\s()-]{4,30}$/.test(phone)) properties.phone = phone;
+
+  const result = await resendContact(env, { email, unsubscribed: false, properties }, segmentId);
+  if (!result.ok) {
+    return json({ error: 'Something went wrong. Please try again.' }, 500);
+  }
+
+  return json({ success: true });
+}
+
+// The product-waitlist signup behind index.html's "Join the waitlist" section.
+// Unlike /subscribe (fire-and-forget: the download already started, so a failed
+// write is invisible and tolerable), a failure here loses a lead outright — so
+// this awaits both writes and reports the real outcome to the form.
+// Exported for tests/waitlist.test.js, which drives it against a stubbed fetch.
+export async function handleWaitlist(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Invalid request.' }, 400);
+  }
+
+  const name = field(body.name, 120);
+  const email = field(body.email, 200).toLowerCase();
+  const profession = field(body.profession, 40).toLowerCase();
+  const professionOther = field(body.professionOther, 120);
+  const phone = field(body.phone, 32);
+  const linkedin = field(body.linkedin, 300);
+  const comment = field(body.comment, COMMENT_MAX);
+
+  if (!name) return json({ error: 'Please tell us your name.' }, 400);
+  if (!EMAIL_RE.test(email)) return json({ error: 'Please enter a valid email address.' }, 400);
+  if (!PROFESSIONS.includes(profession)) return json({ error: 'Please pick what you do.' }, 400);
+  if (profession === 'other' && !professionOther) {
+    return json({ error: 'Tell us what you do so we know who we’re talking to.' }, 400);
+  }
+  if (linkedin && !/^(https?:\/\/)?([\w-]+\.)?linkedin\.com\/[\w\-./%?=&]+$/i.test(linkedin)) {
+    return json({ error: 'That doesn’t look like a LinkedIn URL.' }, 400);
+  }
+
+  // Split on the first space so broadcasts can greet {{FIRST_NAME}} properly; a
+  // single-word name just leaves last_name empty.
+  const space = name.indexOf(' ');
+  const firstName = space === -1 ? name : name.slice(0, space);
+  const lastName = space === -1 ? '' : name.slice(space + 1).trim();
+
+  // Only fields that were actually filled in. An empty value here would be a
+  // real write on a resubmit — blanking the LinkedIn URL someone gave us the
+  // first time — and it's also what a rejected empty string would cost: the
+  // fallback in resendContact() drops the whole properties map, not one key.
+  const properties = { profession, signup_source: 'site-waitlist' };
+  if (profession === 'other') properties.profession_other = professionOther;
+  if (phone) properties.phone = phone;
+  if (linkedin) properties.linkedin = linkedin;
+  if (comment) properties.comment = comment;
+
+  const contact = {
+    email,
+    first_name: firstName,
+    last_name: lastName,
+    unsubscribed: false,
+    properties,
+  };
+
+  // Both in flight at once, and the signup counts as saved if *either* lands:
+  // the Resend contact is the list, the notification email is the paper trail.
+  // Only losing both is a real failure worth showing the user.
+  const [contactResult, notified] = await Promise.all([
+    resendContact(env, contact, env.RESEND_AUDIENCE_ID_PRODUCT_WAITLIST || env.RESEND_AUDIENCE_ID),
+    notifyWaitlistSignup(env, { name, email, profession, professionOther, phone, linkedin, comment }),
+  ]);
+
+  if (!contactResult.ok && !notified) {
+    return json({ error: 'Something went wrong on our end. Please try again.' }, 500);
+  }
+  return json({ success: true });
+}
+
+// Creates or updates a Resend contact. Two failure modes are handled rather
+// than surfaced: an existing contact (PATCH it, so a resubmit refreshes the
+// profile instead of 409ing), and an account where WAITLIST_PROPERTIES haven't
+// been registered yet (retry bare, so the email address is still captured).
+async function resendContact(env, contact, segmentId) {
+  const payload = { ...contact };
+  if (segmentId) payload.segments = [segmentId];
+
+  let result = await postResendContact(env, payload);
+
+  if (result.exists) {
+    return patchResendContact(env, payload);
+  }
+  if (!result.ok && result.propertyError && payload.properties) {
+    console.error(`Resend rejected contact properties — retrying without them. Register these once via POST /contact-properties: ${WAITLIST_PROPERTIES.join(', ')}.`, result.detail);
+    delete payload.properties;
+    result = await postResendContact(env, payload);
+    if (result.exists) return { ok: true };
+  }
+  if (!result.ok) console.error('Resend contact error:', result.status, result.detail);
+  return result;
+}
+
+async function postResendContact(env, payload) {
+  try {
+    const res = await fetch('https://api.resend.com/contacts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) return { ok: true };
+
+    const err = await res.json().catch(() => ({}));
+    const detail = JSON.stringify(err);
+    if (res.status === 409 || err.name === 'already_exists') return { ok: false, exists: true, detail };
+    return {
+      ok: false,
+      status: res.status,
+      detail,
+      // 422/400 with "property" in the message is the unregistered-key case.
+      propertyError: (res.status === 422 || res.status === 400) && /propert/i.test(detail),
+    };
+  } catch (err) {
+    console.error('Resend contact fetch error:', err);
+    return { ok: false, status: 0, detail: String(err) };
+  }
+}
+
+// Contacts are addressable by email as well as id, so no lookup round-trip.
+// `unsubscribed` is deliberately dropped: it's fine to set on creation, but
+// sending it on an update would silently re-subscribe someone who had opted
+// out. `segments` isn't settable here either — an existing contact keeps the
+// segments it already had.
+async function patchResendContact(env, payload) {
+  const { email, segments, unsubscribed, ...updates } = payload;
+  try {
+    const res = await fetch(`https://api.resend.com/contacts/${encodeURIComponent(email)}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updates),
+    });
+    if (res.ok) return { ok: true };
+    const detail = JSON.stringify(await res.json().catch(() => ({})));
+    console.error('Resend contact update error:', res.status, detail);
+    // The contact exists either way, which is most of what we wanted — only the
+    // refreshed profile is lost, so don't fail the signup over it.
+    return { ok: true, stale: true, detail };
+  } catch (err) {
+    console.error('Resend contact update fetch error:', err);
+    return { ok: false, status: 0, detail: String(err) };
+  }
+}
+
+// Emails the new lead to the team inbox. Requires a Resend-verified sending
+// domain for WAITLIST_NOTIFY_FROM; returns false (rather than throwing) if that
+// isn't set up, leaving the contact write as the record.
+async function notifyWaitlistSignup(env, lead) {
+  const label = lead.profession === 'other' ? `Other — ${lead.professionOther}` : lead.profession.toUpperCase();
+  const rows = [
+    ['Name', lead.name],
+    ['Email', lead.email],
+    ['Profession', label],
+    ['Phone', lead.phone || '—'],
+    ['LinkedIn', lead.linkedin || '—'],
+    ['Comment', lead.comment || '—'],
+  ];
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: WAITLIST_NOTIFY_FROM,
+        to: [WAITLIST_NOTIFY_TO],
+        reply_to: lead.email,
+        subject: `Waitlist: ${lead.name} (${label})`,
+        text: rows.map(([k, v]) => `${k}: ${v}`).join('\n'),
+      }),
+    });
+    if (res.ok) return true;
+    console.error('Resend notification error:', res.status, JSON.stringify(await res.json().catch(() => ({}))));
+    return false;
+  } catch (err) {
+    console.error('Resend notification fetch error:', err);
+    return false;
+  }
 }
 
 // Validates the `port` query param the desktop app passed through the whole

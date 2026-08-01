@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Language**: HTML, CSS, JavaScript (vanilla, no framework, no build step)
 - **Entry points**: `index.html` (the landing page), `demo.html` (the interactive product demo embedded in the hero)
 - **Deployment**: Cloudflare Workers (via `wrangler deploy`)
-- **Tests**: `tests/responsive.test.js` (structural + responsiveness checks) and `tests/auth-relay.test.js` (Google-SSO relay unit tests)
+- **Tests**: `tests/responsive.test.js` (structural + responsiveness checks), `tests/auth-relay.test.js` (Google-SSO relay unit tests) and `tests/waitlist.test.js` (/waitlist validation + Resend payload, against a stubbed fetch)
 
 ## Architecture
 
@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`assets/css/site.css`** — design tokens (3 themes: dawn/dusk/paper, as CSS custom properties on `body`/`body[data-theme=...]`) plus every landing-page component class (`.nav__*`, `.hero__*`, `.feature-card`, `.faq-item__*`, `.modal-*`, `.connect-row--*`, `.theme-dot`, etc.).
 - **`assets/js/site.js`** — landing-page behavior, split into small modules (`Theme`, `Faq`, `HeroEmbed`, `DownloadModal`, `ConnectModal`), each owning one piece of UI state and re-rendering only its own DOM region.
 - **`assets/css/demo.css`** / **`assets/js/demo.js`** — the embedded demo's own design language (Plus Jakarta Sans, fixed-resolution dashboard chrome) and its state machine (`state` + `render()` → `renderToolbar/renderTimeline/renderPanel/renderFloating/renderReview`).
-- **`worker.js`** — Cloudflare Worker handling the Google-SSO relay for the Meridian desktop app (isolated by the `auth.meridiona.com` hostname), `/dl` (redirect to the latest GitHub release + PostHog attribution), `/download` (interstitial page with waitlist opt-in), `/subscribe` (Resend audience signup, called from `assets/js/site.js`'s download modal and the `/download` page), and per-path `<title>`/description rewriting for `/writing/*` essay pages (via `env.ASSETS.fetch` + string replace — this is why `index.html` must keep exactly one `<title>` and one `<meta name="description">` tag).
+- **`worker.js`** — Cloudflare Worker handling the Google-SSO relay for the Meridian desktop app (isolated by the `auth.meridiona.com` hostname), `/dl` (redirect to the latest GitHub release + PostHog attribution), `/download` (interstitial page with waitlist opt-in), `/subscribe` (Resend audience signup, called from `assets/js/site.js`'s download modal and the `/download` page), `/waitlist` (the product-waitlist form above the footer — see below), and per-path `<title>`/description rewriting for `/writing/*` essay pages (via `env.ASSETS.fetch` + string replace — this is why `index.html` must keep exactly one `<title>` and one `<meta name="description">` tag).
 
 ### Key design decisions
 
@@ -40,11 +40,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 node tests/responsive.test.js
 node tests/auth-relay.test.js
+node tests/waitlist.test.js
 ```
 
-Or both via `npm test`.
+Or all three via `npm test`.
 
-`responsive.test.js` validates: viewport meta tags, worker.js compatibility (title/description/`</head>` regex targets, `/subscribe` + `/dl` wiring), all three themes present, key sections present (nav, hero, why, faq, footer, both modals, theme switcher), fluid-responsive patterns (`clamp()`, `auto-fit/minmax`), the embedded demo's interactive affordances, balanced `<script>`/`<style>` tags, and the writing section's structure/links.
+`responsive.test.js` validates: viewport meta tags, worker.js compatibility (title/description/`</head>` regex targets, `/subscribe` + `/waitlist` + `/dl` wiring), all three themes present, key sections present (nav, hero, why, faq, footer, all three modals, waitlist CTA, theme switcher), fluid-responsive patterns (`clamp()`, `auto-fit/minmax`), the embedded demo's interactive affordances, balanced `<script>`/`<style>` tags, and the writing section's structure/links.
 
 **Exit code**: 0 on success, 1 if any test fails.
 
@@ -63,7 +64,7 @@ python3 -m http.server 8080
 ### Deploy to Cloudflare
 
 ```bash
-node tests/responsive.test.js && node tests/auth-relay.test.js && wrangler deploy
+node tests/responsive.test.js && node tests/auth-relay.test.js && node tests/waitlist.test.js && wrangler deploy
 ```
 
 Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangler.jsonc` config specifies:
@@ -99,7 +100,8 @@ Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangl
 ├── robots.txt / sitemap.xml
 ├── tests/
 │   ├── responsive.test.js  # Structural + responsiveness test suite
-│   └── auth-relay.test.js  # Google-SSO relay unit tests
+│   ├── auth-relay.test.js  # Google-SSO relay unit tests
+│   └── waitlist.test.js    # /waitlist + /subscribe: validation, Resend payload (stubbed fetch)
 ├── .gitignore
 └── CLAUDE.md               # This file
 ```
@@ -136,6 +138,26 @@ Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangl
 
 `worker.js` fetches `env.ASSETS` for `/` and does a regex replace on `<title>[^<]*</title>` and `<meta name="description"[^>]*>` for `/writing/*` essay routes, then injects a `<link rel="canonical">` before `</head>`. Keep exactly one of each tag in `index.html`, and keep `</head>` unique — the test suite enforces this.
 
+### The waitlist form stores fields as Resend Contact Properties
+
+`POST /waitlist` (the "Join the waitlist" section above the footer) collects name, profession, email, phone, LinkedIn and an optional free-text comment. Resend's Nov-2025 contacts release added real **Contact Properties**, so the extra fields go in `properties` rather than being smuggled through `first_name`/`last_name` the way `/subscribe` used to do with phone/OS — both routes now use properties.
+
+**Properties must be registered once before they can be set**; unregistered keys are rejected outright. This is ordering-critical, not just a prerequisite for the new route: if it hasn't been done, `resendContact()` strips `properties` and `/subscribe` silently stops capturing OS and phone — data it *does* capture today via the old hack. Run for each of `profession`, `profession_other`, `phone`, `linkedin`, `comment`, `signup_source`, `os` (the list is `WAITLIST_PROPERTIES` in `worker.js`):
+
+```bash
+curl -X POST https://api.resend.com/contact-properties \
+  -H "Authorization: Bearer $RESEND_API_KEY" -H 'Content-Type: application/json' \
+  -d '{"key":"profession","type":"string"}'
+```
+
+If they're missing, `resendContact()` logs loudly and retries without properties so the email address is still captured rather than the signup being dropped.
+
+Two other things this route depends on:
+- `RESEND_AUDIENCE_ID_PRODUCT_WAITLIST` (a `wrangler secret put` value) — falls back to `RESEND_AUDIENCE_ID`. Keep it distinct from `RESEND_AUDIENCE_ID_WAITLIST`, which means "waiting on an unreleased OS", not this.
+- A Resend-**verified sending domain** for `WAITLIST_NOTIFY_FROM`, or the per-signup notification to `WAITLIST_NOTIFY_TO` 403s. The signup still succeeds on the contact write alone; only losing *both* is reported to the user.
+
+Contacts are global by email address, so the same person signing up here and via the download modal is one contact — which is why neither route puts non-name data in the name fields any more.
+
 ### Fluid first, breakpoints where fluid can't reach
 
 Default to fluid sizing — `clamp()` type and `repeat(auto-fit,minmax(...))` grids — so sections reflow continuously; that's still the bulk of the layout. But a few things genuinely can't be made responsive with sizing alone, and those have explicit mobile `@media` breakpoints (the demo/why/spacing rules are grouped at the bottom of `site.css`; the nav has its own at 760/560px; breakpoints used across the file are 760/640/560px):
@@ -157,7 +179,7 @@ There's no hamburger menu; the nav is deliberately minimal (4 items) so it stays
 - `.wrangler` and `.dev.vars*` are ignored (Cloudflare build artifacts)
 - `.env*` files are ignored (never commit secrets)
 - Use `.env.example` for documenting required environment variables
-- Deploy only after tests pass: `node tests/responsive.test.js && node tests/auth-relay.test.js && wrangler deploy`
+- Deploy only after tests pass: `node tests/responsive.test.js && node tests/auth-relay.test.js && node tests/waitlist.test.js && wrangler deploy`
 
 ## Browser Support
 

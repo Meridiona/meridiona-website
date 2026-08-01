@@ -334,6 +334,15 @@
       </div>
     </div>
 
+    <section id="waitlist" data-rv class="waitlist-cta" aria-labelledby="waitlist-title">
+      <div class="waitlist-cta__copy">
+        <span class="eyebrow">Early access</span>
+        <h2 id="waitlist-title" class="waitlist-cta__title">Get in line for what’s next</h2>
+        <p class="waitlist-cta__body">We ship to the waitlist first — new builds, the platforms we haven’t reached yet, and the occasional ask about what’s actually broken. Tell us who you are and we’ll aim it at the right people.</p>
+      </div>
+      <button type="button" data-waitlist-open class="btn-primary btn-primary--lg waitlist-cta__btn">Join the waitlist</button>
+    </section>
+
     <footer class="site-footer" role="contentinfo">
       <div class="footer-grid">
         <div class="footer-brand">
@@ -395,6 +404,52 @@
       <a href="#" class="connect-icon" title="LinkedIn" aria-label="LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.44-2.14 2.94v5.66H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0Z"/></svg></a>
     </div>
     <div class="connect-footnote">no spam, just diamonds in your feed ✦</div>
+  </div>
+</div>
+
+<div id="modal-waitlist" class="modal-overlay modal-overlay--top">
+  <div class="modal-card modal-card--waitlist">
+    <button id="btn-close-waitlist" class="icon-close icon-close--waitlist" aria-label="Close">✕</button>
+    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
+    <div id="wl-intro">
+      <h3 class="modal-title">Join the waitlist</h3>
+      <p class="modal-subtitle modal-subtitle--connect">Five fields, one of them optional twice over. We use it to decide what ships next — nothing else.</p>
+    </div>
+    <form id="wl-form" class="waitlist-form" novalidate>
+      <label class="field-label" for="wl-name">Name</label>
+      <input id="wl-name" name="name" class="email-input email-input--left" type="text" autocomplete="name" placeholder="Ada Lovelace" required>
+
+      <span class="field-label" id="wl-profession-label">What do you do?</span>
+      <div id="wl-profession" class="profession-grid" role="group" aria-labelledby="wl-profession-label">
+        <button type="button" class="profession-option" data-profession="pm" aria-pressed="false">PM</button>
+        <button type="button" class="profession-option" data-profession="investor" aria-pressed="false">Investor</button>
+        <button type="button" class="profession-option" data-profession="dev" aria-pressed="false">Dev</button>
+        <button type="button" class="profession-option" data-profession="founder" aria-pressed="false">Founder</button>
+        <button type="button" class="profession-option" data-profession="other" aria-pressed="false">Other</button>
+      </div>
+      <input id="wl-profession-input" type="hidden" name="profession" value="">
+      <input id="wl-profession-other" class="email-input email-input--left" type="text" placeholder="So — what do you do?" aria-label="Your profession" hidden>
+
+      <label class="field-label" for="wl-email">Email</label>
+      <input id="wl-email" name="email" class="email-input email-input--left" type="email" autocomplete="email" placeholder="you@work.com" required>
+
+      <label class="field-label" for="wl-phone">Phone <span class="field-label__opt">optional</span></label>
+      <div id="wl-phone-slot"></div>
+
+      <label class="field-label" for="wl-linkedin">LinkedIn <span class="field-label__opt">optional</span></label>
+      <input id="wl-linkedin" name="linkedin" class="email-input email-input--left" type="url" inputmode="url" placeholder="linkedin.com/in/ada" aria-label="LinkedIn profile URL">
+
+      <label class="field-label" for="wl-comment">Anything else? <span class="field-label__opt">optional</span></label>
+      <textarea id="wl-comment" name="comment" class="email-input email-input--left comment-input" rows="3" maxlength="500" placeholder="What are you hoping Meridian does for you?" aria-label="Anything else (optional)"></textarea>
+
+      <p id="wl-error" class="form-error" style="display:none" role="alert"></p>
+      <button id="wl-submit" type="submit" class="btn-primary btn-primary--block">Join the waitlist →</button>
+      <div class="form-note">No spam. We email when there's something worth opening.</div>
+    </form>
+    <div id="wl-done" class="waitlist-done" hidden>
+      <h3 class="modal-title"><span class="success-check">✓</span> You’re on the list</h3>
+      <p class="modal-subtitle modal-subtitle--connect">We’ll be in touch when there’s something to show you — and we’ll know who we’re writing to.</p>
+    </div>
   </div>
 </div>
 
