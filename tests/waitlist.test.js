@@ -1,5 +1,7 @@
 /**
- * Unit tests for the product-waitlist signup (POST /waitlist in worker.js).
+ * Unit tests for the two Resend-backed signup routes in worker.js: the product
+ * waitlist (POST /waitlist) and the download modal's email capture
+ * (POST /subscribe).
  *
  * Everything Resend-facing is driven against a stubbed global fetch, so these
  * assert the two things that actually matter and can't be seen from the
@@ -7,10 +9,13 @@
  * it lands in Resend in the shape Resend expects (custom Contact Properties,
  * not the first_name/last_name smuggling /subscribe used before Nov 2025).
  *
+ * /subscribe is covered here because this change rewrote it three ways at once
+ * — endpoint, payload shape and field mapping — on a path that was already live.
+ *
  * Run with: node tests/waitlist.test.js
  */
 
-import { handleWaitlist } from '../worker.js';
+import { handleWaitlist, handleSubscribe } from '../worker.js';
 
 // ─── Minimal test harness (mirrors tests/responsive.test.js) ──────────────────
 let passed = 0, failed = 0;
@@ -145,7 +150,19 @@ await test('a picked profession does not carry a stale "other" value', async () 
   stubFetch(ok);
   await post({ ...VALID, profession: 'pm', professionOther: 'leftover text' });
   restoreFetch();
-  expect(callTo('/contacts').body.properties.profession_other).toBe('');
+  expect('profession_other' in callTo('/contacts').body.properties).toBe(false);
+});
+
+await test('blank optional fields are omitted, not sent as empty strings', async () => {
+  stubFetch(ok);
+  await post({ name: 'Ada', email: 'ada@example.com', profession: 'dev' });
+  restoreFetch();
+  // Sending '' would blank out a phone/LinkedIn given on an earlier submission,
+  // since an existing contact is PATCHed.
+  const props = callTo('/contacts').body.properties;
+  expect('phone' in props).toBe(false);
+  expect('linkedin' in props).toBe(false);
+  expect(props.profession).toBe('dev');
 });
 
 console.log('\nTeam notification');
@@ -224,6 +241,94 @@ await test('a thrown network error is caught rather than 500ing the Worker', asy
   restoreFetch();
   expect(res.status).toBe(500);
   expect((await res.json()).error).toContain('try again');
+});
+
+// ─── /subscribe ──────────────────────────────────────────────────────────────
+// The download modal's email capture. It predates this change and was already
+// live, so these cover the migration off the first_name/last_name hack rather
+// than the route's behavior in general.
+console.log('\n/subscribe migration off the name fields');
+
+const SUB_ENV = {
+  RESEND_API_KEY: 're_test_key',
+  RESEND_AUDIENCE_ID: 'seg_all',
+  RESEND_AUDIENCE_ID_DOWNLOAD: 'seg_download',
+  RESEND_AUDIENCE_ID_WAITLIST: 'seg_os_waitlist',
+};
+const subscribe = (body) => handleSubscribe(new Request('https://meridiona.com/subscribe', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body),
+}), SUB_ENV);
+
+await test('posts to the global contacts endpoint with the segment in the body', async () => {
+  stubFetch(ok);
+  const res = await subscribe({ email: 'Ada@Example.com', source: 'download', os: 'mac' });
+  restoreFetch();
+  expect(res.status).toBe(200);
+  const contact = callTo('/contacts');
+  // Not the old /audiences/{id}/contacts path — segments moved into the body.
+  expect(contact.url).toBe('https://api.resend.com/contacts');
+  expect(contact.body.email).toBe('ada@example.com');
+  expect(contact.body.segments[0]).toBe('seg_download');
+});
+
+await test('OS and phone ride in properties, never in the name fields', async () => {
+  stubFetch(ok);
+  await subscribe({ email: 'ada@example.com', source: 'download', os: 'windows', phone: '+1 201 555 0123' });
+  restoreFetch();
+  const body = callTo('/contacts').body;
+  // This is the whole point of the migration: a name field must stay a name
+  // field, or a /waitlist signup and a download signup fight over it.
+  expect('first_name' in body).toBe(false);
+  expect('last_name' in body).toBe(false);
+  expect(body.properties.os).toBe('windows');
+  expect(body.properties.phone).toBe('+1 201 555 0123');
+  expect(body.properties.signup_source).toBe('download');
+});
+
+await test('a malformed phone is dropped without failing the signup', async () => {
+  stubFetch(ok);
+  const res = await subscribe({ email: 'ada@example.com', source: 'download', phone: 'call me maybe' });
+  restoreFetch();
+  expect(res.status).toBe(200);
+  expect('phone' in callTo('/contacts').body.properties).toBe(false);
+});
+
+await test('the OS waitlist still routes to its own segment, not the product waitlist', async () => {
+  stubFetch(ok);
+  await subscribe({ email: 'ada@example.com', source: 'waitlist', os: 'linux' });
+  restoreFetch();
+  expect(callTo('/contacts').body.segments[0]).toBe('seg_os_waitlist');
+});
+
+await test('rejects a malformed email before calling Resend', async () => {
+  stubFetch(ok);
+  const res = await subscribe({ email: 'nope', source: 'download' });
+  restoreFetch();
+  expect(res.status).toBe(400);
+  expect(calls.length).toBe(0);
+});
+
+await test('an existing subscriber is updated, not reported as an error', async () => {
+  stubFetch((url, body, init) =>
+    (!init || init.method === 'POST') ? { status: 409, json: { name: 'already_exists' } } : ok());
+  const res = await subscribe({ email: 'ada@example.com', source: 'download', os: 'mac' });
+  restoreFetch();
+  expect(res.status).toBe(200);
+  const patch = calls.find((c) => c.method === 'PATCH');
+  expect(patch.body.properties.os).toBe('mac');
+  expect('unsubscribed' in patch.body).toBe(false);
+});
+
+await test('unregistered properties fall back to a bare contact rather than a 500', async () => {
+  let attempt = 0;
+  stubFetch(() => (++attempt === 1 ? { status: 422, json: { message: 'Unknown contact property: os' } } : ok()));
+  const res = await subscribe({ email: 'ada@example.com', source: 'download', os: 'mac' });
+  restoreFetch();
+  expect(res.status).toBe(200);
+  expect(calls.length).toBe(2);
+  expect('properties' in calls[1].body).toBe(false);
 });
 
 console.log('\n' + '─'.repeat(50));

@@ -131,44 +131,7 @@ async function handle(request, url, env, ctx) {
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
-      let email, source, os, phone;
-      try {
-        const body = await request.json();
-        email = (body.email || '').trim().toLowerCase();
-        // 'download' = already has (or is getting) the Mac build; 'waitlist' = waiting on an
-        // unreleased OS. Anything else/missing falls back to the shared audience below.
-        source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
-        os = ['mac', 'windows', 'linux'].includes(body.os) ? body.os : null;
-        // Optional; a malformed value is dropped rather than failing the whole signup.
-        phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 32) : '';
-      } catch {
-        return json({ error: 'Invalid request.' }, 400);
-      }
-
-      if (!email || !EMAIL_RE.test(email)) {
-        return json({ error: 'Please enter a valid email address.' }, 400);
-      }
-
-      const segmentId =
-        (source === 'download' && env.RESEND_AUDIENCE_ID_DOWNLOAD) ||
-        (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
-        env.RESEND_AUDIENCE_ID;
-
-      // OS and phone used to be smuggled through last_name/first_name because
-      // Resend had nowhere else to put them. Resend's Nov-2025 contacts release
-      // added real Contact Properties (see WAITLIST_PROPERTIES), so they now go
-      // where they belong — which also stops a /waitlist signup from clobbering
-      // a real name with a phone number, contacts being global by email.
-      const properties = { signup_source: source || 'download-modal' };
-      if (os) properties.os = os;
-      if (/^[+\d][\d\s()-]{4,30}$/.test(phone)) properties.phone = phone;
-
-      const result = await resendContact(env, { email, unsubscribed: false, properties }, segmentId);
-      if (!result.ok) {
-        return json({ error: 'Something went wrong. Please try again.' }, 500);
-      }
-
-      return json({ success: true });
+      return handleSubscribe(request, env);
     }
 
     if (url.pathname === '/waitlist' && request.method === 'POST') {
@@ -233,6 +196,52 @@ function field(value, max) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
+// The "ping me about updates" email capture behind the download modal and the
+// /download interstitial. Fire-and-forget by design on the client side: the
+// download has already started by the time this is called, so site.js doesn't
+// wait on the result.
+// Exported for tests/waitlist.test.js, which drives it against a stubbed fetch.
+export async function handleSubscribe(request, env) {
+  let email, source, os, phone;
+  try {
+    const body = await request.json();
+    email = (body.email || '').trim().toLowerCase();
+    // 'download' = already has (or is getting) the Mac build; 'waitlist' = waiting on an
+    // unreleased OS. Anything else/missing falls back to the shared audience below.
+    source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
+    os = ['mac', 'windows', 'linux'].includes(body.os) ? body.os : null;
+    // Optional; a malformed value is dropped rather than failing the whole signup.
+    phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 32) : '';
+  } catch {
+    return json({ error: 'Invalid request.' }, 400);
+  }
+
+  if (!email || !EMAIL_RE.test(email)) {
+    return json({ error: 'Please enter a valid email address.' }, 400);
+  }
+
+  const segmentId =
+    (source === 'download' && env.RESEND_AUDIENCE_ID_DOWNLOAD) ||
+    (source === 'waitlist' && env.RESEND_AUDIENCE_ID_WAITLIST) ||
+    env.RESEND_AUDIENCE_ID;
+
+  // OS and phone used to be smuggled through last_name/first_name because
+  // Resend had nowhere else to put them. Resend's Nov-2025 contacts release
+  // added real Contact Properties (see WAITLIST_PROPERTIES), so they now go
+  // where they belong — which also stops a /waitlist signup from clobbering
+  // a real name with a phone number, contacts being global by email.
+  const properties = { signup_source: source || 'download-modal' };
+  if (os) properties.os = os;
+  if (/^[+\d][\d\s()-]{4,30}$/.test(phone)) properties.phone = phone;
+
+  const result = await resendContact(env, { email, unsubscribed: false, properties }, segmentId);
+  if (!result.ok) {
+    return json({ error: 'Something went wrong. Please try again.' }, 500);
+  }
+
+  return json({ success: true });
+}
+
 // The product-waitlist signup behind index.html's "Join the waitlist" section.
 // Unlike /subscribe (fire-and-forget: the download already started, so a failed
 // write is invisible and tolerable), a failure here loses a lead outright — so
@@ -269,18 +278,21 @@ export async function handleWaitlist(request, env) {
   const firstName = space === -1 ? name : name.slice(0, space);
   const lastName = space === -1 ? '' : name.slice(space + 1).trim();
 
+  // Only fields that were actually filled in. An empty value here would be a
+  // real write on a resubmit — blanking the LinkedIn URL someone gave us the
+  // first time — and it's also what a rejected empty string would cost: the
+  // fallback in resendContact() drops the whole properties map, not one key.
+  const properties = { profession, signup_source: 'site-waitlist' };
+  if (profession === 'other') properties.profession_other = professionOther;
+  if (phone) properties.phone = phone;
+  if (linkedin) properties.linkedin = linkedin;
+
   const contact = {
     email,
     first_name: firstName,
     last_name: lastName,
     unsubscribed: false,
-    properties: {
-      profession,
-      profession_other: profession === 'other' ? professionOther : '',
-      phone,
-      linkedin,
-      signup_source: 'site-waitlist',
-    },
+    properties,
   };
 
   // Both in flight at once, and the signup counts as saved if *either* lands:

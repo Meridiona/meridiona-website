@@ -101,7 +101,7 @@ Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangl
 ├── tests/
 │   ├── responsive.test.js  # Structural + responsiveness test suite
 │   ├── auth-relay.test.js  # Google-SSO relay unit tests
-│   └── waitlist.test.js    # /waitlist validation + Resend contact payload (stubbed fetch)
+│   └── waitlist.test.js    # /waitlist + /subscribe: validation, Resend payload (stubbed fetch)
 ├── .gitignore
 └── CLAUDE.md               # This file
 ```
@@ -142,7 +142,7 @@ Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangl
 
 `POST /waitlist` (the "Join the waitlist" section above the footer) collects name, profession, email, phone and LinkedIn. Resend's Nov-2025 contacts release added real **Contact Properties**, so the extra fields go in `properties` rather than being smuggled through `first_name`/`last_name` the way `/subscribe` used to do with phone/OS — both routes now use properties.
 
-**Properties must be registered once before they can be set**; unregistered keys are rejected outright. Before this route can store anything, run for each of `profession`, `profession_other`, `phone`, `linkedin`, `signup_source`, `os` (the list is `WAITLIST_PROPERTIES` in `worker.js`):
+**Properties must be registered once before they can be set**; unregistered keys are rejected outright. This is ordering-critical, not just a prerequisite for the new route: if it hasn't been done, `resendContact()` strips `properties` and `/subscribe` silently stops capturing OS and phone — data it *does* capture today via the old hack. Run for each of `profession`, `profession_other`, `phone`, `linkedin`, `signup_source`, `os` (the list is `WAITLIST_PROPERTIES` in `worker.js`):
 
 ```bash
 curl -X POST https://api.resend.com/contact-properties \
