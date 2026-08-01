@@ -387,6 +387,7 @@ body[data-theme="paper"]{
 .profession-option{padding:11px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;transition:border-color .18s ease,color .18s ease}
 .profession-option:hover{border-color:var(--acc);color:var(--acc)}
 .profession-option.is-active{border-color:var(--acc);background:var(--chip);color:var(--acc)}
+.comment-input{min-height:78px;line-height:1.55;resize:vertical}
 .waitlist-form .btn-primary--block{margin-top:16px}
 .waitlist-form .form-note{margin-top:10px;text-align:center}
 .waitlist-done{padding:6px 0 2px}

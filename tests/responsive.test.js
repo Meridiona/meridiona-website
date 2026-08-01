@@ -131,7 +131,7 @@ test('site.js calls /subscribe, /waitlist and /dl the way worker.js expects', ()
 test('/waitlist validates every field the form sends and writes them to Resend properties', () => {
   // The form posts these five keys; worker.js must read all of them or a field
   // silently stops being collected.
-  ['body.name', 'body.email', 'body.profession', 'body.professionOther', 'body.phone', 'body.linkedin']
+  ['body.name', 'body.email', 'body.profession', 'body.professionOther', 'body.phone', 'body.linkedin', 'body.comment']
     .forEach((k) => expect(worker).toContain(k));
   expect(worker).toContain('PROFESSIONS.includes(profession)');
   // Custom Contact Properties, not the old first_name/last_name smuggling.
@@ -211,7 +211,7 @@ test('waitlist CTA above the footer opens a server-rendered signup form', () => 
   expect(index).toContain('id="modal-waitlist"');
   // Form markup lives in the HTML (crawlable, works before site.js runs) rather
   // than being innerHTML'd like the download modal's body.
-  ['wl-name', 'wl-email', 'wl-profession', 'wl-linkedin', 'wl-phone-slot', 'wl-done']
+  ['wl-name', 'wl-email', 'wl-profession', 'wl-linkedin', 'wl-comment', 'wl-phone-slot', 'wl-done']
     .forEach((id) => expect(index).toContain(`id="${id}"`));
   ['pm', 'investor', 'dev', 'founder', 'other']
     .forEach((p) => expect(index).toContain(`data-profession="${p}"`));

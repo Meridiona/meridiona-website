@@ -427,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const profession = $('wl-profession-input').value;
         const professionOther = $('wl-profession-other').value.trim();
         const linkedin = $('wl-linkedin').value.trim();
+        const comment = $('wl-comment').value.trim();
 
         if (!name) return wlError('What should we call you?');
         if (!EMAIL_RE.test(email)) return wlError('That email address doesn’t look right.');
@@ -442,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/waitlist', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, profession, professionOther, phone: wlPhone.value(), linkedin }),
+          body: JSON.stringify({ name, email, profession, professionOther, phone: wlPhone.value(), linkedin, comment }),
         })
           .then((res) => res.json().catch(() => ({})).then((data) => ({ ok: res.ok, data })))
           .then(({ ok, data }) => {

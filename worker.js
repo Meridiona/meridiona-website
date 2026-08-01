@@ -39,7 +39,10 @@ const PROFESSIONS = ['pm', 'investor', 'dev', 'founder', 'other'];
 // unregistered keys are rejected outright. These are the keys this Worker sets;
 // see README/`docs` for the one-time curl. resendContact() degrades gracefully
 // if they're missing rather than dropping a signup.
-const WAITLIST_PROPERTIES = ['profession', 'profession_other', 'phone', 'linkedin', 'signup_source', 'os'];
+const WAITLIST_PROPERTIES = ['profession', 'profession_other', 'phone', 'linkedin', 'comment', 'signup_source', 'os'];
+// The free-text "anything else?" box. Capped well under any property-size limit;
+// the notification email carries the same text, so nothing is lost either way.
+const COMMENT_MAX = 500;
 const WAITLIST_NOTIFY_TO = 'company@meridiona.com';
 // Must be on a domain verified for sending in Resend, or /emails 403s.
 const WAITLIST_NOTIFY_FROM = 'Meridian Waitlist <waitlist@meridiona.com>';
@@ -261,6 +264,7 @@ export async function handleWaitlist(request, env) {
   const professionOther = field(body.professionOther, 120);
   const phone = field(body.phone, 32);
   const linkedin = field(body.linkedin, 300);
+  const comment = field(body.comment, COMMENT_MAX);
 
   if (!name) return json({ error: 'Please tell us your name.' }, 400);
   if (!EMAIL_RE.test(email)) return json({ error: 'Please enter a valid email address.' }, 400);
@@ -286,6 +290,7 @@ export async function handleWaitlist(request, env) {
   if (profession === 'other') properties.profession_other = professionOther;
   if (phone) properties.phone = phone;
   if (linkedin) properties.linkedin = linkedin;
+  if (comment) properties.comment = comment;
 
   const contact = {
     email,
@@ -300,7 +305,7 @@ export async function handleWaitlist(request, env) {
   // Only losing both is a real failure worth showing the user.
   const [contactResult, notified] = await Promise.all([
     resendContact(env, contact, env.RESEND_AUDIENCE_ID_PRODUCT_WAITLIST || env.RESEND_AUDIENCE_ID),
-    notifyWaitlistSignup(env, { name, email, profession, professionOther, phone, linkedin }),
+    notifyWaitlistSignup(env, { name, email, profession, professionOther, phone, linkedin, comment }),
   ]);
 
   if (!contactResult.ok && !notified) {
@@ -399,6 +404,7 @@ async function notifyWaitlistSignup(env, lead) {
     ['Profession', label],
     ['Phone', lead.phone || '—'],
     ['LinkedIn', lead.linkedin || '—'],
+    ['Comment', lead.comment || '—'],
   ];
   try {
     const res = await fetch('https://api.resend.com/emails', {

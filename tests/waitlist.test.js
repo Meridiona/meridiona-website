@@ -157,12 +157,29 @@ await test('blank optional fields are omitted, not sent as empty strings', async
   stubFetch(ok);
   await post({ name: 'Ada', email: 'ada@example.com', profession: 'dev' });
   restoreFetch();
-  // Sending '' would blank out a phone/LinkedIn given on an earlier submission,
-  // since an existing contact is PATCHed.
+  // Sending '' would blank out a phone/LinkedIn/comment given on an earlier
+  // submission, since an existing contact is PATCHed.
   const props = callTo('/contacts').body.properties;
   expect('phone' in props).toBe(false);
   expect('linkedin' in props).toBe(false);
+  expect('comment' in props).toBe(false);
   expect(props.profession).toBe('dev');
+});
+
+await test('the free-text comment is stored and forwarded to the team inbox', async () => {
+  stubFetch(ok);
+  await post({ ...VALID, comment: 'Mostly want this for standups.' });
+  restoreFetch();
+  expect(callTo('/contacts').body.properties.comment).toBe('Mostly want this for standups.');
+  expect(callTo('/emails').body.text).toContain('Mostly want this for standups.');
+});
+
+await test('an over-long comment is truncated rather than rejected', async () => {
+  stubFetch(ok);
+  await post({ ...VALID, comment: 'x'.repeat(900) });
+  restoreFetch();
+  // Losing the tail of a rambling comment beats losing the whole signup.
+  expect(callTo('/contacts').body.properties.comment.length).toBe(500);
 });
 
 console.log('\nTeam notification');
