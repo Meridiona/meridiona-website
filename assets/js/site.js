@@ -60,6 +60,110 @@ document.addEventListener('DOMContentLoaded', () => {
       return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
     };
 
+    // ── country-code combobox + phone input ──
+    // Two forms need this field (the download modal and the waitlist modal), so
+    // it's a factory over an id prefix and a state object owning
+    // { phoneCode, phone }. bind() attaches delegated handlers to whatever
+    // container the field is rendered into, so the container can re-render the
+    // markup underneath without rebinding anything.
+    const phoneCodeField = (prefix, state) => {
+      const codeId = prefix + '-phone-code-input';
+      const listId = prefix + '-phone-code-list';
+      const phoneId = prefix + '-phone';
+      const listEl = () => $(listId);
+      const codeEl = () => $(codeId);
+      const phoneEl = () => $(phoneId);
+
+      const html = () =>
+        '<div class="phone-row">' +
+          '<div class="phone-code">' +
+            '<input id="' + codeId + '" class="phone-select" type="text" autocomplete="off" spellcheck="false" placeholder="Search" ' +
+              'value="' + phoneCodeLabel(state.phoneCode) + '" aria-label="Country code" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="' + listId + '">' +
+            '<div id="' + listId + '" class="phone-code-list" role="listbox" hidden></div>' +
+          '</div>' +
+          '<input id="' + phoneId + '" class="phone-input" type="tel" inputmode="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[state.phoneCode] || '') + '" value="' + state.phone + '" aria-label="Phone number (optional)">' +
+        '</div>';
+
+      const renderList = (query) => {
+        const list = listEl();
+        if (!list) return;
+        const q = (query || '').trim().toLowerCase();
+        const matches = q
+          ? COUNTRY_CODES.filter((cc) => cc.name.toLowerCase().includes(q) || cc.code.includes(q))
+          : COUNTRY_CODES;
+        list.innerHTML = matches.length
+          ? matches.map((cc) =>
+              '<button type="button" class="phone-code-option' + (cc.code === state.phoneCode ? ' is-active' : '') + '" data-code="' + cc.code + '" role="option">' +
+                '<span class="phone-code-option__code">' + cc.code + '</span><span class="phone-code-option__name">' + cc.name + '</span>' +
+              '</button>').join('')
+          : '<div class="phone-code-empty">No matches</div>';
+      };
+      const openList = () => {
+        const list = listEl(), input = codeEl();
+        if (!list || !input) return;
+        renderList('');
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+      };
+      const closeList = () => {
+        const list = listEl(), input = codeEl();
+        if (!list || !input) return;
+        list.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+      };
+      const select = (code) => {
+        state.phoneCode = code;
+        const input = codeEl();
+        if (input) input.value = phoneCodeLabel(code);
+        const tel = phoneEl();
+        if (tel) {
+          tel.placeholder = COUNTRY_CODE_PLACEHOLDERS[code] || '';
+          tel.value = code === '+1'
+            ? formatUSPhone(tel.value)
+            : tel.value.replace(/[()]/g, '').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+        closeList();
+      };
+
+      const bind = (root) => {
+        // focusin/focusout (not focus/blur, which don't bubble) so the combobox
+        // opens the instant the field is clicked into.
+        root.addEventListener('focusin', (e) => { if (e.target.id === codeId) { e.target.value = ''; openList(); } });
+        root.addEventListener('focusout', (e) => {
+          if (e.target.id === codeId) { e.target.value = phoneCodeLabel(state.phoneCode); closeList(); }
+        });
+        // mousedown (fires before blur) + preventDefault so clicking an option
+        // selects it instead of the input just losing focus first.
+        root.addEventListener('mousedown', (e) => {
+          const opt = e.target.closest('.phone-code-option');
+          if (opt) { e.preventDefault(); select(opt.dataset.code); }
+        });
+        root.addEventListener('keydown', (e) => {
+          if (e.target.id !== codeId) return;
+          if (e.key === 'Escape') { e.target.blur(); return; }
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const first = listEl() && listEl().querySelector('.phone-code-option');
+            if (first) select(first.dataset.code);
+          }
+        });
+        root.addEventListener('input', (e) => {
+          if (e.target.id === codeId) { renderList(e.target.value); return; }
+          if (e.target.id === phoneId && state.phoneCode === '+1') {
+            const formatted = formatUSPhone(e.target.value);
+            e.target.value = formatted;
+            e.target.setSelectionRange(formatted.length, formatted.length);
+          }
+        });
+      };
+
+      // National number as typed, kept in sync on state so a re-render restores it.
+      const digits = () => { const tel = phoneEl(); return tel ? tel.value.trim() : ''; };
+      // Dial code + number, or '' when the (optional) field was left blank.
+      const value = () => { const d = digits(); return d ? state.phoneCode + ' ' + d : ''; };
+      return { html, bind, digits, value };
+    };
+
     // ── theme ──
     const applyTheme = (id) => {
       document.body.dataset.theme = id;
@@ -157,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // options" falls back to the manual os-picker, both for when detection
     // guesses wrong and for browsing what's available/coming soon.
     const dm = { os: null, showPicker: false, email: '', phoneCode: '+1', phone: '', sent: false };
+    const dlPhone = phoneCodeField('dl', dm);
     const fireDownload = (ref) => { $('dl-frame').src = '/dl?ref=' + ref + (dm.os === 'windows' ? '&os=windows' : ''); };
     const osPickerHtml = () =>
       '<h3 class="modal-title">Get Meridian</h3><p class="modal-subtitle">What are you running?</p><div class="os-picker">' +
@@ -169,56 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
           '<input id="dl-email" class="email-input" type="email"' + (required ? ' required autofocus' : '') + ' placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
           '<p id="dl-email-error" class="form-error" style="display:none">Enter a valid email address to continue.</p>' +
           '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
-          '<div class="phone-row">' +
-            '<div class="phone-code" id="dl-phone-code-wrap">' +
-              '<input id="dl-phone-code-input" class="phone-select" type="text" autocomplete="off" spellcheck="false" placeholder="Search" ' +
-                'value="' + phoneCodeLabel(dm.phoneCode) + '" aria-label="Country code" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dl-phone-code-list">' +
-              '<div id="dl-phone-code-list" class="phone-code-list" role="listbox" hidden></div>' +
-            '</div>' +
-            '<input id="dl-phone" class="phone-input" type="tel" inputmode="tel" placeholder="' + (COUNTRY_CODE_PLACEHOLDERS[dm.phoneCode] || '') + '" value="' + dm.phone + '" aria-label="Phone number (optional)">' +
-          '</div>' +
+          dlPhone.html() +
           '<button type="submit" class="btn-primary btn-primary--block">' + ctaLabel + '</button>' +
         '</form>';
-    };
-    const renderPhoneCodeList = (query) => {
-      const list = $('dl-phone-code-list');
-      if (!list) return;
-      const q = (query || '').trim().toLowerCase();
-      const matches = q
-        ? COUNTRY_CODES.filter((cc) => cc.name.toLowerCase().includes(q) || cc.code.includes(q))
-        : COUNTRY_CODES;
-      list.innerHTML = matches.length
-        ? matches.map((cc) =>
-            '<button type="button" class="phone-code-option' + (cc.code === dm.phoneCode ? ' is-active' : '') + '" data-code="' + cc.code + '" role="option">' +
-              '<span class="phone-code-option__code">' + cc.code + '</span><span class="phone-code-option__name">' + cc.name + '</span>' +
-            '</button>').join('')
-        : '<div class="phone-code-empty">No matches</div>';
-    };
-    const openPhoneCodeList = () => {
-      const list = $('dl-phone-code-list'); const input = $('dl-phone-code-input');
-      if (!list || !input) return;
-      renderPhoneCodeList('');
-      list.hidden = false;
-      input.setAttribute('aria-expanded', 'true');
-    };
-    const closePhoneCodeList = () => {
-      const list = $('dl-phone-code-list'); const input = $('dl-phone-code-input');
-      if (!list || !input) return;
-      list.hidden = true;
-      input.setAttribute('aria-expanded', 'false');
-    };
-    const selectPhoneCode = (code) => {
-      dm.phoneCode = code;
-      const codeInput = $('dl-phone-code-input');
-      if (codeInput) codeInput.value = phoneCodeLabel(code);
-      const phoneInput = $('dl-phone');
-      if (phoneInput) {
-        phoneInput.placeholder = COUNTRY_CODE_PLACEHOLDERS[code] || '';
-        phoneInput.value = code === '+1'
-          ? formatUSPhone(phoneInput.value)
-          : phoneInput.value.replace(/[()]/g, '').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-      }
-      closePhoneCodeList();
     };
     const renderDl = () => {
       const body = $('modal-download-body');
@@ -266,38 +324,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (e.target.id === 'dl-back') { dm.showPicker = true; renderDl(); }
     });
+    // Country combobox + phone formatting; everything below only deals with email.
+    dlPhone.bind($('modal-download-body'));
     // focusin/focusout (not focus/blur, which don't bubble) so the email
     // placeholder disappears the instant the field is clicked into, not just
-    // once the user starts typing, and the country combobox opens on focus.
+    // once the user starts typing.
     $('modal-download-body').addEventListener('focusin', (e) => {
       if (e.target.id === 'dl-email' && !e.target.value) {
         e.target.dataset.ph = e.target.placeholder;
         e.target.placeholder = '';
       }
-      if (e.target.id === 'dl-phone-code-input') { e.target.value = ''; openPhoneCodeList(); }
     });
     $('modal-download-body').addEventListener('focusout', (e) => {
       if (e.target.id === 'dl-email' && !e.target.value && e.target.dataset.ph) {
         e.target.placeholder = e.target.dataset.ph;
-      }
-      if (e.target.id === 'dl-phone-code-input') {
-        e.target.value = phoneCodeLabel(dm.phoneCode);
-        closePhoneCodeList();
-      }
-    });
-    // mousedown (fires before blur) + preventDefault so clicking an option
-    // selects it instead of the input just losing focus first.
-    $('modal-download-body').addEventListener('mousedown', (e) => {
-      const opt = e.target.closest('.phone-code-option');
-      if (opt) { e.preventDefault(); selectPhoneCode(opt.dataset.code); }
-    });
-    $('modal-download-body').addEventListener('keydown', (e) => {
-      if (e.target.id !== 'dl-phone-code-input') return;
-      if (e.key === 'Escape') { e.target.blur(); return; }
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const first = $('dl-phone-code-list') && $('dl-phone-code-list').querySelector('.phone-code-option');
-        if (first) selectPhoneCode(first.dataset.code);
       }
     });
     $('modal-download-body').addEventListener('input', (e) => {
@@ -305,13 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.classList.remove('email-input--error');
         const err = $('dl-email-error');
         if (err) err.style.display = 'none';
-        return;
-      }
-      if (e.target.id === 'dl-phone-code-input') { renderPhoneCodeList(e.target.value); return; }
-      if (e.target.id === 'dl-phone' && dm.phoneCode === '+1') {
-        const formatted = formatUSPhone(e.target.value);
-        e.target.value = formatted;
-        e.target.setSelectionRange(formatted.length, formatted.length);
       }
     });
     $('modal-download-body').addEventListener('submit', (e) => {
@@ -326,11 +359,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const phoneDigits = ($('dl-phone').value || '').trim();
-      const phoneCode = dm.phoneCode;
-      const phone = phoneDigits ? (phoneCode + ' ' + phoneDigits) : '';
-
-      dm.email = v; dm.phone = phoneDigits; dm.sent = true;
+      const phone = dlPhone.value();
+      dm.email = v; dm.phone = dlPhone.digits(); dm.sent = true;
 
       fetch('/subscribe', {
         method: 'POST',
@@ -347,7 +377,97 @@ document.addEventListener('DOMContentLoaded', () => {
     $('btn-connect').addEventListener('click', () => $('modal-connect').classList.add('is-open'));
     $('btn-close-connect').addEventListener('click', () => $('modal-connect').classList.remove('is-open'));
     $('modal-connect').addEventListener('click', (e) => { if (e.target.id === 'modal-connect') $('modal-connect').classList.remove('is-open'); });
-    this._esc = (e) => { if (e.key === 'Escape') { closeDl(); $('modal-connect').classList.remove('is-open'); } };
+    // ── waitlist modal ──
+    // The form markup is server-rendered in index.html (so it's visible without
+    // JS and to crawlers); this only owns the "Other" reveal, validation, submit
+    // and the success swap. Unlike the download modal's /subscribe call, a
+    // failure here is shown to the user — nothing else captured the lead.
+    let closeWaitlist = null;
+    if ($('modal-waitlist')) {
+      const wl = { phoneCode: '+1', phone: '', sending: false };
+      const wlPhone = phoneCodeField('wl', wl);
+      const openWl = () => { $('modal-waitlist').classList.add('is-open'); const n = $('wl-name'); if (n) n.focus(); };
+      const closeWl = () => $('modal-waitlist').classList.remove('is-open');
+      const wlError = (msg) => {
+        const err = $('wl-error');
+        err.textContent = msg || '';
+        err.style.display = msg ? 'block' : 'none';
+      };
+
+      $('wl-phone-slot').innerHTML = wlPhone.html();
+      wlPhone.bind($('modal-waitlist'));
+
+      document.querySelectorAll('[data-waitlist-open]').forEach((btn) => btn.addEventListener('click', openWl));
+      $('btn-close-waitlist').addEventListener('click', closeWl);
+      $('modal-waitlist').addEventListener('click', (e) => { if (e.target.id === 'modal-waitlist') closeWl(); });
+
+      // "Other" is a real answer, not a dead end — picking it reveals a free-text
+      // field so we learn what the role actually is.
+      $('wl-profession').addEventListener('click', (e) => {
+        const opt = e.target.closest('[data-profession]');
+        if (!opt) return;
+        $('wl-profession').querySelectorAll('.profession-option').forEach((b) => {
+          b.classList.toggle('is-active', b === opt);
+          b.setAttribute('aria-pressed', String(b === opt));
+        });
+        $('wl-profession-input').value = opt.dataset.profession;
+        const other = $('wl-profession-other');
+        other.hidden = opt.dataset.profession !== 'other';
+        if (!other.hidden) other.focus(); else other.value = '';
+        wlError('');
+      });
+
+      $('wl-form').addEventListener('input', () => wlError(''));
+      $('wl-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (wl.sending) return;
+
+        const name = $('wl-name').value.trim();
+        const email = $('wl-email').value.trim();
+        const profession = $('wl-profession-input').value;
+        const professionOther = $('wl-profession-other').value.trim();
+        const linkedin = $('wl-linkedin').value.trim();
+
+        if (!name) return wlError('What should we call you?');
+        if (!EMAIL_RE.test(email)) return wlError('That email address doesn’t look right.');
+        if (!profession) return wlError('Pick what you do — it shapes what we build first.');
+        if (profession === 'other' && !professionOther) return wlError('Tell us what you do.');
+
+        wl.phone = wlPhone.digits();
+        wl.sending = true;
+        const submit = $('wl-submit');
+        submit.disabled = true;
+        submit.textContent = 'Joining…';
+
+        fetch('/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, profession, professionOther, phone: wlPhone.value(), linkedin }),
+        })
+          .then((res) => res.json().catch(() => ({})).then((data) => ({ ok: res.ok, data })))
+          .then(({ ok, data }) => {
+            if (!ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+            $('wl-form').hidden = true;
+            $('wl-intro').hidden = true;
+            $('wl-done').hidden = false;
+          })
+          .catch((err) => wlError(err.message || 'Something went wrong. Please try again.'))
+          .finally(() => {
+            wl.sending = false;
+            submit.disabled = false;
+            submit.textContent = 'Join the waitlist →';
+          });
+      });
+
+      closeWaitlist = closeWl;
+    }
+
+    this._esc = (e) => {
+      if (e.key !== 'Escape') return;
+      closeDl();
+      $('modal-connect').classList.remove('is-open');
+      if (closeWaitlist) closeWaitlist();
+    };
     document.addEventListener('keydown', this._esc);
 
     // ── intro cinematic ──
