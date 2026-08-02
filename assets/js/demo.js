@@ -830,45 +830,45 @@ function createDemo(refs, opts) {
 
   async function runSummaryDemo() {
     showCursor();
-    await sleep(450); if (aborted) return;
+    await sleep(900); if (aborted) return;
     var pill = refs.toolbarLeftExtra.querySelector('.sumpill');
-    camera('scale(1.1) translate(30px,26px)', 1300);   // zoom in on the Daily-summary pill
-    cursorTo(pill, 1050);
+    camera('scale(1.1) translate(30px,26px)', 1600);   // zoom in on the Daily-summary pill
+    cursorTo(pill, 1400);
     if (pill) pill.classList.add('sumpill--hot');
-    await sleep(1150); if (aborted) return;
+    await sleep(1700); if (aborted) return;
     cursorClick();
-    await sleep(260); if (aborted) return;
-    setSummaryCaption('This is your Daily Summary — your whole day, built automatically at 6 PM');
+    await sleep(400); if (aborted) return;
+    setSummaryCaption('This is your Daily Summary — built automatically at the end of every day.');
     openSummary();
     camera('scale(1)', 850);                            // zoom back out to reveal the summary
     if (pill) setTimeout(function () { pill.classList.remove('sumpill--hot'); }, 600);
-    await sleep(2400); if (aborted) return;
+    await sleep(3400); if (aborted) return;
     setSummaryCaption('2 of 3 done. Click a finished task to post it to Jira.');
     var card0 = document.getElementById('msum-card'); if (card0) card0.scrollTop = 0;
     state.nudgeTaskId = 'c2'; renderSummary();
-    await sleep(700); if (aborted) return;
+    await sleep(900); if (aborted) return;
     camera('scale(1.05) translate(0,-20px)', 1000);     // ease in on the task about to be clicked
     cursorTo(document.querySelector('.msum-row[data-task-id="d5"]'), 1000);
-    await sleep(900); if (aborted) return;
+    await sleep(1100); if (aborted) return;
     // hand control to the user — fast fallback so it never stalls
     await waitForUserClick('.msum-row[data-task-id="d5"]', 3200); if (aborted) return;
     cursorClick();
-    await sleep(260); if (aborted) return;
+    await sleep(350); if (aborted) return;
     state.nudgeTaskId = null;
     summarySelectTask('d5');
     setSummaryCaption('This is the worklog update Meridian wrote for that task — post it straight to Jira.');
-    await sleep(1500); if (aborted) return;
+    await sleep(2800); if (aborted) return;
     // auto-click the "Post to Jira" button for them
-    camera('scale(1.06) translate(0,-20px)', 900);      // zoom in on the Post-to-Jira click
-    cursorTo(refs.summary.querySelector('.msum-tk-post'), 950);
-    await sleep(950); if (aborted) return;
+    camera('scale(1.06) translate(0,-20px)', 1100);      // zoom in on the Post-to-Jira click
+    cursorTo(refs.summary.querySelector('.msum-tk-post'), 1200);
+    await sleep(1300); if (aborted) return;
     cursorClick();
     summaryPost('d5');
     sfx('posted');
     setSummaryCaption('Posting to Jira…');
-    await sleep(1150); if (aborted) return;
-    setSummaryCaption('Logged to Jira ✓ — posted for you, no ticket-hunting.');
     await sleep(1400); if (aborted) return;
+    setSummaryCaption('Logged to Jira ✓ — posted for you, no ticket-hunting.');
+    await sleep(1900); if (aborted) return;
     // back to the daily summary, reveal the standup update
     camera('scale(1)', 850);                            // zoom out before returning to the summary
     summaryBack();

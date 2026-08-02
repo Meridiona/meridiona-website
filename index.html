@@ -99,6 +99,10 @@
     <div class="intro-statement__l2">Don’t let your work go unnoticed.</div>
   </div>
   <button id="intro-skip" class="intro-skip">Skip intro →</button>
+  <div id="intro-rotate" class="intro-rotate" aria-hidden="true">
+    <span class="intro-rotate__icon" aria-hidden="true">⟳</span>
+    <span class="intro-rotate__text">Rotate your screen</span>
+  </div>
 </div>
 <button id="replay-intro" class="replay-intro" aria-label="Replay intro"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 1 0 18.5 16"></path><path d="M20 4v6h-6"></path></svg>Replay intro</button>
 <nav class="nav" role="navigation" aria-label="Main">
@@ -153,6 +157,10 @@
     <div id="hero-outer-frame" class="hero__embed-frame">
       <div id="hero-viewport" class="hero__embed-viewport">
         <iframe id="hero-embed-frame" class="hero__iframe" src="/demo?live=1" title="Meridian product demo"></iframe>
+        <button id="demo-open" class="demo-open" type="button" aria-label="Open the full-size interactive demo">
+          <span class="demo-open__icon">▶</span>
+          <span class="demo-open__label">Tap to open the live demo</span>
+        </button>
       </div>
     </div>
   </div>
@@ -254,9 +262,11 @@
               <div class="scrolly__panel-visual">
                 <div class="worklog-flow">
                   <div class="worklog-draft">
+                    <span class="worklog-draft__badge"><span class="worklog-draft__badge-dot"></span>Auto-drafted from your day — no typing</span>
                     <p class="worklog-draft__text">Fixed slow product search — added a Postgres full-text index instead of standing up Elasticsearch. p95 latency down from 4.2s to 180ms.</p>
                     <span class="worklog-ticket-chip"><span class="worklog-ticket-dot"></span>MER-241 · Search latency</span>
-                    <div class="worklog-draft__status"><span class="worklog-draft__status-dot"></span>Posted to Jira</div>
+                    <div class="worklog-post-action"><span class="worklog-post-btn">Post to Jira<span class="worklog-post-tap" aria-hidden="true"></span></span></div>
+                    <div class="worklog-draft__status"><span class="worklog-draft__status-dot"></span>Posted — one click, zero typing</div>
                   </div>
                   <div class="worklog-connector" aria-hidden="true">
                     <svg class="worklog-connector__svg" viewBox="0 0 60 200" preserveAspectRatio="none">
@@ -378,6 +388,17 @@
   <div class="cookie-consent__actions">
     <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
     <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
+  </div>
+</div>
+
+<div id="demo-fullscreen" class="demo-fullscreen" aria-hidden="true">
+  <button id="demo-fullscreen-close" class="demo-fullscreen__close" type="button" aria-label="Close demo">✕</button>
+  <div class="demo-fullscreen__rotate" aria-hidden="true">
+    <span class="demo-fullscreen__rotate-icon" aria-hidden="true">⟳</span>
+    <span class="demo-fullscreen__rotate-text">Rotate your screen</span>
+  </div>
+  <div class="demo-fullscreen__stage">
+    <iframe id="demo-fullscreen-frame" class="demo-fullscreen__iframe" title="Meridian product demo" src="" allow="autoplay"></iframe>
   </div>
 </div>
 
