@@ -13,17 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
       windows: { emailNote: 'Windows 10/11 · 64-bit', successTitle: 'Download started', successBody: 'Meridian-setup.exe is on its way. Run it, and look for the diamond in your system tray.' },
       linux: { emailTitle: 'Get in line', emailPrompt: 'Meridian doesn’t speak penguin yet. Leave your email — you’ll be the first ping when it does.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'Linux is coming. You’re at the front of the queue — we’ll ping you the day it lands.' },
       other: { emailTitle: 'Get in line', emailPrompt: 'We don’t have a build for your device yet. Leave your email — you’ll be the first to know when we do.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'We’ll ping you the day Meridian lands on your platform.' },
+      mobile: { emailTitle: 'Meridian is a desktop app', emailPrompt: 'It follows the work you do on your Mac or Windows machine, so there’s nothing to install on a phone. Open meridiona.com on your laptop to download it — or leave your email and we’ll keep you posted.', ctaLabel: 'Join the waitlist', emailNote: 'macOS 14+ (Apple Silicon) and Windows 10/11.', successTitle: 'Saved you a spot', successBody: 'We’ll ping you with what’s next. When you’re back at your Mac or Windows machine, meridiona.com has the download.' },
     };
     const EMAIL_RE = /\S+@\S+\.\S+/;
     const isDownloadOS = (os) => os === 'mac' || os === 'windows';
-    // Best-effort client detection so the right build starts downloading without
-    // asking — mobile checked first since Android UAs also match /Linux/ and
-    // iPadOS reports platform "MacIntel" like a real Mac.
-    const detectOS = () => {
+    // Phone/tablet detection, deliberately UA-based and not viewport-based: a
+    // desktop browser in a narrow window still gets the download, and a phone in
+    // landscape still doesn't. iPadOS reports platform "MacIntel" like a real
+    // Mac, so it's separated by maxTouchPoints.
+    const isMobileUA = () => {
       const ua = navigator.userAgent || '';
       const platform = navigator.platform || '';
-      if (/Android/i.test(ua)) return null;
-      if (/iPhone|iPad|iPod/i.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return null;
+      return /Android/i.test(ua)
+        || /iPhone|iPad|iPod/i.test(ua)
+        || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    };
+    // Best-effort client detection so the right build starts downloading without
+    // asking — mobile checked first since Android UAs also match /Linux/. Null
+    // means "no build we can start here" (mobile, or an unknown desktop OS).
+    const detectOS = () => {
+      if (isMobileUA()) return null;
+      const platform = navigator.platform || '';
       if (/Mac/i.test(platform)) return 'mac';
       if (/Win/i.test(platform)) return 'windows';
       if (/Linux/i.test(platform)) return 'linux';
@@ -260,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // is an optional "get updates" ask, not a gate. "see other download
     // options" falls back to the manual os-picker, both for when detection
     // guesses wrong and for browsing what's available/coming soon.
+    const IS_MOBILE = isMobileUA();
     const dm = { os: null, showPicker: false, email: '', phoneCode: '+1', phone: '', sent: false };
     const dlPhone = phoneCodeField('dl', dm);
     const fireDownload = (ref) => { $('dl-frame').src = '/dl?ref=' + ref + (dm.os === 'windows' ? '&os=windows' : ''); };
@@ -268,7 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
         '<button class="os-option os-option--primary" data-os="mac"><span class="os-option__name">macOS</span><span class="os-option__meta os-option__meta--accent">Apple Silicon · ready today</span></button>' +
         '<button class="os-option" data-os="windows"><span class="os-option__name">Windows</span><span class="os-option__meta os-option__meta--accent">10/11 · ready today</span></button>' +
         '<button class="os-option" data-os="linux"><span class="os-option__name">Linux</span><span class="os-option__meta">coming soon · join waitlist</span></button></div>';
-    const backLinkHtml = (marginTop) => '<button id="dl-back" class="btn-text" style="margin-top:' + marginTop + 'px">← see other download options</button>';
+    // Suppressed on mobile: every option behind it starts a desktop installer
+    // the phone can't run, and DL.mobile already names both platforms.
+    const backLinkHtml = (marginTop) => (IS_MOBILE ? '' :
+      '<button id="dl-back" class="btn-text" style="margin-top:' + marginTop + 'px">← see other download options</button>');
     const emailFormHtml = (ctaLabel, required) => {
       return '<form id="dl-form" class="email-form">' +
           '<input id="dl-email" class="email-input" type="email"' + (required ? ' required autofocus' : '') + ' placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
@@ -304,13 +318,26 @@ document.addEventListener('DOMContentLoaded', () => {
       body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' + backLinkHtml(16);
     };
     const openDl = () => {
-      dm.os = detectOS() || 'other'; dm.showPicker = false; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false;
+      dm.os = IS_MOBILE ? 'mobile' : (detectOS() || 'other');
+      dm.showPicker = false; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false;
       renderDl();
       $('modal-download').classList.add('is-open');
       if (isDownloadOS(dm.os)) fireDownload('landing-modal-auto');
     };
     const closeDl = () => $('modal-download').classList.remove('is-open');
-    $('btn-download-nav').addEventListener('click', openDl);
+    // On a phone there is nothing to download, so the nav's primary action
+    // becomes the waitlist instead — [data-waitlist-open] is picked up by the
+    // waitlist modal's binding further down. That modal only exists on the
+    // landing page, so writing pages (which share this nav) keep the download
+    // modal, where DL.mobile tells the same desktop-only story. The FAQ CTA
+    // always opens the modal for the same reason.
+    const navDl = $('btn-download-nav');
+    if (IS_MOBILE && $('modal-waitlist')) {
+      navDl.textContent = 'Join waitlist';
+      navDl.setAttribute('data-waitlist-open', '');
+    } else {
+      navDl.addEventListener('click', openDl);
+    }
     if ($('btn-download-faq')) $('btn-download-faq').addEventListener('click', openDl);
     $('btn-close-download').addEventListener('click', closeDl);
     $('modal-download').addEventListener('click', (e) => { if (e.target.id === 'modal-download') closeDl(); });

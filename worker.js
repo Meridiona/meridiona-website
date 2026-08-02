@@ -212,7 +212,9 @@ export async function handleSubscribe(request, env) {
     // 'download' = already has (or is getting) the Mac build; 'waitlist' = waiting on an
     // unreleased OS. Anything else/missing falls back to the shared audience below.
     source = body.source === 'download' || body.source === 'waitlist' ? body.source : null;
-    os = ['mac', 'windows', 'linux'].includes(body.os) ? body.os : null;
+    // 'mobile' isn't a build target — it records that someone tried to download
+    // from a phone, which is the signal for whether that traffic is worth anything.
+    os = ['mac', 'windows', 'linux', 'mobile'].includes(body.os) ? body.os : null;
     // Optional; a malformed value is dropped rather than failing the whole signup.
     phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 32) : '';
   } catch {
@@ -585,10 +587,10 @@ function downloadPage(env, url) {
       : '<svg viewBox="0 0 384 512" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>'}
     Meridian for ${isWindows ? 'Windows' : 'Mac'}
   </span>
-  <h1>Your download is starting…</h1>
-  <p class="sub">${isWindows ? 'Windows 10/11 · 64-bit' : 'macOS · Apple silicon'} · free</p>
+  <h1 id="dl-head">Your download is starting…</h1>
+  <p class="sub" id="dl-sub">${isWindows ? 'Windows 10/11 · 64-bit' : 'macOS · Apple silicon'} · free</p>
 
-  <p class="label">Want to hear about updates?</p>
+  <p class="label" id="dl-label">Want to hear about updates?</p>
   <form id="sub-form">
     <div class="form-row">
       <input id="sub-email" type="email" placeholder="you@company.com" required autocomplete="email" aria-label="Email address">
@@ -603,7 +605,7 @@ function downloadPage(env, url) {
   <p class="msg mono" id="sub-msg">New releases and the occasional note. No spam.</p>
 
   <div class="divider"></div>
-  <p class="fallback">Download didn't start? <a href="${dlPath}" id="dl-fallback">Get ${target.asset}</a>.</p>
+  <p class="fallback" id="dl-fallback-row">Download didn't start? <a href="${dlPath}" id="dl-fallback">Get ${target.asset}</a>.</p>
 </div>
 
 <iframe id="dl-frame" style="display:none" title="download" aria-hidden="true"></iframe>
@@ -618,6 +620,12 @@ function downloadPage(env, url) {
     posthog.init(KEY,{api_host:HOST,defaults:"2026-05-30",person_profiles:"identified_only"});
     try{ posthog.capture('download_page_viewed',{ref:REF}); }catch(e){}
   }
+  // Meridian only runs on macOS/Windows, so a phone or tablet must never have an
+  // installer pushed at it — same UA test as assets/js/site.js's isMobileUA().
+  var ua = navigator.userAgent || '', platform = navigator.platform || '';
+  var IS_MOBILE = /Android/i.test(ua) || /iPhone|iPad|iPod/i.test(ua)
+    || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
   function startDownload(){
     var url = DL;
     try {
@@ -631,8 +639,17 @@ function downloadPage(env, url) {
     var fb = document.getElementById('dl-fallback');
     if (fb) fb.setAttribute('href', url);
   }
-  // Small delay so PostHog can boot and set a distinct_id before we fire /dl.
-  setTimeout(startDownload, 400);
+  if (IS_MOBILE) {
+    // Keep the email capture; swap the download promise for the desktop-only story.
+    document.getElementById('dl-head').textContent = 'Meridian is a desktop app';
+    document.getElementById('dl-sub').textContent = 'Runs on macOS 14+ (Apple Silicon) and Windows 10/11 — nothing to install on a phone.';
+    document.getElementById('dl-label').textContent = 'Leave your email and we\\'ll keep you posted.';
+    document.getElementById('sub-msg').textContent = 'Open meridiona.com on your laptop to download.';
+    document.getElementById('dl-fallback-row').textContent = 'Open meridiona.com on your Mac or Windows machine to get it.';
+  } else {
+    // Small delay so PostHog can boot and set a distinct_id before we fire /dl.
+    setTimeout(startDownload, 400);
+  }
 
   var COUNTRY_CODES = [
     ['+1','US/Canada','201 555 0123'],['+44','UK','7911 123456'],['+91','India','98765 43210'],
@@ -662,7 +679,7 @@ function downloadPage(env, url) {
     var phoneDigits = document.getElementById('sub-phone').value.trim();
     var phone = phoneDigits ? (codeSelect.value + ' ' + phoneDigits) : '';
     msg.textContent = 'Joining…';
-    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'download',os:${JSON.stringify(isWindows ? 'windows' : 'mac')},phone:phone})})
+    fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:IS_MOBILE?'waitlist':'download',os:IS_MOBILE?'mobile':${JSON.stringify(isWindows ? 'windows' : 'mac')},phone:phone})})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(function(res){
         if(res.ok && res.j && res.j.success){
