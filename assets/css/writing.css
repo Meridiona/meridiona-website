@@ -196,6 +196,14 @@
 /* keep the fixed theme switcher from covering the last line on short viewports */
 .writing-page .site-footer{margin-top:96px}
 
+@media (max-width:640px){
+  .writing-page{padding-top:100px}
+  .entry{grid-template-columns:1fr;gap:6px;padding:32px 0}
+  .entry__stamp{padding-top:0}
+  .letter-card{padding:32px 20px}
+  .letter-card__form{flex-direction:column}
+}
+
 @media (prefers-reduced-motion: reduce){
   .entry__title a{transition:none}
 }
