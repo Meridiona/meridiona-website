@@ -254,6 +254,35 @@ document.addEventListener('DOMContentLoaded', () => {
     this._resize = sizeEmbed;
     window.addEventListener('resize', this._resize);
 
+    // ── mobile: tap-to-open fullscreen demo (rotate-to-view) ──
+    const demoOpenBtn = $('demo-open');
+    const demoFS = $('demo-fullscreen');
+    if (demoOpenBtn && demoFS) {
+      const fsFrame = $('demo-fullscreen-frame');
+      const fsCloseBtn = $('demo-fullscreen-close');
+      const siteRoot = $('site');
+      const openDemoFS = () => {
+        if (window.innerWidth > 640) return;
+        fsFrame.src = '/demo?live=1';
+        demoFS.classList.add('is-on');
+        demoFS.setAttribute('aria-hidden', 'false');
+        if (siteRoot) siteRoot.setAttribute('inert', '');
+        document.documentElement.classList.add('intro-lock');
+        fsCloseBtn.focus();
+      };
+      const closeDemoFS = () => {
+        demoFS.classList.remove('is-on');
+        demoFS.setAttribute('aria-hidden', 'true');
+        if (siteRoot) siteRoot.removeAttribute('inert');
+        document.documentElement.classList.remove('intro-lock');
+        fsFrame.src = '';
+        demoOpenBtn.focus();
+      };
+      demoOpenBtn.addEventListener('click', openDemoFS);
+      fsCloseBtn.addEventListener('click', closeDemoFS);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && demoFS.classList.contains('is-on')) closeDemoFS(); });
+    }
+
     // ── download modal ──
     // dm.os is auto-detected on open and the real build starts downloading
     // immediately (see fireDownload below) — the email/phone form beneath it
