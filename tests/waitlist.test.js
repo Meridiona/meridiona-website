@@ -319,6 +319,15 @@ await test('the OS waitlist still routes to its own segment, not the product wai
   expect(callTo('/contacts').body.segments[0]).toBe('seg_os_waitlist');
 });
 
+await test('a download attempt from a phone is recorded as os=mobile', async () => {
+  // Not a build target — it's how we tell mobile traffic apart from a real
+  // unsupported-desktop signup. Dropping it would silently lose that signal.
+  stubFetch(ok);
+  await subscribe({ email: 'ada@example.com', source: 'waitlist', os: 'mobile' });
+  restoreFetch();
+  expect(callTo('/contacts').body.properties.os).toBe('mobile');
+});
+
 await test('rejects a malformed email before calling Resend', async () => {
   stubFetch(ok);
   const res = await subscribe({ email: 'nope', source: 'download' });

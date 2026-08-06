@@ -205,6 +205,25 @@ test('download modal with mac/windows/linux picker (rendered by site.js)', () =>
   expect(siteJs).toContain("data-os=\"windows\"");
   expect(siteJs).toContain("data-os=\"linux\"");
 });
+test('phones are never handed a desktop installer', () => {
+  // Meridian only runs on macOS/Windows. Detection is UA-based on purpose — a
+  // desktop browser in a narrow window must still download.
+  expect(siteJs).toContain('const isMobileUA = ');
+  expect(siteJs).toContain('const IS_MOBILE = isMobileUA()');
+  // Nav CTA becomes the waitlist instead of the download on mobile...
+  expect(siteJs).toContain("navDl.setAttribute('data-waitlist-open', '')");
+  // ...and the modal explains the desktop-only story rather than implying a
+  // phone build is on the way.
+  expect(siteJs).toContain("dm.os = IS_MOBILE ? 'mobile'");
+  expect(siteJs).toContain('Meridian is a desktop app');
+  // The /download interstitial auto-fires /dl into a hidden iframe; that must be
+  // gated too, or a shared link pulls a .dmg onto someone's phone.
+  expect(worker).toContain('var IS_MOBILE = ');
+  expect(worker).toMatch(/if \(IS_MOBILE\) \{[\s\S]*?\} else \{[\s\S]*?setTimeout\(startDownload, 400\)/);
+  // The writing pages share this nav but have no waitlist modal, so the swap is
+  // gated on the modal existing — otherwise the button is dead there.
+  expect(siteJs).toContain("if (IS_MOBILE && $('modal-waitlist'))");
+});
 test('waitlist CTA above the footer opens a server-rendered signup form', () => {
   expect(index).toContain('id="waitlist"');
   expect(index).toContain('data-waitlist-open');
