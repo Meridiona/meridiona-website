@@ -111,7 +111,7 @@ async function handle(request, url, env, ctx) {
     const meta = WRITING_META[url.pathname] || WRITING_META[url.pathname.replace(/\/$/, '')];
     if (meta && env.ASSETS) {
       try {
-        const base = await env.ASSETS.fetch(new Request(`${url.origin}/`));
+        const base = await env.ASSETS.fetch(new Request(`${url.origin}${url.pathname}`));
         let html = await base.text();
         html = html
           .replace(/<title>[^<]*<\/title>/, `<title>${meta.title}</title>`)
