@@ -450,22 +450,22 @@ body.intro .mscrim{background:transparent}
 
 /* ── privacy scene ─────────────────────────────────────────────────────── */
 .mprivacy{position:absolute;left:0;right:0;top:-84px;bottom:0;z-index:62;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:52px 90px;opacity:0;pointer-events:none;transition:opacity .7s ease;
-  background:radial-gradient(120% 110% at 50% 44%,#2A1C56 0%,#1A1140 55%,#0E0925 100%)}
+  background:radial-gradient(120% 110% at 50% 44%,#FBFAFF 0%,#F4F1FC 55%,#EEE9FA 100%)}
 .mprivacy.is-on{opacity:1}
-.mpriv__eyebrow{font:700 12px 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.24em;text-transform:uppercase;color:#B9A6F0;opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+.mpriv__eyebrow{font:700 12px 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.24em;text-transform:uppercase;color:#6D28D9;opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
 .mprivacy.is-on .mpriv__eyebrow{opacity:1;transform:none;transition-delay:.1s}
-.mpriv__head{font:800 40px/1.18 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#fff;letter-spacing:-.03em;margin-top:14px;max-width:780px;text-wrap:balance;opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.85,.25,1)}
+.mpriv__head{font:800 40px/1.18 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#211A44;letter-spacing:-.03em;margin-top:14px;max-width:780px;text-wrap:balance;opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.85,.25,1)}
 .mprivacy.is-on .mpriv__head{opacity:1;transform:none;transition-delay:.2s}
 .mpriv__hl{background:linear-gradient(100deg,#A855F7,#7C6BF5);-webkit-background-clip:text;background-clip:text;color:transparent}
 .mpriv__stage{position:relative;width:560px;height:280px;margin:22px 0 6px}
-.mpriv__glow{position:absolute;left:50%;top:50%;width:250px;height:250px;transform:translate(-50%,-50%);border-radius:99px;background:radial-gradient(circle,rgba(139,92,246,.5),rgba(139,92,246,0) 66%);opacity:0;transition:opacity .9s ease}
+.mpriv__glow{position:absolute;left:50%;top:50%;width:250px;height:250px;transform:translate(-50%,-50%);border-radius:99px;background:radial-gradient(circle,rgba(139,92,246,.22),rgba(139,92,246,0) 66%);opacity:0;transition:opacity .9s ease}
 .mprivacy.is-on .mpriv__glow{opacity:1;transition-delay:.35s;animation:priv-pulse 3.6s ease-in-out infinite .9s}
 @keyframes priv-pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.09)}}
-.mpriv__logo{position:absolute;left:50%;top:50%;width:150px;height:150px;object-fit:contain;opacity:0;transform:translate(-50%,-50%) scale(.35);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.9,.25,1);filter:drop-shadow(0 14px 44px rgba(139,92,246,.65))}
+.mpriv__logo{position:absolute;left:50%;top:50%;width:150px;height:150px;object-fit:contain;opacity:0;transform:translate(-50%,-50%) scale(.35);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.9,.25,1);filter:drop-shadow(0 14px 44px rgba(124,58,237,.35))}
 .mprivacy.is-on .mpriv__logo{opacity:1;transform:translate(-50%,-50%) scale(1);transition-delay:.3s}
-.mpriv__badge{position:absolute;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.97);border-radius:999px;padding:11px 18px;
-  font:800 15px -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#2A1C56;white-space:nowrap;
-  box-shadow:0 20px 44px -16px rgba(0,0,0,.7),0 0 0 1px rgba(139,92,246,.28);opacity:0;transition:opacity .5s ease,transform .6s cubic-bezier(.3,1.35,.4,1)}
+.mpriv__badge{position:absolute;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E4DEF6;border-radius:999px;padding:11px 18px;
+  font:800 15px -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#211A44;white-space:nowrap;
+  box-shadow:0 20px 44px -16px rgba(35,20,80,.28);opacity:0;transition:opacity .5s ease,transform .6s cubic-bezier(.3,1.35,.4,1)}
 .mpriv__badge svg{color:#7C3AED;flex:none}
 .mpriv__badge--top{left:50%;top:0;transform:translate(-50%,26px) scale(.3)}
 .mpriv__badge--top.is-pop{opacity:1;transform:translate(-50%,0) scale(1)}
@@ -473,7 +473,7 @@ body.intro .mscrim{background:transparent}
 .mpriv__badge--left.is-pop{opacity:1;transform:translate(0,-50%) scale(1)}
 .mpriv__badge--right{right:0;top:50%;transform:translate(-40px,-50%) scale(.3)}
 .mpriv__badge--right.is-pop{opacity:1;transform:translate(0,-50%) scale(1)}
-.mpriv__foot{font:600 16px/1.6 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#CBBFEA;max-width:640px;margin-top:10px;min-height:52px;opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+.mpriv__foot{font:600 16px/1.6 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;color:#6E6A88;max-width:640px;margin-top:10px;min-height:52px;opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
 .mprivacy.is-on .mpriv__foot{opacity:1;transform:none;transition-delay:.5s}
-.mpriv__foot b{color:#fff}
-.mpriv__foot--final{font-weight:800;font-size:22px;color:#fff;letter-spacing:-.01em}
+.mpriv__foot b{color:#211A44}
+.mpriv__foot--final{font-weight:800;font-size:22px;color:#211A44;letter-spacing:-.01em}
