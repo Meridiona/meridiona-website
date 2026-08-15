@@ -1,17 +1,17 @@
 /*
- * Meridian hero timeline — the CURRENT dashboard timeline UI (ported verbatim
+ * Meridian hero timeline: the CURRENT dashboard timeline UI (ported verbatim
  * from new/assets/js/demo.js: multi-lane duration-proportional task bands +
  * "today at a glance" panel) wrapped in an animated INTRO sequence:
  *
- *   1. teaser  — a clock sweeps from morning through to night while the
+ *   1. teaser: a clock sweeps from morning through to night while the
  *                timeline sits dark behind a scrim
- *   2. question — a relatable "what did you actually get done?" prompt
- *   3. rewind  — the clock spins back to 9 AM
- *   4. build   — the clock ticks hour by hour; a descending "now" line
+ *   2. question: a relatable "what did you actually get done?" prompt
+ *   3. rewind: the clock spins back to 9 AM
+ *   4. build: the clock ticks hour by hour; a descending "now" line
  *                replays the day, dropping each task row in as it's reached,
  *                merging multi-sitting tasks into one card
- *   5. handoff — everything stabilises into the exact static timeline, the
- *                panel slides in, an "it's live — poke around" note appears,
+ *   5. handoff: everything stabilises into the exact static timeline, the
+ *                panel slides in, an "it's live, poke around" note appears,
  *                and the UI becomes fully interactive
  *
  * The rendered timeline/panel/toolbar are byte-for-byte the real demo, so the
@@ -59,7 +59,7 @@ function createDemo(refs, opts) {
   var HUES = ['#8B5CF6', '#A21CAF', '#6366F1', '#9333EA'];
   var TICKET_POOL = [
     { key: 'MER-482', title: 'Fix token-refresh race condition in auth' },
-    { key: 'MER-495', title: 'Redis session store — eviction & TTL' },
+    { key: 'MER-495', title: 'Redis session store: eviction & TTL' },
     { key: 'MER-501', title: 'Sprint planning & board grooming' },
     { key: 'MER-475', title: 'Add cursor pagination to activity-feed API' },
     { key: 'MER-510', title: 'Polish onboarding empty states' },
@@ -100,7 +100,7 @@ function createDemo(refs, opts) {
           'Found why the feed was taking a while to show up for people with a lot of activity.',
           'Changed how it loads so it shows up almost instantly, no matter how much history someone has.',
           'Double-checked it worked well for small, medium, and very active accounts before shipping.',
-          'Shipped it — the feed now feels noticeably snappier for everyone.'] },
+          'Shipped it, the feed now feels noticeably snappier for everyone.'] },
       { id: 'd6', title: 'Watching a talk on YouTube while a long test run finished', hue: 3, segments: [[290, 490]], cat: 'research',
         apps: ['Google Chrome'], ticket: null, status: 'tracked',
         summary: ['Kept a systems-design talk playing in the background while the test suite ran.', 'Picked up a couple of ideas worth trying on the activity-feed work.'] },
@@ -184,7 +184,7 @@ function createDemo(refs, opts) {
   }
 
   // ── actions (ported) ─────────────────────────────────────────────────
-  // Reset just restores the interactive demo's data to its starting state —
+  // Reset just restores the interactive demo's data to its starting state;
   // it must NOT replay the intro cinematic (that's what "Replay intro" is for).
   function resetAll() {
     if (rafId) cancelAnimationFrame(rafId);
@@ -254,7 +254,7 @@ function createDemo(refs, opts) {
 
   // ── daily summary (end-of-day review) ────────────────────────────
   var STANDUP_LINES = [
-    'Shipped activity-feed pagination — the feed now loads instantly (MER-475).',
+    'Shipped activity-feed pagination, the feed now loads instantly (MER-475).',
     'Fixed the random-logout bug that slipped in overnight (MER-482).',
     'Shared standup notes and planned the sprint (MER-501).',
     'Next up: onboarding empty-state polish rolls to tomorrow.',
@@ -358,7 +358,7 @@ function createDemo(refs, opts) {
         '<div class="msum-hero__l">' +
           '<div class="msum-hd__eyebrow">DAILY SUMMARY · WED JUL 22</div>' +
           '<div class="msum-hd__title">You had a very productive day</div>' +
-          '<div class="msum-sum">You wrapped <b>2 of 3</b> planned tasks. An urgent logout bug pulled you off the third — it rolls to tomorrow, already noted.</div>' +
+          '<div class="msum-sum">You wrapped <b>2 of 3</b> planned tasks. An urgent logout bug pulled you off the third, it rolls to tomorrow, already noted.</div>' +
         '</div>' +
         '<div class="msum-hero__r">' +
           '<div class="msum-donut"><svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="#ECE5FA" stroke-width="9"></circle><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="#7C3AED" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + dash + ' ' + (C - dash) + '" transform="rotate(-90 42 42)"></circle></svg><div class="msum-donut__c"><span class="msum-donut__pct">' + pct + '%</span><span class="msum-donut__lbl">of plan</span></div></div>' +
@@ -371,11 +371,11 @@ function createDemo(refs, opts) {
       '</div>' +
       '<div class="msum-cards">' +
         '<div class="msum-card msum-card--violet"><div class="msum-card__ic">↯</div><div class="msum-card__x"><div class="msum-card__t">Handled the unexpected</div><div class="msum-card__b">A random-logout bug wasn’t on the plan. You caught it and shipped a fix.</div></div></div>' +
-        '<div class="msum-card msum-card--green"><div class="msum-card__ic">✦</div><div class="msum-card__x"><div class="msum-card__t">New learning</div><div class="msum-card__b">Cursor pagination made the activity feed feel instant — worth reusing.</div></div></div>' +
+        '<div class="msum-card msum-card--green"><div class="msum-card__ic">✦</div><div class="msum-card__x"><div class="msum-card__t">New learning</div><div class="msum-card__b">Cursor pagination made the activity feed feel instant, worth reusing.</div></div></div>' +
       '</div>' +
       '<div class="msum-cols">' +
         '<div class="msum-worked"><div class="msum-worked__hd">TODAY’S PLAN · tap a done task to post to Jira</div>' + plan + '</div>' +
-        '<div class="msum-standup"><div class="msum-standup__hd"><span>STANDUP — READY TO PASTE</span><button class="msum-standup__copy" data-action="copy-standup">Copy</button></div>' +
+        '<div class="msum-standup"><div class="msum-standup__hd"><span>STANDUP · READY TO PASTE</span><button class="msum-standup__copy" data-action="copy-standup">Copy</button></div>' +
           '<div class="msum-standup__body">' + STANDUP_LINES.map(function (l) { return '<div class="msum-standup__line">' + esc(l) + '</div>'; }).join('') + '</div></div>' +
       '</div>';
   }
@@ -385,7 +385,7 @@ function createDemo(refs, opts) {
     if (!t) return summaryHomeBody();
     var accent = hueColor(t.hue), w = wl(t.id), lo = taskStart(t), hi = taskEnd(t);
     var footer;
-    if (!t.ticket) footer = '<div class="msum-tk-note">No ticket matched — this one is just tracked for you.</div>';
+    if (!t.ticket) footer = '<div class="msum-tk-note">No ticket matched, this one is just tracked for you.</div>';
     else if (w.posted) footer = '<div class="msum-tk-posted">' + jiraIcon(15) + 'Posted &amp; logged to Jira <span class="msum-tk-check msum-tk-check--pop">✓</span></div>';
     else if (w.summaryPosting) footer = '<button class="msum-tk-post" disabled style="background:' + accent + '">Posting to Jira…</button>';
     else footer = '<button class="msum-tk-post" data-action="summary-post" data-task-id="' + t.id + '" style="background:' + accent + '">Post to Jira</button>';
@@ -805,11 +805,11 @@ function createDemo(refs, opts) {
         '<div class="mpriv__badge mpriv__badge--left">' + privIcon('code') + 'Open source</div>' +
         '<div class="mpriv__badge mpriv__badge--right">' + privIcon('sliders') + 'You control it</div>' +
       '</div>' +
-      '<div class="mpriv__foot">Meridian runs entirely on your device — <b>nothing is uploaded, nothing phones home.</b></div>';
+      '<div class="mpriv__foot">Meridian runs entirely on your device, <b>nothing is uploaded, nothing phones home.</b></div>';
     void refs.privacy.offsetWidth;
     refs.privacy.classList.add('is-on');
     await sleep(780); if (aborted) return;
-    // privacy now covers the summary — close it underneath, no flash
+    // privacy now covers the summary; close it underneath, no flash
     closeSummary();
     setSummaryCaption('');
     await sleep(320); if (aborted) return;
@@ -838,7 +838,7 @@ function createDemo(refs, opts) {
     await sleep(1700); if (aborted) return;
     cursorClick();
     await sleep(400); if (aborted) return;
-    setSummaryCaption('This is your Daily Summary — built automatically at the end of every day.');
+    setSummaryCaption('This is your Daily Summary, built automatically at the end of every day.');
     openSummary();
     camera('scale(1)', 850);                            // zoom back out to reveal the summary
     if (pill) setTimeout(function () { pill.classList.remove('sumpill--hot'); }, 600);
@@ -850,13 +850,13 @@ function createDemo(refs, opts) {
     camera('scale(1.05) translate(0,-20px)', 1000);     // ease in on the task about to be clicked
     cursorTo(document.querySelector('.msum-row[data-task-id="d5"]'), 1000);
     await sleep(1100); if (aborted) return;
-    // hand control to the user — fast fallback so it never stalls
+    // hand control to the user; fast fallback so it never stalls
     await waitForUserClick('.msum-row[data-task-id="d5"]', 3200); if (aborted) return;
     cursorClick();
     await sleep(350); if (aborted) return;
     state.nudgeTaskId = null;
     summarySelectTask('d5');
-    setSummaryCaption('This is the worklog update Meridian wrote for that task — post it straight to Jira.');
+    setSummaryCaption('This is the worklog update Meridian wrote for that task, post it straight to Jira.');
     await sleep(2800); if (aborted) return;
     // auto-click the "Post to Jira" button for them
     camera('scale(1.06) translate(0,-20px)', 1100);      // zoom in on the Post-to-Jira click
@@ -867,7 +867,7 @@ function createDemo(refs, opts) {
     sfx('posted');
     setSummaryCaption('Posting to Jira…');
     await sleep(1400); if (aborted) return;
-    setSummaryCaption('Logged to Jira ✓ — posted for you, no ticket-hunting.');
+    setSummaryCaption('Logged to Jira ✓, posted for you, no ticket-hunting.');
     await sleep(1900); if (aborted) return;
     // back to the daily summary, reveal the standup update
     camera('scale(1)', 850);                            // zoom out before returning to the summary
@@ -882,7 +882,7 @@ function createDemo(refs, opts) {
     cursorClick();
     copyStandup();
     sfx('posted');
-    setSummaryCaption('Copied — paste it straight into Slack or standup.');
+    setSummaryCaption('Copied, paste it straight into Slack or standup.');
     await sleep(1600); if (aborted) return;
     camera('scale(1)', 950);                             // zoom back out
     hideCursor();
@@ -919,7 +919,7 @@ function createDemo(refs, opts) {
   // ── intro "a day in the life" scene ─────────────────────────────────
   // App-activity chips surface in time order behind the clock as it sweeps the
   // day; the background warms in the morning and dims toward evening, ending on
-  // a "logged off" beat — so the viewer feels a full, blurry day go by.
+  // a "logged off" beat, so the viewer feels a full, blurry day go by.
   var DAY_MOMENTS = [
     { at: 12,  app: 'Slack',         label: 'Slack catch-up',        x: 232, y: '25%' },
     { at: 80,  app: 'Microsoft Teams', label: 'Team standup',        x: 946, y: '21%' },
@@ -1009,14 +1009,14 @@ function createDemo(refs, opts) {
     buildClock();
     updateClock(0);
     blackout(false);
-    refs.root.classList.add('intro-clean');   // device blends into the dark stage — no chrome/border
+    refs.root.classList.add('intro-clean');   // device blends into the dark stage; no chrome/border
     if (document.body) document.body.classList.add('intro');
     refs.scrim.classList.remove('is-off');     // opaque cover on
     refs.clock.className = 'mclock mclock--hero';
     camera('scale(1)', 0);
     setupDay();
     await sleep(700); if (aborted) return;
-    // ── teaser: the day plays out — app moments surface as the clock sweeps 9 → 5,
+    // -- teaser: the day plays out; app moments surface as the clock sweeps 9 to 5,
     //    the light warms then dims toward evening, with a slow cinematic push-in
     camera('scale(1.045)', 8600);
     var capShown = false;
@@ -1075,7 +1075,7 @@ function createDemo(refs, opts) {
     void document.getElementById('desk').offsetWidth;
     camera('scale(1)', 1400);
     await sleep(1300); if (aborted) return;
-    // ── build: the day replays hour by hour — ease in a little while it ticks,
+    // -- build: the day replays hour by hour; ease in a little while it ticks,
     //    then pull back out as it reaches 6 PM
     var stops = [60, 120, 180, 240, 300, 360, 420, 480, 540, 552];
     var prev = 0;

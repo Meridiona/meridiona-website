@@ -1,23 +1,18 @@
-// Meridian v2 landing page behavior — theme switching, FAQ accordion, lines
+// Meridian v2 landing page behavior: theme switching, FAQ accordion, lines
 // ticker, hero embed sizing, download/connect modals, cinematic intro replay,
 // and the scroll-jacked "why" rail.
 document.addEventListener('DOMContentLoaded', () => {
     const $ = (id) => document.getElementById(id);
-    const THEMES = [
-      { id: 'dawn', label: 'Dawn — light lavender', sw: 'linear-gradient(135deg,#f1edfb 50%,#7c3aed 50%)' },
-      { id: 'dusk', label: 'Dusk — dark', sw: 'linear-gradient(135deg,#171226 50%,#8b5cf6 50%)' },
-      { id: 'paper', label: 'Paper — warm ink', sw: 'linear-gradient(135deg,#faf8f3 50%,#4f46e5 50%)' },
-    ];
     const DL = {
       mac: { emailNote: 'macOS 14+ · Apple Silicon (M1 or later)', successTitle: 'Download started', successBody: 'Meridian.dmg is on its way. Drag it to Applications and look for the diamond in your menu bar.' },
       windows: { emailNote: 'Windows 10/11 · 64-bit', successTitle: 'Download started', successBody: 'Meridian-setup.exe is on its way. Run it, and look for the diamond in your system tray.' },
-      linux: { emailTitle: 'Get in line', emailPrompt: 'Meridian doesn’t speak penguin yet. Leave your email — you’ll be the first ping when it does.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'Linux is coming. You’re at the front of the queue — we’ll ping you the day it lands.' },
-      other: { emailTitle: 'Get in line', emailPrompt: 'We don’t have a build for your device yet. Leave your email — you’ll be the first to know when we do.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'We’ll ping you the day Meridian lands on your platform.' },
+      linux: { emailTitle: 'Get in line', emailPrompt: 'Meridian doesn’t speak penguin yet. Leave your email, you’ll be the first ping when it does.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'Linux is coming. You’re at the front of the queue, we’ll ping you the day it lands.' },
+      other: { emailTitle: 'Get in line', emailPrompt: 'We don’t have a build for your device yet. Leave your email, you’ll be the first to know when we do.', ctaLabel: 'Join the waitlist', emailNote: 'No spam. One email, the day it ships.', successTitle: 'Saved you a spot', successBody: 'We’ll ping you the day Meridian lands on your platform.' },
     };
     const EMAIL_RE = /\S+@\S+\.\S+/;
     const isDownloadOS = (os) => os === 'mac' || os === 'windows';
     // Best-effort client detection so the right build starts downloading without
-    // asking — mobile checked first since Android UAs also match /Linux/ and
+    // asking; mobile checked first since Android UAs also match /Linux/ and
     // iPadOS reports platform "MacIntel" like a real Mac.
     const detectOS = () => {
       const ua = navigator.userAgent || '';
@@ -29,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (/Linux/i.test(platform)) return 'linux';
       return null;
     };
-    const THEME_STORAGE_KEY = 'meridian-theme';
     const COUNTRY_CODES = [
       { code: '+1', name: 'US/Canada', ph: '201 555 0123' }, { code: '+44', name: 'UK', ph: '7911 123456' },
       { code: '+91', name: 'India', ph: '98765 43210' }, { code: '+61', name: 'Australia', ph: '412 345 678' },
@@ -49,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const cc = COUNTRY_CODES.find((c) => c.code === code);
       return cc ? cc.code + ' ' + cc.name : code;
     };
-    // As-you-type US/Canada formatting — (201) 555-0123 — so the number reads
+    // As-you-type US/Canada formatting, e.g. (201) 555-0123, so the number reads
     // as a real US number instead of a raw digit string; other countries are
     // left as typed since their formats vary too much to guess.
     const formatUSPhone = (raw) => {
@@ -164,17 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return { html, bind, digits, value };
     };
 
-    // ── theme ──
-    const applyTheme = (id) => {
-      document.body.dataset.theme = id;
-      try { localStorage.setItem(THEME_STORAGE_KEY, id); } catch (e) {}
-      $('theme-dots').innerHTML = THEMES.map((t) =>
-        '<button class="theme-dot' + (id === t.id ? ' is-active' : '') + '" data-theme-id="' + t.id + '" title="' + t.label + '" aria-label="' + t.label + '" style="background:' + t.sw + '"></button>').join('');
-    };
-    let saved = 'dawn'; try { saved = localStorage.getItem(THEME_STORAGE_KEY) || 'dawn'; } catch (e) {}
-    applyTheme(saved);
-    $('theme-dots').addEventListener('click', (e) => { const el = e.target.closest('[data-theme-id]'); if (el) applyTheme(el.dataset.themeId); });
-
     // ── obfuscated mailto links (built at runtime so scrapers see no plaintext address) ──
     document.querySelectorAll('.js-email-link').forEach((el) => {
       const addr = el.dataset.user + '@' + el.dataset.domain;
@@ -239,11 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sizeEmbed = () => {
       const wrap = $('hero-embed-wrap'); if (!wrap) return;
       const vw = window.innerWidth || 1440, vh = window.innerHeight || 900;
-      const CHROME = 340, MAT_PAD = 18, MAT_BORDER = 2, MAT = (MAT_PAD + MAT_BORDER) * 2;
+      const CHROME = 410, MAT_PAD = 18, MAT_BORDER = 2, MAT = (MAT_PAD + MAT_BORDER) * 2;
       const hero = document.querySelector('.hero');
       let avail = vw - 48;
       if (hero) { const cs = getComputedStyle(hero); avail = hero.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); }
-      let embedW = Math.max(280, Math.min(1120, Math.min((vh - CHROME) * (1240 / 720), avail - MAT)));
+      let embedW = Math.max(280, Math.min(1200, Math.min((vh - CHROME) * (1240 / 720), avail - MAT)));
       embedW = Math.min(embedW, avail - MAT);
       const embedH = Math.round(embedW * 720 / 1240);
       wrap.style.width = Math.round(embedW + MAT) + 'px';
@@ -285,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── download modal ──
     // dm.os is auto-detected on open and the real build starts downloading
-    // immediately (see fireDownload below) — the email/phone form beneath it
+    // immediately (see fireDownload below); the email/phone form beneath it
     // is an optional "get updates" ask, not a gate. "see other download
     // options" falls back to the manual os-picker, both for when detection
     // guesses wrong and for browsing what's available/coming soon.
@@ -302,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return '<form id="dl-form" class="email-form">' +
           '<input id="dl-email" class="email-input" type="email"' + (required ? ' required autofocus' : '') + ' placeholder="you@work.com" value="' + dm.email + '" aria-label="Email address">' +
           '<p id="dl-email-error" class="form-error" style="display:none">Enter a valid email address to continue.</p>' +
-          '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>' +
+          '<p class="phone-hint">📱 Got a number? (Totally optional) Drop it below so we can text you when we ship fixes, ask what broke, or just say thanks. Never spam.</p>' +
           dlPhone.html() +
           '<button type="submit" class="btn-primary btn-primary--block">' + ctaLabel + '</button>' +
         '</form>';
@@ -397,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email: v, source: isDownloadOS(dm.os) ? 'download' : 'waitlist', os: dm.os, phone }),
       }).catch(() => { /* non-fatal: the confirmation UI has already been shown */ });
 
-      // The download itself already fired on open/pick for mac/windows (fireDownload) —
+      // The download itself already fired on open/pick for mac/windows (fireDownload);
       // this form only ever gates the waitlist signup for unsupported platforms.
       renderDl();
     });
@@ -406,97 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
     $('btn-connect').addEventListener('click', () => $('modal-connect').classList.add('is-open'));
     $('btn-close-connect').addEventListener('click', () => $('modal-connect').classList.remove('is-open'));
     $('modal-connect').addEventListener('click', (e) => { if (e.target.id === 'modal-connect') $('modal-connect').classList.remove('is-open'); });
-    // ── waitlist modal ──
-    // The form markup is server-rendered in index.html (so it's visible without
-    // JS and to crawlers); this only owns the "Other" reveal, validation, submit
-    // and the success swap. Unlike the download modal's /subscribe call, a
-    // failure here is shown to the user — nothing else captured the lead.
-    let closeWaitlist = null;
-    if ($('modal-waitlist')) {
-      const wl = { phoneCode: '+1', phone: '', sending: false };
-      const wlPhone = phoneCodeField('wl', wl);
-      const openWl = () => { $('modal-waitlist').classList.add('is-open'); const n = $('wl-name'); if (n) n.focus(); };
-      const closeWl = () => $('modal-waitlist').classList.remove('is-open');
-      const wlError = (msg) => {
-        const err = $('wl-error');
-        err.textContent = msg || '';
-        err.style.display = msg ? 'block' : 'none';
-      };
-
-      $('wl-phone-slot').innerHTML = wlPhone.html();
-      wlPhone.bind($('modal-waitlist'));
-
-      document.querySelectorAll('[data-waitlist-open]').forEach((btn) => btn.addEventListener('click', openWl));
-      $('btn-close-waitlist').addEventListener('click', closeWl);
-      $('modal-waitlist').addEventListener('click', (e) => { if (e.target.id === 'modal-waitlist') closeWl(); });
-
-      // "Other" is a real answer, not a dead end — picking it reveals a free-text
-      // field so we learn what the role actually is.
-      $('wl-profession').addEventListener('click', (e) => {
-        const opt = e.target.closest('[data-profession]');
-        if (!opt) return;
-        $('wl-profession').querySelectorAll('.profession-option').forEach((b) => {
-          b.classList.toggle('is-active', b === opt);
-          b.setAttribute('aria-pressed', String(b === opt));
-        });
-        $('wl-profession-input').value = opt.dataset.profession;
-        const other = $('wl-profession-other');
-        other.hidden = opt.dataset.profession !== 'other';
-        if (!other.hidden) other.focus(); else other.value = '';
-        wlError('');
-      });
-
-      $('wl-form').addEventListener('input', () => wlError(''));
-      $('wl-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (wl.sending) return;
-
-        const name = $('wl-name').value.trim();
-        const email = $('wl-email').value.trim();
-        const profession = $('wl-profession-input').value;
-        const professionOther = $('wl-profession-other').value.trim();
-        const linkedin = $('wl-linkedin').value.trim();
-        const comment = $('wl-comment').value.trim();
-
-        if (!name) return wlError('What should we call you?');
-        if (!EMAIL_RE.test(email)) return wlError('That email address doesn’t look right.');
-        if (!profession) return wlError('Pick what you do — it shapes what we build first.');
-        if (profession === 'other' && !professionOther) return wlError('Tell us what you do.');
-
-        wl.phone = wlPhone.digits();
-        wl.sending = true;
-        const submit = $('wl-submit');
-        submit.disabled = true;
-        submit.textContent = 'Joining…';
-
-        fetch('/waitlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, profession, professionOther, phone: wlPhone.value(), linkedin, comment }),
-        })
-          .then((res) => res.json().catch(() => ({})).then((data) => ({ ok: res.ok, data })))
-          .then(({ ok, data }) => {
-            if (!ok) throw new Error(data.error || 'Something went wrong. Please try again.');
-            $('wl-form').hidden = true;
-            $('wl-intro').hidden = true;
-            $('wl-done').hidden = false;
-          })
-          .catch((err) => wlError(err.message || 'Something went wrong. Please try again.'))
-          .finally(() => {
-            wl.sending = false;
-            submit.disabled = false;
-            submit.textContent = 'Join the waitlist →';
-          });
-      });
-
-      closeWaitlist = closeWl;
-    }
-
     this._esc = (e) => {
       if (e.key !== 'Escape') return;
       closeDl();
       $('modal-connect').classList.remove('is-open');
-      if (closeWaitlist) closeWaitlist();
     };
     document.addEventListener('keydown', this._esc);
 
@@ -542,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!introActive || introEnding) return; introEnding = true;
       markIntroSeen();
       if (instant) {
-        // "Skip intro" — drop straight into the site, no cinematic wind-down,
+        // "Skip intro": drop straight into the site, no cinematic wind-down,
         // and no lingering full-screen overlay left silently eating clicks.
         clearIntroTimers();
         const d = document.getElementById('intro-dots'); if (d) d.style.display = '';
@@ -596,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('intro-skip').addEventListener('click', () => endIntro(true));
     replayBtn.addEventListener('click', () => startIntro(true));
     if (introSeen) {
-      // Returning visitor — the intro already played once; go straight to the
+      // Returning visitor: the intro already played once; go straight to the
       // site instead of autoplaying the cinematic again.
       introEl.style.display = 'none';
       if (noteMon) noteMon.classList.add('is-in');

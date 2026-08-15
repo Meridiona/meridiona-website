@@ -1,4 +1,4 @@
-/* Self-hosted fonts (Latin subset only — the site has no non-Latin content).
+/* Self-hosted fonts (Latin subset only; the site has no non-Latin content).
  * These are the same variable-font files Google Fonts serves; downloaded
  * once and hosted locally so the page doesn't pay for a third-party
  * DNS lookup + connection to fonts.googleapis.com/fonts.gstatic.com, and so

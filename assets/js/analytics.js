@@ -1,8 +1,8 @@
 /*
- * PostHog product analytics — same project/key as the root site's
+ * PostHog product analytics: same project/key as the root site's
  * (../../index.html). The <script> tag itself loads async; PostHog only
  * actually boots and starts capturing once the visitor has accepted the
- * cookie consent banner (CookieConsent in site.js) — see CONSENT_KEY below.
+ * cookie consent banner (CookieConsent in site.js); see CONSENT_KEY below.
  */
 (function () {
   var KEY = 'phc_zaKjKC5K7GoexwGJH9kePAq56PbA2EdcemKMMrthivmD'; // PostHog write-only key (safe in public apps)
