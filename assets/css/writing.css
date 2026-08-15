@@ -1,13 +1,13 @@
 /*
- * Writing section — essay index + long-form article styles.
+ * Writing section: essay index + long-form article styles.
  * Loaded alongside site.css (which owns the theme tokens, nav, footer,
  * modals). This file only styles the reading experience.
  *
  * Type roles here:
- *   Space Grotesk   — headlines (brand display, same as the landing page)
- *   Newsreader      — essay body: an optical-size serif made for on-screen
+ *   Space Grotesk   : headlines (brand display, same as the landing page)
+ *   Newsreader      : essay body, an optical-size serif made for on-screen
  *                     long-form reading; only writing pages load it
- *   JetBrains Mono  — journal furniture: dates, read times, tags, § markers
+ *   JetBrains Mono  : journal furniture, dates, read times, tags, § markers
  */
 
 /* ── shared page shell ─────────────────────────────────────────────────── */
@@ -113,7 +113,7 @@
 .prose em{font-style:italic}
 .prose a{color:var(--acc);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 
-/* section headings carry a mono § index — the journal-entry marker */
+/* section headings carry a mono § index; the journal-entry marker */
 .prose h2{
   font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;
   font-size:clamp(23px,3vw,29px);line-height:1.22;margin:2.4em 0 .8em;text-wrap:balance;

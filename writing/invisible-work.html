@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The timesheet wasn't lying. It was blind. — Meridian</title>
-<meta name="description" content="We recorded everything a developer did for a week and compared it to their worklogs. Nothing was misattributed — but a third of the week's real work appeared in no record at all.">
+<title>The timesheet wasn't lying. It was blind. · Meridian</title>
+<meta name="description" content="We recorded everything a developer did for a week and compared it to their worklogs. Nothing was misattributed, but a third of the week's real work appeared in no record at all.">
 <link rel="canonical" href="https://meridiona.com/writing/invisible-work">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Meridian">
-<meta property="og:title" content="The timesheet wasn't lying. It was blind. — Meridian">
-<meta property="og:description" content="We recorded everything a developer did for a week and compared it to their worklogs. Nothing was misattributed — but a third of the week's real work appeared in no record at all.">
+<meta property="og:title" content="The timesheet wasn't lying. It was blind. · Meridian">
+<meta property="og:description" content="We recorded everything a developer did for a week and compared it to their worklogs. Nothing was misattributed, but a third of the week's real work appeared in no record at all.">
 <meta property="og:url" content="https://meridiona.com/writing/invisible-work">
 <meta property="og:image" content="https://meridiona.com/assets/images/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The timesheet wasn't lying. It was blind. — Meridian">
-<meta name="twitter:description" content="We recorded everything a developer did for a week and compared it to their worklogs. Nothing was misattributed — but a third of the week's real work appeared in no record at all.">
+<meta name="twitter:title" content="The timesheet wasn't lying. It was blind. · Meridian">
+<meta name="twitter:description" content="We recorded everything a developer did for a week and compared it to their worklogs. Nothing was misattributed, but a third of the week's real work appeared in no record at all.">
 <meta name="twitter:image" content="https://meridiona.com/assets/images/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
@@ -29,26 +29,9 @@
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
+<div class="site" id="site">
 
-<nav class="nav" role="navigation" aria-label="Main">
-  <div class="nav__inner">
-    <a href="/" class="nav__brand">
-      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="24" height="24" loading="eager">
-      <span class="nav__brand-name">Meridian</span>
-    </a>
-    <div class="nav__links">
-      <a href="/#why" class="nav__link">Why</a>
-      <a href="/#faq" class="nav__link">FAQ</a>
-      <a href="/writing" class="nav__link" style="color:var(--ink)">Writing</a>
-      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="nav__link nav__link--mono">GitHub ↗</a>
-      <button id="btn-connect" title="Connect" class="btn-ghost">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"></circle><circle cx="6" cy="12" r="2.6"></circle><circle cx="18" cy="19" r="2.6"></circle><path d="M8.4 10.7 L15.6 6.3M8.4 13.3 L15.6 17.7"></path></svg>
-        Connect
-      </button>
-      <button id="btn-download-nav" class="btn-primary">Download</button>
-    </div>
-  </div>
-</nav>
+<!--NAV-->
 
 <main id="main-content" role="main" class="writing-page">
   <div class="writing-page__inner">
@@ -58,7 +41,7 @@
     <header class="article-head">
       <div class="eyebrow">Engineering · data · worklogs</div>
       <h1 class="article-head__title">The timesheet wasn't lying. It was blind.</h1>
-      <p class="article-head__dek">We recorded everything a developer did for a week. The hours weren't in the wrong place — a third of them were nowhere at all.</p>
+      <p class="article-head__dek">We recorded everything a developer did for a week. The hours weren't in the wrong place; a third of them were nowhere at all.</p>
       <div class="article-head__meta">
         <span>July 10, 2026</span>
         <span class="article-head__meta-dot">·</span>
@@ -68,33 +51,33 @@
 
     <article class="prose">
 
-      <p class="prose__lede">For the past year we've been building a tool that watches what you do on your machine — every window, every terminal, every doc — and tries to write your Jira updates for you. This is not a pitch for it. It's about the thing we found while building it, which turned out to be more interesting than the product.</p>
+      <p class="prose__lede">For the past year we've been building a tool that watches what you do on your machine (every window, every terminal, every doc) and tries to write your Jira updates for you. This is not a pitch for it. It's about the thing we found while building it, which turned out to be more interesting than the product.</p>
 
-      <p>The premise was simple: nobody remembers what they did yesterday. Standups are improv. Worklogs are historical fiction written minutes before the sprint review. So we assumed the problem we were solving was accuracy — people attributing time to the wrong ticket, padding, misremembering. We built accordingly: a classifier that matched real activity to tickets, tuned obsessively against false positives, with an abstain gate so it would rather say nothing than guess.</p>
+      <p>The premise was simple: nobody remembers what they did yesterday. Standups are improv. Worklogs are historical fiction written minutes before the sprint review. So we assumed the problem we were solving was accuracy: people attributing time to the wrong ticket, padding, misremembering. We built accordingly: a classifier that matched real activity to tickets, tuned obsessively against false positives, with an abstain gate so it would rather say nothing than guess.</p>
 
-      <p>Then we ran it against a full week of real work and compared its output to what actually got logged by hand. We were hunting for the mismatches — hours logged to the wrong place.</p>
+      <p>Then we ran it against a full week of real work and compared its output to what actually got logged by hand. We were hunting for the mismatches: hours logged to the wrong place.</p>
 
       <p>There weren't any, really. What people logged was almost always correct. That was the first surprise.</p>
 
       <h2><span class="sec-index">§ 01</span>The second surprise was the hole.</h2>
 
-      <p>Roughly 45 hours of genuine work that week appeared in no ticket, no worklog, no standup. Not misattributed — <em>absent</em>. The failure mode of human work-tracking isn't precision. It's recall. Nobody lies on their timesheet. They just silently drop a third of their week, and neither they nor anyone else ever notices, because you can't notice an absence.</p>
+      <p>Roughly 45 hours of genuine work that week appeared in no ticket, no worklog, no standup. Not misattributed, <em>absent</em>. The failure mode of human work-tracking isn't precision. It's recall. Nobody lies on their timesheet. They just silently drop a third of their week, and neither they nor anyone else ever notices, because you can't notice an absence.</p>
 
-      <p>And the dropped work had a shape. It wasn't slacking. It was the debugging session that turned out to be an infra problem and therefore belonged to no ticket. The hour unblocking a teammate. Two dead-end approaches tried before the one that worked. The reading you do before you're allowed to have opinions about a system. All real. All load-bearing. All deleted — because at the end of the day your brain runs a quiet triage: does this map to something with a name? If not, it's discarded, and it doesn't feel like forgetting. It feels like nothing happened.</p>
+      <p>And the dropped work had a shape. It wasn't slacking. It was the debugging session that turned out to be an infra problem and therefore belonged to no ticket. The hour unblocking a teammate. Two dead-end approaches tried before the one that worked. The reading you do before you're allowed to have opinions about a system. All real. All load-bearing. All deleted, because at the end of the day your brain runs a quiet triage: does this map to something with a name? If not, it's discarded, and it doesn't feel like forgetting. It feels like nothing happened.</p>
 
       <h2><span class="sec-index">§ 02</span>Why estimates never get better.</h2>
 
-      <p>Once you see it, you see it everywhere, and it explains something everyone complains about: why estimates never get better. Every estimate leans on history — formally in tooling, informally in "how long did this take last time?" And that history is systematically missing the expensive parts. The false starts and yak-shaving never got written down, so the record says the last feature took four days when it took seven. Then we're shocked when the next one takes seven. The dataset isn't noisy; it's censored, and censored data is worse than noise because it's confidently wrong in one consistent direction.</p>
+      <p>Once you see it, you see it everywhere, and it explains something everyone complains about: why estimates never get better. Every estimate leans on history, formally in tooling, informally in "how long did this take last time?" And that history is systematically missing the expensive parts. The false starts and yak-shaving never got written down, so the record says the last feature took four days when it took seven. Then we're shocked when the next one takes seven. The dataset isn't noisy; it's censored, and censored data is worse than noise because it's confidently wrong in one consistent direction.</p>
 
-      <p>It warps credit, too. The work that survives into the record is the work that had a ticket waiting for it. The person grinding through ambiguous, unticketed problems — often your most senior engineer, doing the org's most valuable work — produces the least evidence of having worked. We built our recording systems structurally biased against exactly the labor we claim to value most.</p>
+      <p>It warps credit, too. The work that survives into the record is the work that had a ticket waiting for it. The person grinding through ambiguous, unticketed problems (often your most senior engineer, doing the org's most valuable work) produces the least evidence of having worked. We built our recording systems structurally biased against exactly the labor we claim to value most.</p>
 
       <h2><span class="sec-index">§ 03</span>It invalidated our own architecture.</h2>
 
-      <p>The humbling part for us: this invalidated our own architecture. We'd built a careful matcher — activity in, ticket out — and the data said matching was never the bottleneck. A system like this has to capture work before deciding where it belongs, and be willing to conclude "this was real, and there is no ticket for it." That verdict — hours of legitimate work with no home on the board — turned out to be the single most useful thing it could say. We'd been treating it as a classification failure. It was the finding.</p>
+      <p>The humbling part for us: this invalidated our own architecture. We'd built a careful matcher, activity in, ticket out, and the data said matching was never the bottleneck. A system like this has to capture work before deciding where it belongs, and be willing to conclude "this was real, and there is no ticket for it." That verdict, hours of legitimate work with no home on the board, turned out to be the single most useful thing it could say. We'd been treating it as a classification failure. It was the finding.</p>
 
       <h2><span class="sec-index">§ 04</span>You can't fix this with discipline.</h2>
 
-      <p>You also can't fix this with discipline, which is everyone's first instinct. "Just log more diligently" fails because the deletion happens before the moment of logging. You can't faithfully record what your brain has already classified as nothing. The gap isn't between what people did and what they wrote down. It's between what they did and what they remember doing — and no process fixes that from the writing-down side.</p>
+      <p>You also can't fix this with discipline, which is everyone's first instinct. "Just log more diligently" fails because the deletion happens before the moment of logging. You can't faithfully record what your brain has already classified as nothing. The gap isn't between what people did and what they wrote down. It's between what they did and what they remember doing, and no process fixes that from the writing-down side.</p>
 
       <p>So now I read every burndown chart and every "where did the quarter go" retro with one specific suspicion: the story isn't wrong. It's incomplete, in a consistent direction, and the missing hours sit precisely in the categories that would explain why everything takes longer than planned.</p>
 
@@ -133,7 +116,7 @@
 </main>
 
 <div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site — nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
+  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site. Nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
   <div class="cookie-consent__actions">
     <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
     <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
@@ -170,13 +153,8 @@
   </div>
 </div>
 
-<!-- ============ THEME SWITCHER ============ -->
-<div id="theme-switcher" class="theme-switcher">
-  <span class="theme-switcher__label">theme</span>
-  <div id="theme-dots" class="theme-dots"></div>
-</div>
-
 <iframe id="dl-frame" class="dl-frame" title="download" aria-hidden="true"></iframe>
+</div>
 
 <script src="/assets/js/site.js" defer></script>
 </body>

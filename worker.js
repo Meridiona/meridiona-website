@@ -3,39 +3,59 @@ import { createClerkClient } from '@clerk/backend';
 // Google-SSO relay for the Meridian desktop app (tray/src-tauri/src/commands/clerk_signin.rs).
 // Routed by hostname so none of the rest of this file's logic is touched.
 const AUTH_HOSTNAME = 'auth.meridiona.com';
-// Clerk's Account Portal for the Meridian app — the real, hosted Google
+// Clerk's Account Portal for the Meridian app: the real, hosted Google
 // sign-in page. NOT a secret, just config; update once production has its
 // own Account Portal domain (see the Meridian repo's setup-wizard plan).
 const ACCOUNT_PORTAL_URL = 'https://touching-unicorn-15.accounts.dev';
-// One-time exchange token TTL — long enough for the browser round-trip
+// One-time exchange token TTL, long enough for the browser round-trip
 // through Google + Clerk, short enough that a leaked/logged URL is useless
 // within minutes.
 const AUTH_TOKEN_TTL_SECONDS = 120;
 
 const WRITING_META = {
   '/writing/velocity-visibility': {
-    title: 'Your velocity went up. Your visibility went down. — Meridiona',
-    description: 'AI tools made everyone faster — but the faster you go, the less you can reconstruct about how the work got done. Why the record of your work has to keep pace with it.',
+    title: 'Your velocity went up. Your visibility went down. · Meridiona',
+    description: 'AI tools made everyone faster, but the faster you go, the less you can reconstruct about how the work got done. Why the record of your work has to keep pace with it.',
     canonical: 'https://meridiona.com/writing/velocity-visibility',
   },
   '/writing/eval-loop': {
-    title: 'More context made my classifier worse, not better — Meridiona',
-    description: 'A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.',
+    title: 'More context made my classifier worse, not better · Meridiona',
+    description: 'A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy, and why removing a context limit made accuracy worse, not better.',
     canonical: 'https://meridiona.com/writing/eval-loop',
   },
   '/writing': {
-    title: 'Writing — Meridiona',
+    title: 'Writing · Meridiona',
     description: 'Technical essays and field notes on AI, engineering, and building intelligent organisations.',
     canonical: 'https://meridiona.com/writing',
   },
 };
 
+// Single source of truth for the nav is the <nav> block in index.html; writing
+// pages hold a `<!--NAV-->` placeholder instead of duplicating the markup.
+// This pulls it live off '/' and rewrites the handful of in-page anchors
+// (index.html uses "#top"/"#why"/"#faq") into path-rooted links that work from
+// any /writing/* URL, plus marks the Writing nav item active.
+const NAV_RE = /<nav class="nav" role="navigation" aria-label="Main">[\s\S]*?<\/nav>/;
+let cachedNav = null;
+async function canonicalWritingNav(env, origin) {
+  if (cachedNav) return cachedNav;
+  const home = await env.ASSETS.fetch(new Request(`${origin}/`));
+  const match = (await home.text()).match(NAV_RE);
+  if (!match) return null;
+  cachedNav = match[0]
+    .replace('href="#top"', 'href="/"')
+    .replace('href="#why"', 'href="/#why"')
+    .replace('href="#faq"', 'href="/#faq"')
+    .replace('<a href="/writing" class="nav__link">Writing</a>', '<a href="/writing" class="nav__link" style="color:var(--ink)">Writing</a>');
+  return cachedNav;
+}
+
 // The product waitlist (the "Join the waitlist" section above the footer on
 // index.html). Distinct from /subscribe's `source: 'waitlist'`, which only ever
-// meant "ping me when my OS ships" — this one collects a real lead profile.
+// meant "ping me when my OS ships", this one collects a real lead profile.
 const PROFESSIONS = ['pm', 'investor', 'dev', 'founder', 'other'];
 // Resend Contact Properties must be registered once before they can be set on a
-// contact (POST https://api.resend.com/contact-properties, type "string") —
+// contact (POST https://api.resend.com/contact-properties, type "string"),
 // unregistered keys are rejected outright. These are the keys this Worker sets;
 // see README/`docs` for the one-time curl. resendContact() degrades gracefully
 // if they're missing rather than dropping a signup.
@@ -48,7 +68,7 @@ const WAITLIST_NOTIFY_TO = 'company@meridiona.com';
 const WAITLIST_NOTIFY_FROM = 'Meridian Waitlist <waitlist@meridiona.com>';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Always resolves to the newest release's asset — no version to bump in code.
+// Always resolves to the newest release's asset; no version to bump in code.
 // Filenames must match the meridian repo's actual CI-published asset names
 // exactly (release.yml), or /dl 404s against a real GitHub redirect.
 const DOWNLOAD_URL = 'https://github.com/Meridiona/meridian/releases/latest/download/Meridian-aarch64.dmg';
@@ -74,13 +94,13 @@ export default {
 };
 
 async function handle(request, url, env, ctx) {
-    // www → apex, 301, preserving path + query — one canonical host.
+    // www to apex, 301, preserving path + query; one canonical host.
     if (url.hostname === 'www.meridiona.com') {
       url.hostname = 'meridiona.com';
       return Response.redirect(url.toString(), 301);
     }
 
-    // Google-SSO relay — isolated by hostname, never touches the routes below.
+    // Google-SSO relay, isolated by hostname, never touches the routes below.
     if (url.hostname === AUTH_HOSTNAME) {
       if (url.pathname === '/auth/callback') return handleAuthCallback(request, url, env);
       if (url.pathname === '/auth/exchange') return handleAuthExchange(url, env);
@@ -108,20 +128,31 @@ async function handle(request, url, env, ctx) {
       return downloadPage(env, url);
     }
 
-    const meta = WRITING_META[url.pathname] || WRITING_META[url.pathname.replace(/\/$/, '')];
-    if (meta && env.ASSETS) {
+    const isWritingPage = url.pathname === '/writing' || url.pathname.startsWith('/writing/');
+    if (isWritingPage && env.ASSETS) {
       try {
         const base = await env.ASSETS.fetch(new Request(`${url.origin}${url.pathname}`));
         let html = await base.text();
-        html = html
-          .replace(/<title>[^<]*<\/title>/, `<title>${meta.title}</title>`)
-          .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${meta.description}">`)
-          .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${meta.title}">`)
-          .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${meta.description}">`)
-          .replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${meta.canonical}">`)
-          .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${meta.title}">`)
-          .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${meta.description}">`)
-          .replace(/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${meta.canonical}">`);
+
+        const meta = WRITING_META[url.pathname] || WRITING_META[url.pathname.replace(/\/$/, '')];
+        if (meta) {
+          html = html
+            .replace(/<title>[^<]*<\/title>/, `<title>${meta.title}</title>`)
+            .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${meta.description}">`)
+            .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${meta.title}">`)
+            .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${meta.description}">`)
+            .replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${meta.canonical}">`)
+            .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${meta.title}">`)
+            .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${meta.description}">`)
+            .replace(/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${meta.canonical}">`);
+        }
+
+        // The nav lives only in index.html; writing pages carry a `<!--NAV-->`
+        // placeholder instead of their own copy, so there's one source of truth
+        // to edit rather than five drifting duplicates.
+        const nav = await canonicalWritingNav(env, url.origin);
+        if (nav) html = html.replace('<!--NAV-->', nav);
+
         return new Response(html, {
           headers: {
             'Content-Type': 'text/html;charset=UTF-8',
@@ -145,10 +176,10 @@ async function handle(request, url, env, ctx) {
 }
 
 // Applies a baseline of security headers to every response this Worker returns
-// (HSTS, CSP, clickjacking/MIME-sniffing protection, etc — see ShipCheck's
+// (HSTS, CSP, clickjacking/MIME-sniffing protection, etc; see ShipCheck's
 // "Fix Before Launch" security findings). CSP is relaxed with 'unsafe-inline'
 // for style/script only on routes that are known to render inline <style>/
-// <script> (the /download and auth.meridiona.com interstitial pages) — every
+// <script> (the /download and auth.meridiona.com interstitial pages); every
 // other route (the static site, /writing/*, /subscribe, /dl) has none, so it
 // gets the strict policy.
 function withSecurityHeaders(response, url) {
@@ -164,7 +195,7 @@ function withSecurityHeaders(response, url) {
     "img-src 'self' data: https:",
     "connect-src 'self' https://*.i.posthog.com https://*.posthog.com",
     // The hidden #dl-frame iframe (site.js's download modal) points at /dl,
-    // which 302s to github.com and then to GitHub's release-asset CDN —
+    // which 302s to github.com and then to GitHub's release-asset CDN;
     // frame-src is checked against every hop of that redirect chain, not just
     // the initial same-origin request, so both hosts must be allowed or the
     // browser silently kills the download partway through.
@@ -193,7 +224,7 @@ function json(data, status = 200) {
 }
 
 // Trims an untrusted string field to a sane maximum. Over-long input is cut
-// rather than rejected — a pasted LinkedIn URL with tracking junk on the end
+// rather than rejected: a pasted LinkedIn URL with tracking junk on the end
 // shouldn't cost someone their signup.
 function field(value, max) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -231,7 +262,7 @@ export async function handleSubscribe(request, env) {
   // OS and phone used to be smuggled through last_name/first_name because
   // Resend had nowhere else to put them. Resend's Nov-2025 contacts release
   // added real Contact Properties (see WAITLIST_PROPERTIES), so they now go
-  // where they belong — which also stops a /waitlist signup from clobbering
+  // where they belong, which also stops a /waitlist signup from clobbering
   // a real name with a phone number, contacts being global by email.
   const properties = { signup_source: source || 'download-modal' };
   if (os) properties.os = os;
@@ -247,7 +278,7 @@ export async function handleSubscribe(request, env) {
 
 // The product-waitlist signup behind index.html's "Join the waitlist" section.
 // Unlike /subscribe (fire-and-forget: the download already started, so a failed
-// write is invisible and tolerable), a failure here loses a lead outright — so
+// write is invisible and tolerable), a failure here loses a lead outright, so
 // this awaits both writes and reports the real outcome to the form.
 // Exported for tests/waitlist.test.js, which drives it against a stubbed fetch.
 export async function handleWaitlist(request, env) {
@@ -283,8 +314,8 @@ export async function handleWaitlist(request, env) {
   const lastName = space === -1 ? '' : name.slice(space + 1).trim();
 
   // Only fields that were actually filled in. An empty value here would be a
-  // real write on a resubmit — blanking the LinkedIn URL someone gave us the
-  // first time — and it's also what a rejected empty string would cost: the
+  // real write on a resubmit: blanking the LinkedIn URL someone gave us the
+  // first time, and it's also what a rejected empty string would cost: the
   // fallback in resendContact() drops the whole properties map, not one key.
   const properties = { profession, signup_source: 'site-waitlist' };
   if (profession === 'other') properties.profession_other = professionOther;
@@ -328,7 +359,7 @@ async function resendContact(env, contact, segmentId) {
     return patchResendContact(env, payload);
   }
   if (!result.ok && result.propertyError && payload.properties) {
-    console.error(`Resend rejected contact properties — retrying without them. Register these once via POST /contact-properties: ${WAITLIST_PROPERTIES.join(', ')}.`, result.detail);
+    console.error(`Resend rejected contact properties, retrying without them. Register these once via POST /contact-properties: ${WAITLIST_PROPERTIES.join(', ')}.`, result.detail);
     delete payload.properties;
     result = await postResendContact(env, payload);
     if (result.exists) return { ok: true };
@@ -368,7 +399,7 @@ async function postResendContact(env, payload) {
 // Contacts are addressable by email as well as id, so no lookup round-trip.
 // `unsubscribed` is deliberately dropped: it's fine to set on creation, but
 // sending it on an update would silently re-subscribe someone who had opted
-// out. `segments` isn't settable here either — an existing contact keeps the
+// out. `segments` isn't settable here either; an existing contact keeps the
 // segments it already had.
 async function patchResendContact(env, payload) {
   const { email, segments, unsubscribed, ...updates } = payload;
@@ -384,7 +415,7 @@ async function patchResendContact(env, payload) {
     if (res.ok) return { ok: true };
     const detail = JSON.stringify(await res.json().catch(() => ({})));
     console.error('Resend contact update error:', res.status, detail);
-    // The contact exists either way, which is most of what we wanted — only the
+    // The contact exists either way, which is most of what we wanted; only the
     // refreshed profile is lost, so don't fail the signup over it.
     return { ok: true, stale: true, detail };
   } catch (err) {
@@ -397,14 +428,14 @@ async function patchResendContact(env, payload) {
 // domain for WAITLIST_NOTIFY_FROM; returns false (rather than throwing) if that
 // isn't set up, leaving the contact write as the record.
 async function notifyWaitlistSignup(env, lead) {
-  const label = lead.profession === 'other' ? `Other — ${lead.professionOther}` : lead.profession.toUpperCase();
+  const label = lead.profession === 'other' ? `Other: ${lead.professionOther}` : lead.profession.toUpperCase();
   const rows = [
     ['Name', lead.name],
     ['Email', lead.email],
     ['Profession', label],
-    ['Phone', lead.phone || '—'],
-    ['LinkedIn', lead.linkedin || '—'],
-    ['Comment', lead.comment || '—'],
+    ['Phone', lead.phone || 'N/A'],
+    ['LinkedIn', lead.linkedin || 'N/A'],
+    ['Comment', lead.comment || 'N/A'],
   ];
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -431,10 +462,10 @@ async function notifyWaitlistSignup(env, lead) {
 }
 
 // Validates the `port` query param the desktop app passed through the whole
-// flow — it's what we redirect the browser back to, so it must be a real
+// flow; it's what we redirect the browser back to, so it must be a real
 // ephemeral TCP port, not attacker-controlled input reflected into a redirect.
 // Exported for tests/auth-relay.test.js (the Clerk-dependent handlers below
-// aren't unit-tested — they need a live Clerk instance).
+// aren't unit-tested; they need a live Clerk instance).
 export function isValidLoopbackPort(raw) {
   if (!raw || !/^\d{1,5}$/.test(raw)) return false;
   const n = Number(raw);
@@ -466,7 +497,7 @@ async function handleAuthCallback(request, url, env) {
     signInUrl: `${ACCOUNT_PORTAL_URL}/sign-in`,
   });
 
-  // Mid-handshake — Clerk needs one more round-trip to finish syncing the
+  // Mid-handshake: Clerk needs one more round-trip to finish syncing the
   // session from the primary domain. Forward its headers verbatim (they
   // carry the redirect that continues the dance); we'll see this same
   // request again once it completes.
@@ -476,7 +507,7 @@ async function handleAuthCallback(request, url, env) {
 
   if (!requestState.isAuthenticated) {
     // Not signed in yet (e.g. this URL was opened directly, or the handshake
-    // came back empty) — send them to sign in, preserving our own callback
+    // came back empty), send them to sign in, preserving our own callback
     // URL as the post-sign-in redirect so they land back here.
     const callbackUrl = `https://${AUTH_HOSTNAME}${url.pathname}?${url.searchParams.toString()}`;
     const signInUrl = `${ACCOUNT_PORTAL_URL}/sign-in?redirect_url=${encodeURIComponent(callbackUrl)}`;
@@ -504,7 +535,7 @@ async function handleAuthCallback(request, url, env) {
   return Response.redirect(finish.toString(), 302);
 }
 
-// Server-to-server redemption of the one-time token minted above — called by
+// Server-to-server redemption of the one-time token minted above; called by
 // the desktop app's loopback listener, never by the browser. Single-use: the
 // token is deleted on first successful read, so a leaked/logged callback URL
 // (which only the browser and the desktop app ever see) can't be replayed.
@@ -544,7 +575,7 @@ function downloadPage(env, url) {
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Downloading Meridian for ${isWindows ? 'Windows' : 'Mac'} — Meridiona</title>
+<title>Downloading Meridian for ${isWindows ? 'Windows' : 'Mac'} · Meridiona</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -593,7 +624,7 @@ function downloadPage(env, url) {
     <div class="form-row">
       <input id="sub-email" type="email" placeholder="you@company.com" required autocomplete="email" aria-label="Email address">
     </div>
-    <p class="phone-hint">📱 Got a number? (optional) So we can text you when we ship fixes, ask what broke, or just say thanks — never spam.</p>
+    <p class="phone-hint">📱 Got a number? (optional) So we can text you when we ship fixes, ask what broke, or just say thanks. Never spam.</p>
     <div class="form-row">
       <select id="sub-phone-code" aria-label="Country code"></select>
       <input id="sub-phone" type="tel" placeholder="55 5123 4567" aria-label="Phone number (optional)">

@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy Policy & Data Handling — Meridiona</title>
-<meta name="description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it — the full data handling policy behind the local-first app and meridiona.com.">
+<title>Privacy Policy & Data Handling · Meridiona</title>
+<meta name="description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it: the full data handling policy behind the local-first app and meridiona.com.">
 <link rel="canonical" href="https://meridiona.com/privacy">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Meridian">
-<meta property="og:title" content="Privacy Policy & Data Handling — Meridiona">
-<meta property="og:description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it — the full data handling policy behind the local-first app and meridiona.com.">
+<meta property="og:title" content="Privacy Policy & Data Handling · Meridiona">
+<meta property="og:description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it: the full data handling policy behind the local-first app and meridiona.com.">
 <meta property="og:url" content="https://meridiona.com/privacy">
 <meta property="og:image" content="https://meridiona.com/assets/images/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Privacy Policy & Data Handling — Meridiona">
-<meta name="twitter:description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it — the full data handling policy behind the local-first app and meridiona.com.">
+<meta name="twitter:title" content="Privacy Policy & Data Handling · Meridiona">
+<meta name="twitter:description" content="What Meridian collects, where it's stored, when it ever leaves your device, and how to delete it: the full data handling policy behind the local-first app and meridiona.com.">
 <meta name="twitter:image" content="https://meridiona.com/assets/images/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
@@ -56,7 +56,7 @@
     <a href="/" class="backlink">← Back home</a>
     <h1>Privacy Policy & Data Handling</h1>
     <p class="legal-updated">Last updated: July 25, 2026 · Meridiona</p>
-    <p class="legal-scope">Applies to Meridian, the Meridiona LLP developer-productivity tool — version 1.75.0 and above.</p>
+    <p class="legal-scope">Applies to Meridian, the Meridiona LLP developer-productivity tool (version 1.75.0 and above).</p>
 
     <p>This Privacy Policy describes what data Meridian collects, how it is processed and stored, who can access it, and how it can be deleted. It supplements, and does not replace, any Non-Disclosure Agreement between Meridiona LLP ("<strong>Meridiona</strong>," "<strong>we</strong>") and the organization that has authorized its employees to use Meridian ("<strong>Customer</strong>," "<strong>you</strong>"), and Meridiona's Terms of Use.</p>
 
@@ -72,7 +72,7 @@
         <tbody>
           <tr><td>Window &amp; app activity</td><td>Active application name, window titles, timestamps, session durations</td><td>In-process screen capture on the user's device</td></tr>
           <tr><td>On-screen text</td><td>Text extracted via OCR and macOS Accessibility APIs from the visible screen, browser URLs</td><td>In-process capture (<code>capture_frames</code> table)</td></tr>
-          <tr><td>Input signals</td><td>UI events (clicks, key activity) used to detect idle vs. active periods — no keystroke content is logged</td><td>In-process capture (<code>capture_ui_events</code> table)</td></tr>
+          <tr><td>Input signals</td><td>UI events (clicks, key activity) used to detect idle vs. active periods; no keystroke content is logged</td><td>In-process capture (<code>capture_ui_events</code> table)</td></tr>
           <tr><td>Coding-agent sessions</td><td>Conversation transcripts and summaries from Claude Code, Codex, GitHub Copilot, and Cursor sessions on the user's machine</td><td>Local session-store files (e.g., <code>~/.claude/projects/</code>, <code>~/.codex/sessions/</code>)</td></tr>
           <tr><td>Integration data</td><td>Ticket titles, status, and metadata from connected tools (e.g., Jira, Linear, GitHub), if the user connects them</td><td>Direct API calls from the user's device to the connected service, using the user's own credentials</td></tr>
           <tr><td>Diagnostic/telemetry data</td><td>Application logs and error traces (structured, with any sensitive field values redacted where feasible)</td><td>Local telemetry spool on the user's device</td></tr>
@@ -82,7 +82,7 @@
     <p>Meridian does <strong>not</strong> capture audio, and does not log raw keystroke content.</p>
 
     <h2>3. Where data is stored</h2>
-    <p>All activity data is stored <strong>locally</strong>, in a SQLite database on the individual employee's own machine (<code>~/.meridian/meridian.db</code>). Meridiona does not operate a central server that stores customer activity data by default. There is no daemon-side network listener and no account/authentication system — Meridian does not transmit activity data off the device as part of normal operation.</p>
+    <p>All activity data is stored <strong>locally</strong>, in a SQLite database on the individual employee's own machine (<code>~/.meridian/meridian.db</code>). Meridiona does not operate a central server that stores customer activity data by default. There is no daemon-side network listener and no account/authentication system. Meridian does not transmit activity data off the device as part of normal operation.</p>
     <p>Diagnostic logs and traces are likewise captured to a local spool on the device (<code>~/.meridian/telemetry/</code>) and are retained there subject to the retention periods in Section 5.</p>
 
     <h2>4. When data leaves the device</h2>
@@ -113,7 +113,7 @@
 
     <h2>7. Security measures</h2>
     <ul>
-      <li>Activity data is stored in a local, unauthenticated SQLite database scoped to the individual employee's own user account and file-system permissions on their device — the same trust boundary as any other local application data.</li>
+      <li>Activity data is stored in a local, unauthenticated SQLite database scoped to the individual employee's own user account and file-system permissions on their device: the same trust boundary as any other local application data.</li>
       <li>Meridian's daemon does not open any network port or run an HTTP server; there is no remote attack surface for the activity database itself.</li>
       <li>Data sent to third-party AI or integration providers travels over TLS to that provider's API, using credentials the user controls.</li>
       <li>Diagnostic logs are redacted where feasible before being written to the local spool or exported.</li>
@@ -134,10 +134,10 @@
     <p>Meridiona may update this Privacy Policy as Meridian's functionality changes (e.g., new integrations, new telemetry). Material changes affecting Customer data handling will be communicated to Customer's designated contact.</p>
 
     <h2>11. This website (meridiona.com)</h2>
-    <p>Separately from the Meridian app described above, meridiona.com — the marketing site you're reading now — uses two third-party services:</p>
+    <p>Separately from the Meridian app described above, meridiona.com (the marketing site you're reading now) uses two third-party services:</p>
     <ul>
-      <li><strong>PostHog</strong> — privacy-friendly product analytics (page views, button clicks) so we can see how people use the site. This only runs after you accept the cookie banner; declining or ignoring it means nothing is captured. See our <a href="/cookies">Cookie policy</a> for details.</li>
-      <li><strong>Resend</strong> — if you submit a download or waitlist form, we store what you entered with Resend so we can send you release notes and updates. The download form asks for your email and, optionally, a phone number. The waitlist form additionally asks for your name, your profession, optionally a LinkedIn profile URL, and an optional free-text comment; we use those only to decide what to build next and who to tell about it. A copy of each waitlist submission is also emailed to our own team inbox. You can unsubscribe from any email we send, and you can ask us to delete a submission at the address below.</li>
+      <li><strong>PostHog</strong>: privacy-friendly product analytics (page views, button clicks) so we can see how people use the site. This only runs after you accept the cookie banner; declining or ignoring it means nothing is captured. See our <a href="/cookies">Cookie policy</a> for details.</li>
+      <li><strong>Resend</strong>: if you submit a download or waitlist form, we store what you entered with Resend so we can send you release notes and updates. The download form asks for your email and, optionally, a phone number. The waitlist form additionally asks for your name, your profession, optionally a LinkedIn profile URL, and an optional free-text comment; we use those only to decide what to build next and who to tell about it. A copy of each waitlist submission is also emailed to our own team inbox. You can unsubscribe from any email we send, and you can ask us to delete a submission at the address below.</li>
     </ul>
     <p>We don't sell personal data, and we don't run cross-site ad tracking on this site.</p>
 
@@ -147,7 +147,7 @@
 </main>
 
 <div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site — nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
+  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site. Nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
   <div class="cookie-consent__actions">
     <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
     <button id="cookie-accept" type="button" class="btn-primary">Accept</button>

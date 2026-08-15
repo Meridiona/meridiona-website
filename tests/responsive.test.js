@@ -123,9 +123,8 @@ test('worker.js still serves /subscribe, /waitlist, /dl, /download and ASSETS fa
   expect(worker).toContain("url.pathname === '/waitlist'");
   expect(worker).toContain('env.ASSETS.fetch(request)');
 });
-test('site.js calls /subscribe, /waitlist and /dl the way worker.js expects', () => {
+test('site.js calls /subscribe and /dl the way worker.js expects', () => {
   expect(siteJs).toContain("fetch('/subscribe'");
-  expect(siteJs).toContain("fetch('/waitlist'");
   expect(siteJs).toContain('/dl?ref=');
 });
 test('/waitlist validates every field the form sends and writes them to Resend properties', () => {
@@ -160,11 +159,6 @@ test('dusk theme variables are defined', () => {
 test('paper theme variables are defined', () => {
   expect(siteCss).toContain('body[data-theme="paper"]');
 });
-test('theme switcher persists choice and applies data-theme on load', () => {
-  expect(siteJs).toContain("localStorage.setItem(THEME_STORAGE_KEY");
-  expect(siteJs).toContain('document.body.dataset.theme');
-});
-
 // ─── Group 4: Key sections present ───────────────────────────────────────────
 console.log('\nKey sections');
 test('nav with Why/FAQ/GitHub/Connect/Download', () => {
@@ -185,7 +179,7 @@ test('why section present', () => {
   expect(index).toContain('id="why"');
   expect(index).toContain('id="why-scrolly"');
   expect(index).toContain('id="lines-ticker"');
-  expect(index).toContain('You took');
+  expect(index).toContain('You did');
 });
 test('faq section is server-rendered (visible to non-JS crawlers) with JS-driven accordion interaction', () => {
   expect(index).toContain('id="faq"');
@@ -205,34 +199,19 @@ test('download modal with mac/windows/linux picker (rendered by site.js)', () =>
   expect(siteJs).toContain("data-os=\"windows\"");
   expect(siteJs).toContain("data-os=\"linux\"");
 });
-test('waitlist CTA above the footer opens a server-rendered signup form', () => {
+test('"book a call" CTA above the footer links out to the scheduling page', () => {
   expect(index).toContain('id="waitlist"');
-  expect(index).toContain('data-waitlist-open');
-  expect(index).toContain('id="modal-waitlist"');
-  // Form markup lives in the HTML (crawlable, works before site.js runs) rather
-  // than being innerHTML'd like the download modal's body.
-  ['wl-name', 'wl-email', 'wl-profession', 'wl-linkedin', 'wl-comment', 'wl-phone-slot', 'wl-done']
-    .forEach((id) => expect(index).toContain(`id="${id}"`));
-  ['pm', 'investor', 'dev', 'founder', 'other']
-    .forEach((p) => expect(index).toContain(`data-profession="${p}"`));
-  expect(siteJs).toContain("$('wl-form')");
+  expect(index).toContain('https://cal.com/adithya-harish');
 });
-test('waitlist and download modals share one country-code field implementation', () => {
+test('download modal owns the phone-number field implementation', () => {
   expect(siteJs).toContain('phoneCodeField(');
   expect(siteJs).toContain("phoneCodeField('dl'");
-  expect(siteJs).toContain("phoneCodeField('wl'");
-  // One definition, two instantiations — no duplicated combobox.
   expect((siteJs.match(/const phoneCodeField = /g) || []).length).toBe(1);
 });
 test('social connect modal', () => {
   expect(index).toContain('id="modal-connect"');
   expect(index).toContain("Let's be friends");
 });
-test('theme switcher widget with dots container', () => {
-  expect(index).toContain('id="theme-switcher"');
-  expect(index).toContain('id="theme-dots"');
-});
-
 // ─── Group 5: Fluid responsiveness (no fixed breakpoints needed) ─────────────
 console.log('\nFluid responsive layout');
 test('headline uses clamp() for fluid type instead of a fixed breakpoint', () => {
@@ -247,7 +226,7 @@ test('footer grid collapses via minmax, not a hardcoded mobile override', () => 
 });
 test('hero embed recomputes size on window resize (no layout overflow on small viewports)', () => {
   expect(siteJs).toContain("window.addEventListener('resize', this._resize)");
-  expect(siteJs).toContain('Math.max(280, Math.min(1120');
+  expect(siteJs).toContain('Math.max(280, Math.min(1200');
 });
 
 // ─── Group 6: Interactive demo (embedded product) ────────────────────────────
@@ -315,14 +294,39 @@ test('writing pages have no inline <style>/<script> blocks (externalized)', () =
     expect(inlineScripts.length).toBe(0);
   }
 });
-test('writing pages carry the shared chrome: nav, theme switcher, modals, /new-rooted assets', () => {
+test('writing pages carry the shared chrome: nav, modals, /new-rooted assets', () => {
   for (const p of allWritingPages) {
-    expect(p.html).toContain('id="theme-dots"');
     expect(p.html).toContain('id="modal-download"');
     expect(p.html).toContain('id="modal-connect"');
     expect(p.html).toContain('href="/writing"');
     expect(p.html).toContain('src="/assets/js/analytics.js"');
   }
+});
+test('writing pages wrap content in the .site div that defines the theme tokens', () => {
+  // site.css defines --ink/--acc/--mut/--bg/--card/etc. (and the base font)
+  // on `.site`, not on `body` or `:root`. A writing page missing this wrapper
+  // silently loses every theme variable — text falls back to browser
+  // defaults instead of the site's font/color/theme, with no visible error.
+  for (const p of allWritingPages) {
+    expect(p.html).toContain('<div class="site" id="site">');
+  }
+});
+test('writing pages hold a nav placeholder instead of duplicating the markup', () => {
+  // There's no templating (no build step — CLAUDE.md), so a literal <nav>
+  // copy-pasted into every writing page would drift from index.html's over
+  // time. Instead each writing page carries this single placeholder, and
+  // worker.js (see below) injects index.html's <nav> into it per-request —
+  // one source of truth to edit, not five.
+  for (const p of allWritingPages) {
+    expect(p.html).toContain('<!--NAV-->');
+    expect(p.html.includes('<nav class="nav"')).toBeFalsy();
+  }
+});
+test('worker.js injects the canonical nav into every /writing* response', () => {
+  expect(worker).toContain("url.pathname === '/writing' || url.pathname.startsWith('/writing/')");
+  expect(worker).toContain("html.replace('<!--NAV-->', nav)");
+  expect(worker).toContain('async function canonicalWritingNav(env, origin)');
+  expect(worker).toContain(String.raw`<nav class="nav" role="navigation" aria-label="Main">[\s\S]*?<\/nav>`);
 });
 test('essay pages have the reading structure: backlink, article head, prose, footer nav', () => {
   for (const p of essays) {

@@ -1,4 +1,4 @@
-/* Meridiona demo — synthesized UI foley.
+/* Meridiona demo: synthesized UI foley.
    No audio files: every cue is generated with the Web Audio API so it can be
    tuned per event and layered cleanly under a voiceover / background music.
    Exposes window.MeridianAudio.play(name) plus setMuted / isMuted. */
@@ -67,12 +67,12 @@
   }
 
   var CUES = {
-    // cursor click — clean, soft rounded click
+    // cursor click: clean, soft rounded click
     click: function () {
       voice({ type: 'sine', f0: 1120, f1: 760, dur: 0.045, gain: 0.05, attack: 0.001, filter: 'lowpass', filterFreq: 2400 });
       voice({ type: 'sine', f0: 2400, dur: 0.02, gain: 0.02, attack: 0.001 });
     },
-    // click-to-action confirmed — clean rising two-note "ti-dink"
+    // click-to-action confirmed: clean rising two-note "ti-dink"
     posted: function () {
       voice({ type: 'sine', f0: 987.77, dur: 0.1, gain: 0.05, attack: 0.003 });
       voice({ type: 'sine', f0: 1318.51, dur: 0.24, gain: 0.05, attack: 0.004, delay: 0.085 });

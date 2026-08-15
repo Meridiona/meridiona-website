@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>More context made my classifier worse, not better — Meridian</title>
-<meta name="description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.">
+<title>More context made my classifier worse, not better · Meridian</title>
+<meta name="description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy, and why removing a context limit made accuracy worse, not better.">
 <link rel="canonical" href="https://meridiona.com/writing/eval-loop">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Meridian">
-<meta property="og:title" content="More context made my classifier worse, not better — Meridian">
-<meta property="og:description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.">
+<meta property="og:title" content="More context made my classifier worse, not better · Meridian">
+<meta property="og:description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy, and why removing a context limit made accuracy worse, not better.">
 <meta property="og:url" content="https://meridiona.com/writing/eval-loop">
 <meta property="og:image" content="https://meridiona.com/assets/images/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="More context made my classifier worse, not better — Meridian">
-<meta name="twitter:description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy — and why removing a context limit made accuracy worse, not better.">
+<meta name="twitter:title" content="More context made my classifier worse, not better · Meridian">
+<meta name="twitter:description" content="A post-eval workflow that turns LLM classifier failures into a machine-maintained taxonomy, and why removing a context limit made accuracy worse, not better.">
 <meta name="twitter:image" content="https://meridiona.com/assets/images/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
@@ -29,26 +29,9 @@
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
+<div class="site" id="site">
 
-<nav class="nav" role="navigation" aria-label="Main">
-  <div class="nav__inner">
-    <a href="/" class="nav__brand">
-      <img class="nav__brand-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="24" height="24" loading="eager">
-      <span class="nav__brand-name">Meridian</span>
-    </a>
-    <div class="nav__links">
-      <a href="/#why" class="nav__link">Why</a>
-      <a href="/#faq" class="nav__link">FAQ</a>
-      <a href="/writing" class="nav__link" style="color:var(--ink)">Writing</a>
-      <a href="https://github.com/Meridiona/meridian" target="_blank" rel="noopener" class="nav__link nav__link--mono">GitHub ↗</a>
-      <button id="btn-connect" title="Connect" class="btn-ghost">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"></circle><circle cx="6" cy="12" r="2.6"></circle><circle cx="18" cy="19" r="2.6"></circle><path d="M8.4 10.7 L15.6 6.3M8.4 13.3 L15.6 17.7"></path></svg>
-        Connect
-      </button>
-      <button id="btn-download-nav" class="btn-primary">Download</button>
-    </div>
-  </div>
-</nav>
+<!--NAV-->
 
 <main id="main-content" role="main" class="writing-page">
   <div class="writing-page__inner">
@@ -58,7 +41,7 @@
     <header class="article-head">
       <div class="eyebrow">Engineering · evals · AI</div>
       <h1 class="article-head__title">Using Claude Code skills to close the eval loop.</h1>
-      <p class="article-head__dek">How I turned classifier failures into a structured, machine-maintained backlog — and why more context made accuracy worse, not better.</p>
+      <p class="article-head__dek">How I turned classifier failures into a structured, machine-maintained backlog, and why more context made accuracy worse, not better.</p>
       <div class="article-head__meta">
         <span>May 29, 2026</span>
         <span class="article-head__meta-dot">·</span>
@@ -90,7 +73,7 @@
         <li>What is the highest-leverage thing to fix next?</li>
       </ul>
 
-      <p>The traditional approach — maintaining notes manually — breaks down almost immediately. Notes become outdated after the second run. There is no consistent structure. Nobody tracks recurrence. And reviewing dozens of failures turns into a forensic exercise every time.</p>
+      <p>The traditional approach, maintaining notes manually, breaks down almost immediately. Notes become outdated after the second run. There is no consistent structure. Nobody tracks recurrence. And reviewing dozens of failures turns into a forensic exercise every time.</p>
 
       <h2><span class="sec-index">§ 01</span>The key insight.</h2>
 
@@ -100,7 +83,7 @@
 
       <pre><code>/eval-feedback</code></pre>
 
-      <p>It is not an autonomous agent and it does not run continuously. It is simply a repeatable post-eval analysis workflow — a perfect fit for evaluating classifier failures.</p>
+      <p>It is not an autonomous agent and it does not run continuously. It is simply a repeatable post-eval analysis workflow, a perfect fit for evaluating classifier failures.</p>
 
       <h2><span class="sec-index">§ 02</span>The data structure.</h2>
 
@@ -120,9 +103,9 @@
 
       <h2><span class="sec-index">§ 03</span>Three design decisions.</h2>
 
-      <p><strong>First:</strong> a lean-read pattern. Instead of loading the entire file into context every time, the skill pulls only targeted slices using <code>jq</code> — recent runs, open failure classes, matching observations, summary statistics. This lets the file grow indefinitely without consuming large amounts of context. Based on current usage, roughly 20&nbsp;KB of additional data per run.</p>
+      <p><strong>First:</strong> a lean-read pattern. Instead of loading the entire file into context every time, the skill pulls only targeted slices using <code>jq</code>: recent runs, open failure classes, matching observations, summary statistics. This lets the file grow indefinitely without consuming large amounts of context. Based on current usage, roughly 20&nbsp;KB of additional data per run.</p>
 
-      <p><strong>Second:</strong> updates through a small Python append workflow — load → mutate → write. The skill never edits JSON directly.</p>
+      <p><strong>Second:</strong> updates through a small Python append workflow: load, mutate, write. The skill never edits JSON directly.</p>
 
       <p><strong>Third, and most valuable:</strong> every observation contains a <code>failure_class_id</code>. That single field links individual failures to a persistent failure pattern. When the same pattern appears again, its occurrence count increases automatically. Recurring problems rise to the top without any manual prioritisation.</p>
 
@@ -130,7 +113,7 @@
 
       <p>After three runs, the system identified 10 named failure classes across 62 observations. One class dominated everything else. I called it <em>optimism-bias</em>. It appeared 27 times across all three runs.</p>
 
-      <p>The pattern was consistent: whenever the classifier encountered any adjacent signal — a mention in a document, a related article, a matching keyword, or a topically similar file path — it tended to classify the session as belonging to the target task with high confidence.</p>
+      <p>The pattern was consistent: whenever the classifier encountered any adjacent signal (a mention in a document, a related article, a matching keyword, or a topically similar file path) it tended to classify the session as belonging to the target task with high confidence.</p>
 
       <p>Even more interesting was what happened during a context experiment. I removed a 2,500-character OCR truncation limit, expecting additional context to improve accuracy. The opposite happened. Performance got worse. The classifier became more confident in incorrect predictions because the additional context provided more opportunities to find loosely related evidence.</p>
 
@@ -199,7 +182,7 @@
 </main>
 
 <div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site — nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
+  <p class="cookie-consent__text">We use privacy-friendly product analytics (PostHog) to see how people use this site. Nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
   <div class="cookie-consent__actions">
     <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
     <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
@@ -236,13 +219,8 @@
   </div>
 </div>
 
-<!-- ============ THEME SWITCHER ============ -->
-<div id="theme-switcher" class="theme-switcher">
-  <span class="theme-switcher__label">theme</span>
-  <div id="theme-dots" class="theme-dots"></div>
-</div>
-
 <iframe id="dl-frame" class="dl-frame" title="download" aria-hidden="true"></iframe>
+</div>
 
 <script src="/assets/js/site.js" defer></script>
 </body>
