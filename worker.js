@@ -68,6 +68,16 @@ const WAITLIST_NOTIFY_TO = 'company@meridiona.com';
 const WAITLIST_NOTIFY_FROM = 'Meridian Waitlist <waitlist@meridiona.com>';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Desktop-app sign-ins (auth.meridiona.com), see handleAuthCallback below.
+const LOGIN_NOTIFY_TO = 'company@meridiona.com';
+const LOGIN_NOTIFY_FROM = 'Meridian Sign-ins <notify@meridiona.com>';
+const WELCOME_EMAIL_FROM = 'Meridian <hello@meridiona.com>';
+// How fresh a Clerk user record has to be, relative to the moment they land on
+// the callback, to count as "just signed up" rather than "logging back in".
+// Wide enough to absorb the Google OAuth + Clerk handshake round-trip, which
+// can run to a minute or two on a slow network.
+const NEW_USER_WINDOW_MS = 5 * 60 * 1000;
+
 // Always resolves to the newest release's asset; no version to bump in code.
 // Filenames must match the meridian repo's actual CI-published asset names
 // exactly (release.yml), or /dl 404s against a real GitHub redirect.
@@ -102,7 +112,7 @@ async function handle(request, url, env, ctx) {
 
     // Google-SSO relay, isolated by hostname, never touches the routes below.
     if (url.hostname === AUTH_HOSTNAME) {
-      if (url.pathname === '/auth/callback') return handleAuthCallback(request, url, env);
+      if (url.pathname === '/auth/callback') return handleAuthCallback(request, url, env, ctx);
       if (url.pathname === '/auth/exchange') return handleAuthExchange(url, env);
       return json({ error: 'not found' }, 404);
     }
@@ -461,6 +471,68 @@ async function notifyWaitlistSignup(env, lead) {
   }
 }
 
+// Pings the team inbox every time someone completes the desktop app's Google
+// sign-in, so a login isn't just a silent KV write. Called via ctx.waitUntil
+// from handleAuthCallback — never blocks the redirect back to the app.
+async function notifyLogin(env, { email, userId, isNewUser }) {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: LOGIN_NOTIFY_FROM,
+        to: [LOGIN_NOTIFY_TO],
+        subject: `${isNewUser ? 'New sign-up' : 'Sign-in'}: ${email}`,
+        text: `${email}\nClerk user id: ${userId}\n${isNewUser ? 'First time signing in.' : 'Returning user.'}`,
+      }),
+    });
+    if (!res.ok) console.error('Resend login-notify error:', res.status, JSON.stringify(await res.json().catch(() => ({}))));
+  } catch (err) {
+    console.error('Resend login-notify fetch error:', err);
+  }
+}
+
+// Welcomes a brand-new Clerk user the first time they complete the desktop
+// app's sign-in. Gated on isNewUser (see handleAuthCallback's NEW_USER_WINDOW_MS
+// check) so returning logins never re-send it.
+async function sendWelcomeEmail(env, email) {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: WELCOME_EMAIL_FROM,
+        to: [email],
+        // hello@ isn't a real inbox, route replies to the one we actually read.
+        reply_to: WAITLIST_NOTIFY_TO,
+        subject: "You're in, welcome to Meridian",
+        text: [
+          'Hey,',
+          '',
+          "Thanks for signing in, you're all set.",
+          '',
+          "From here Meridian just runs quietly in the background, keeping track of what you actually worked on so none of it gets lost by the time someone asks you about it. That's the whole idea behind it, we don't want your work to go unnoticed, not by your team and not by you either, when you're trying to remember what you did three weeks ago.",
+          '',
+          "If anything looks off, or you just want to say hi, reply to this email. A real person reads these, not a bot.",
+          '',
+          'Glad you\'re here.',
+          '',
+          'The Meridian team',
+        ].join('\n'),
+      }),
+    });
+    if (!res.ok) console.error('Resend welcome-email error:', res.status, JSON.stringify(await res.json().catch(() => ({}))));
+  } catch (err) {
+    console.error('Resend welcome-email fetch error:', err);
+  }
+}
+
 // Validates the `port` query param the desktop app passed through the whole
 // flow; it's what we redirect the browser back to, so it must be a real
 // ephemeral TCP port, not attacker-controlled input reflected into a redirect.
@@ -478,7 +550,7 @@ export function isValidLoopbackPort(raw) {
 // `authenticateRequest` with `satelliteAutoSync: true` completes the
 // handshake and syncs the session here automatically. See
 // tray/src-tauri/src/commands/clerk_signin.rs for the desktop side.
-async function handleAuthCallback(request, url, env) {
+async function handleAuthCallback(request, url, env, ctx) {
   const port = url.searchParams.get('port');
   const state = url.searchParams.get('state');
   if (!isValidLoopbackPort(port)) return json({ error: 'invalid or missing port' }, 400);
@@ -521,6 +593,10 @@ async function handleAuthCallback(request, url, env) {
     console.error('Clerk user has no primary email:', auth.userId);
     return json({ error: 'signed-in user has no email address' }, 500);
   }
+
+  const isNewUser = Date.now() - user.createdAt < NEW_USER_WINDOW_MS;
+  ctx.waitUntil(notifyLogin(env, { email, userId: auth.userId, isNewUser }));
+  if (isNewUser) ctx.waitUntil(sendWelcomeEmail(env, email));
 
   const token = crypto.randomUUID();
   await env.AUTH_TOKENS.put(
