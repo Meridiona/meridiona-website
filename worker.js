@@ -517,7 +517,7 @@ async function sendWelcomeEmail(env, email) {
           '',
           "Thanks for signing in, you're all set.",
           '',
-          "Meridian keeps track of what you actually worked on, so none of it gets lost by the time someone asks you about it, and so you're not the one trying to remember what you did three weeks ago either. That's really the whole point of it.",
+          "So much of what you actually do in a day quietly disappears, the small fix, the late night spent untangling something, the help you gave a teammate that nobody wrote down anywhere. We built Meridian so none of that has to be lost, not to your team, and not to you either, three weeks from now when you're trying to piece it all back together.",
           '',
           "If anything looks off, or you just want to say hi, reply to this email. A real person reads these, not a bot.",
           '',
