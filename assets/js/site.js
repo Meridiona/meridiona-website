@@ -315,15 +315,38 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> ' + c.successTitle + '</h3><p class="modal-subtitle">' + c.successBody + '</p>' + backLinkHtml(16);
     };
-    const openDl = () => {
+    const openDl = (ref) => {
       dm.os = detectOS() || 'other'; dm.showPicker = false; dm.email = ''; dm.phoneCode = '+1'; dm.phone = ''; dm.sent = false;
       renderDl();
       $('modal-download').classList.add('is-open');
-      if (isDownloadOS(dm.os)) fireDownload('landing-modal-auto');
+      if (isDownloadOS(dm.os)) fireDownload(ref || 'landing-modal-auto');
     };
     const closeDl = () => $('modal-download').classList.remove('is-open');
-    $('btn-download-nav').addEventListener('click', openDl);
-    if ($('btn-download-faq')) $('btn-download-faq').addEventListener('click', openDl);
+    // Wrapped rather than passed directly: a listener hands its Event as the
+    // first argument, which would land in openDl's `ref` and be interpolated
+    // into the /dl URL.
+    $('btn-download-nav').addEventListener('click', () => openDl());
+    if ($('btn-download-faq')) $('btn-download-faq').addEventListener('click', () => openDl());
+
+    // Deep link: #download opens this same modal, so an off-site link (the
+    // GitHub README, a launch post) lands people on the real download in one
+    // click instead of two. A fragment never reaches the Worker, so this costs
+    // no route and works on every page carrying the modal - index, 404, terms,
+    // cookies, accessibility.
+    //
+    // Attribution rides on ?ref=, since the Worker cannot see the fragment:
+    // /?ref=github-readme#download is counted separately from a nav click.
+    // Sanitized here as well as in the Worker because it is interpolated into
+    // the /dl URL that fireDownload assigns to the iframe.
+    const deepLinkRef = () => {
+      const r = (new URLSearchParams(location.search).get('ref') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 40);
+      return r || 'landing-hash';
+    };
+    const openDlFromHash = () => { if (location.hash === '#download') openDl(deepLinkRef()); };
+    openDlFromHash();
+    // Also fires for an in-page #download link, which changes the hash without
+    // reloading and so never re-runs the call above.
+    window.addEventListener('hashchange', openDlFromHash);
     $('btn-close-download').addEventListener('click', closeDl);
     $('modal-download').addEventListener('click', (e) => { if (e.target.id === 'modal-download') closeDl(); });
     $('modal-download-body').addEventListener('click', (e) => {
