@@ -511,13 +511,13 @@ async function sendWelcomeEmail(env, email) {
         to: [email],
         // hello@ isn't a real inbox, route replies to the one we actually read.
         reply_to: WAITLIST_NOTIFY_TO,
-        subject: "You're in, welcome to Meridian",
+        subject: 'We hope this helps your work stop going unnoticed',
         text: [
           'Hey,',
           '',
           "Thanks for signing in, you're all set.",
           '',
-          "From here Meridian just runs quietly in the background, keeping track of what you actually worked on so none of it gets lost by the time someone asks you about it. That's the whole idea behind it, we don't want your work to go unnoticed, not by your team and not by you either, when you're trying to remember what you did three weeks ago.",
+          "Meridian keeps track of what you actually worked on, so none of it gets lost by the time someone asks you about it, and so you're not the one trying to remember what you did three weeks ago either. That's really the whole point of it.",
           '',
           "If anything looks off, or you just want to say hi, reply to this email. A real person reads these, not a bot.",
           '',
