@@ -51,7 +51,9 @@ body[data-theme="paper"]{
 .icon-close--connect{top:16px;right:16px}
 
 .nav{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--navbg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
-.nav__inner{width:100%;padding:0 36px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.nav__inner{position:relative;width:100%;padding:0 36px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.nav__ph-badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;line-height:0}
+.nav__ph-badge img{height:32px;width:auto}
 .nav__brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}
 .nav__brand-mark{width:36px;height:36px;object-fit:contain;display:inline-block;flex:none}
 .nav__brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.02em}
@@ -72,7 +74,7 @@ body[data-theme="paper"]{
 .has-tooltip:hover::after,.has-tooltip:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}
 .nav__icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:none;background:var(--chip);color:var(--acc);cursor:pointer;transition:background .2s ease,color .2s ease}
 .nav__icon-btn:hover{background:var(--acc);color:var(--btnink)}
-@media (max-width:760px){.nav__inner{padding:0 20px;gap:14px}.nav__links{gap:16px}.nav__github,.btn-ghost,.nav__icon-btn{display:none}}
+@media (max-width:760px){.nav__inner{padding:0 20px;gap:14px}.nav__links{gap:16px}.nav__github,.btn-ghost,.nav__icon-btn,.nav__ph-badge{display:none}}
 @media (max-width:560px){.nav__link{display:none}}
 
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding:84px 24px 12px;position:relative;overflow-x:hidden}
