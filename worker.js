@@ -496,6 +496,19 @@ function primaryEmail(user) {
   return match?.email_address || user.email_addresses?.[0]?.email_address || null;
 }
 
+// Sign-up is email+OTP only (EmailCodeForm.tsx never collects a name), so
+// Clerk's first_name is always null — this guesses one from the address's
+// local part instead. Trailing digits and separator-delimited suffixes are
+// stripped so "akarsh.kumar@…"/"akarsh+test@…" both read as "Akarsh"; returns
+// null (not a raw local part) when nothing legible is left, e.g. "01@…".
+function guessNameFromEmail(email) {
+  const local = email?.split('@')[0];
+  if (!local) return null;
+  const first = local.split(/[._+-]/)[0].replace(/\d+$/, '');
+  if (!first) return null;
+  return first[0].toUpperCase() + first.slice(1).toLowerCase();
+}
+
 // Pings the team inbox on every real sign-in, so a login isn't just a silent
 // event nobody sees. Called via ctx.waitUntil from handleClerkWebhook — never
 // blocks the webhook response Clerk is waiting on.
@@ -523,7 +536,7 @@ async function notifyLogin(env, { email, userId, isNewUser }) {
 // Welcomes a brand-new Clerk user. Driven by user.created, which fires
 // exactly once per user no matter how they authenticated, so no separate
 // dedup/freshness check is needed here the way a login-triggered path would.
-async function sendWelcomeEmail(env, email) {
+async function sendWelcomeEmail(env, email, name) {
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -534,11 +547,9 @@ async function sendWelcomeEmail(env, email) {
       body: JSON.stringify({
         from: WELCOME_EMAIL_FROM,
         to: [email],
-        // Plain and factual on purpose — tagline-style phrasing here reads as
-        // marketing copy to Gmail's Promotions-tab classifier.
-        subject: "You're signed in to Meridian",
+        subject: name ? `Welcome to the family, ${name}` : 'Welcome to the family',
         text: [
-          'Hey,',
+          name ? `Hey ${name},` : 'Hey,',
           '',
           "Thanks for signing in, and honestly, just thanks for giving us a shot in the first place.",
           '',
@@ -576,7 +587,10 @@ async function handleClerkWebhook(request, env, ctx) {
 
   if (evt.type === 'user.created') {
     const email = primaryEmail(evt.data);
-    if (email) ctx.waitUntil(sendWelcomeEmail(env, email));
+    // Prefer a real first_name if sign-up ever collects one; email+OTP today
+    // never does, so this is guessNameFromEmail's fallback in practice.
+    const name = evt.data.first_name?.trim() || guessNameFromEmail(email);
+    if (email) ctx.waitUntil(sendWelcomeEmail(env, email, name));
     else console.error('Clerk user.created with no email on record:', evt.data.id);
   } else if (evt.type === 'session.created') {
     const user = evt.data.user;
