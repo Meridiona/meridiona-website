@@ -79,7 +79,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Desktop-app sign-ins, driven by Clerk webhooks (see handleClerkWebhook).
 const LOGIN_NOTIFY_TO = 'company@meridiona.com';
 const LOGIN_NOTIFY_FROM = 'Meridian Sign-ins <notify@meridiona.com>';
-const WELCOME_EMAIL_FROM = 'Meridian <hello@meridiona.com>';
+// Sent from company@ rather than a hello@/info@/news@-style prefix — those
+// are known Gmail Promotions-tab triggers, and company@ is also a real inbox
+// we read, so replies don't need a separate reply_to override either.
+const WELCOME_EMAIL_FROM = 'Meridian <company@meridiona.com>';
 // How close a session's created_at has to be to its user's created_at to call
 // it "just signed up" rather than "logging back in", purely for the notify
 // email's wording — the welcome email itself doesn't need this, it's driven
@@ -531,8 +534,6 @@ async function sendWelcomeEmail(env, email) {
       body: JSON.stringify({
         from: WELCOME_EMAIL_FROM,
         to: [email],
-        // hello@ isn't a real inbox, route replies to the one we actually read.
-        reply_to: WAITLIST_NOTIFY_TO,
         subject: 'We hope this helps your work stop going unnoticed',
         text: [
           'Hey,',
