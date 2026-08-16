@@ -1,6 +1,14 @@
 import { createClerkClient } from '@clerk/backend';
+import { verifyWebhook } from '@clerk/backend/webhooks';
 
-// Google-SSO relay for the Meridian desktop app (tray/src-tauri/src/commands/clerk_signin.rs).
+// NOTE: the actual desktop-app sign-in is email+OTP, entirely inside the
+// Tauri webview (ui/app/setup/signin/EmailCodeForm.tsx, via tauri-plugin-clerk
+// talking straight to Clerk's API) — it never reaches this Worker. The routes
+// below (/auth/callback, /auth/exchange) are a legacy Google-SSO browser relay
+// for a Rust command (tray/src-tauri/src/commands/clerk_signin.rs) that no
+// longer exists in the app; kept only because nothing currently proves it's
+// safe to delete. Do not hang new sign-in logic off them — see /webhooks/clerk
+// below instead, which is what the app's actual sign-in flow can reach.
 // Routed by hostname so none of the rest of this file's logic is touched.
 const AUTH_HOSTNAME = 'auth.meridiona.com';
 // Clerk's Account Portal for the Meridian app: the real, hosted Google
@@ -68,6 +76,16 @@ const WAITLIST_NOTIFY_TO = 'company@meridiona.com';
 const WAITLIST_NOTIFY_FROM = 'Meridian Waitlist <waitlist@meridiona.com>';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Desktop-app sign-ins, driven by Clerk webhooks (see handleClerkWebhook).
+const LOGIN_NOTIFY_TO = 'company@meridiona.com';
+const LOGIN_NOTIFY_FROM = 'Meridian Sign-ins <notify@meridiona.com>';
+const WELCOME_EMAIL_FROM = 'Meridian <hello@meridiona.com>';
+// How close a session's created_at has to be to its user's created_at to call
+// it "just signed up" rather than "logging back in", purely for the notify
+// email's wording — the welcome email itself doesn't need this, it's driven
+// by the dedicated user.created event, which only ever fires once per user.
+const NEW_USER_WINDOW_MS = 5 * 60 * 1000;
+
 // Always resolves to the newest release's asset; no version to bump in code.
 // Filenames must match the meridian repo's actual CI-published asset names
 // exactly (release.yml), or /dl 404s against a real GitHub redirect.
@@ -104,6 +122,11 @@ async function handle(request, url, env, ctx) {
     if (url.hostname === AUTH_HOSTNAME) {
       if (url.pathname === '/auth/callback') return handleAuthCallback(request, url, env);
       if (url.pathname === '/auth/exchange') return handleAuthExchange(url, env);
+      // Clerk-initiated, not browser-initiated — the one thing on this
+      // hostname the actual (in-app, email+OTP) sign-in flow can reach, since
+      // Clerk itself calls it server-to-server on every real user/session
+      // event regardless of how the app authenticated them.
+      if (url.pathname === '/webhooks/clerk' && request.method === 'POST') return handleClerkWebhook(request, env, ctx);
       return json({ error: 'not found' }, 404);
     }
 
@@ -459,6 +482,107 @@ async function notifyWaitlistSignup(env, lead) {
     console.error('Resend notification fetch error:', err);
     return false;
   }
+}
+
+// Picks the address a Clerk UserJSON payload actually treats as primary,
+// falling back to the first on record — Clerk lets a user hold several, and
+// the webhook payload gives no shortcut for "the one that matters".
+function primaryEmail(user) {
+  if (!user) return null;
+  const match = user.email_addresses?.find((e) => e.id === user.primary_email_address_id);
+  return match?.email_address || user.email_addresses?.[0]?.email_address || null;
+}
+
+// Pings the team inbox on every real sign-in, so a login isn't just a silent
+// event nobody sees. Called via ctx.waitUntil from handleClerkWebhook — never
+// blocks the webhook response Clerk is waiting on.
+async function notifyLogin(env, { email, userId, isNewUser }) {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: LOGIN_NOTIFY_FROM,
+        to: [LOGIN_NOTIFY_TO],
+        subject: `${isNewUser ? 'New sign-up' : 'Sign-in'}: ${email || userId}`,
+        text: `${email || '(no email on record)'}\nClerk user id: ${userId}\n${isNewUser ? 'First time signing in.' : 'Returning user.'}`,
+      }),
+    });
+    if (!res.ok) console.error('Resend login-notify error:', res.status, JSON.stringify(await res.json().catch(() => ({}))));
+  } catch (err) {
+    console.error('Resend login-notify fetch error:', err);
+  }
+}
+
+// Welcomes a brand-new Clerk user. Driven by user.created, which fires
+// exactly once per user no matter how they authenticated, so no separate
+// dedup/freshness check is needed here the way a login-triggered path would.
+async function sendWelcomeEmail(env, email) {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: WELCOME_EMAIL_FROM,
+        to: [email],
+        // hello@ isn't a real inbox, route replies to the one we actually read.
+        reply_to: WAITLIST_NOTIFY_TO,
+        subject: 'We hope this helps your work stop going unnoticed',
+        text: [
+          'Hey,',
+          '',
+          "Thanks for signing in, and honestly, just thanks for giving us a shot in the first place.",
+          '',
+          "We know letting something new into your day isn't nothing, so we don't take it lightly. If anything ever feels off, confusing, or just not quite right, tell us, we genuinely want to hear it. And if something about it makes your day even a little easier, we'd love to hear that too.",
+          '',
+          "Reply to this email any time. A real person reads these, not a bot.",
+          '',
+          'Glad you\'re here.',
+          '',
+          'The Meridian team',
+        ].join('\n'),
+      }),
+    });
+    if (!res.ok) console.error('Resend welcome-email error:', res.status, JSON.stringify(await res.json().catch(() => ({}))));
+  } catch (err) {
+    console.error('Resend welcome-email fetch error:', err);
+  }
+}
+
+// The single source of truth for "someone signed in" — Clerk calls this
+// server-to-server on every real user/session event, so it's the one place
+// in this Worker that reliably sees a sign-in regardless of which client
+// (desktop app, web, any future surface) or sign-in method (email+OTP today)
+// Clerk used. Signature verification is mandatory: this endpoint is public,
+// and an unverified POST here would let anyone trigger arbitrary "welcome"/
+// "login" emails.
+async function handleClerkWebhook(request, env, ctx) {
+  let evt;
+  try {
+    evt = await verifyWebhook(request, { signingSecret: env.CLERK_WEBHOOK_SIGNING_SECRET });
+  } catch (err) {
+    console.error('Clerk webhook verification failed:', err);
+    return json({ error: 'invalid signature' }, 400);
+  }
+
+  if (evt.type === 'user.created') {
+    const email = primaryEmail(evt.data);
+    if (email) ctx.waitUntil(sendWelcomeEmail(env, email));
+    else console.error('Clerk user.created with no email on record:', evt.data.id);
+  } else if (evt.type === 'session.created') {
+    const user = evt.data.user;
+    const email = primaryEmail(user);
+    const isNewUser = !!user && evt.data.created_at - user.created_at < NEW_USER_WINDOW_MS;
+    ctx.waitUntil(notifyLogin(env, { email, userId: evt.data.user_id, isNewUser }));
+  }
+
+  return json({ received: true });
 }
 
 // Validates the `port` query param the desktop app passed through the whole

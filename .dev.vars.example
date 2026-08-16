@@ -8,3 +8,7 @@ RESEND_AUDIENCE_ID_WAITLIST=
 # key, never the publishable key. Full admin access to the Clerk instance;
 # never commit the real value. `wrangler secret put CLERK_SECRET_KEY` for prod.
 CLERK_SECRET_KEY=
+# Signing secret for the auth.meridiona.com/webhooks/clerk endpoint (login
+# notify + welcome email). From Clerk Dashboard → Webhooks → your endpoint →
+# Signing Secret (starts `whsec_`). `wrangler secret put CLERK_WEBHOOK_SIGNING_SECRET` for prod.
+CLERK_WEBHOOK_SIGNING_SECRET=
