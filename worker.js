@@ -547,7 +547,10 @@ async function sendWelcomeEmail(env, email, name) {
       body: JSON.stringify({
         from: WELCOME_EMAIL_FROM,
         to: [email],
-        subject: name ? `Welcome to the family, ${name}` : 'Welcome to the family',
+        // Plain and factual on purpose — "Welcome to the family"-style
+        // phrasing reads as marketing copy to Gmail's Promotions classifier
+        // (confirmed: it landed in Promotions with that subject).
+        subject: name ? `You're signed in, ${name}` : "You're signed in to Meridian",
         text: [
           name ? `Hey ${name},` : 'Hey,',
           '',
