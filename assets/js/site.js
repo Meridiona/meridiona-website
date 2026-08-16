@@ -1,6 +1,14 @@
 // Meridian v2 landing page behavior: theme switching, FAQ accordion, lines
 // ticker, hero embed sizing, download/connect modals, cinematic intro replay,
 // and the scroll-jacked "why" rail.
+// Browsers restore the previous scroll offset on reload by default; on a page
+// with a scroll-jacked section whose height is computed by JS (the "why" rail
+// below), that saved pixel offset can land mid-section once layout settles,
+// reading as "reload dumps me partway down the page." Opt out and always
+// start at the top on a fresh load, unless the URL is pointing at an anchor.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (!location.hash) window.scrollTo(0, 0);
+
 document.addEventListener('DOMContentLoaded', () => {
     const $ = (id) => document.getElementById(id);
     const DL = {
