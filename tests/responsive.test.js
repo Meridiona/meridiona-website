@@ -127,6 +127,20 @@ test('site.js calls /subscribe and /dl the way worker.js expects', () => {
   expect(siteJs).toContain("fetch('/subscribe'");
   expect(siteJs).toContain('/dl?ref=');
 });
+test('#download deep-links into the download modal', () => {
+  // The GitHub README and launch posts link /?ref=github-readme#download, so
+  // the hash must open the same modal a nav click does - on load and on a
+  // later hashchange, since an in-page link never reloads.
+  expect(siteJs).toContain("location.hash === '#download'");
+  expect(siteJs).toContain("addEventListener('hashchange'");
+  // ref is interpolated into the /dl URL, so it has to be sanitized client-side
+  // and not just in worker.js.
+  expect(siteJs).toContain("replace(/[^a-z0-9_-]/gi, '')");
+  // Listeners must stay wrapped: passing openDl directly hands it the Event as
+  // `ref`, which would end up in the /dl query string.
+  expect(siteJs).toContain("addEventListener('click', () => openDl())");
+  expect(siteJs.includes("addEventListener('click', openDl)")).toBe(false);
+});
 test('/waitlist validates every field the form sends and writes them to Resend properties', () => {
   // The form posts these five keys; worker.js must read all of them or a field
   // silently stops being collected.
