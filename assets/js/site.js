@@ -433,6 +433,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let introSeen = false; try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch (e) {}
     const markIntroSeen = () => { try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch (e) {} };
     const introEl = $('intro-cinema'), introFrame = $('intro-frame'), introStmt = $('intro-statement'), replayBtn = $('replay-intro');
+    const introMuteBtn = $('intro-mute');
+    if (introMuteBtn) {
+      let muted = false; try { muted = localStorage.getItem('meridian-muted') === '1'; } catch (e) {}
+      introMuteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      introMuteBtn.addEventListener('click', () => {
+        try {
+          const demo = introFrame.contentWindow && introFrame.contentWindow.__meridianDemo;
+          if (demo && demo.setMuted) muted = demo.setMuted(!demo.isMuted());
+          else muted = !muted;
+        } catch (e) { muted = !muted; }
+        introMuteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      });
+    }
     const heroTitle = document.querySelector('.hero__title');
     const noteMon = document.querySelector('.hero__note-monitor');
     const heroEls = [document.querySelector('.hero__subtitle'), document.querySelector('.hero__pointer'), $('hero-embed-wrap'), document.querySelector('.trust-strip')];
@@ -472,6 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // "Skip intro": drop straight into the site, no cinematic wind-down,
         // and no lingering full-screen overlay left silently eating clicks.
         clearIntroTimers();
+        try { introFrame.contentWindow.postMessage({ type: 'meridian-intro-skip' }, location.origin); } catch (e) {}
         const d = document.getElementById('intro-dots'); if (d) d.style.display = '';
         introEl.style.display = 'none';
         introEl.classList.remove('is-hidden');

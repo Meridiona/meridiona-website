@@ -124,8 +124,70 @@ function createDemo(refs, opts) {
   var rafId = null;
   var pendingUserClick = null;
   var doneFired = false;
-  function fireDone() { if (doneFired) return; doneFired = true; if (opts.onDone) { try { opts.onDone(); } catch (e) {} } }
+  function fireDone() { if (doneFired) return; doneFired = true; IntroAudio.fadeOutAndStop(900); if (opts.onDone) { try { opts.onDone(); } catch (e) {} } }
   function sfx(name) { if (window.MeridianAudio) window.MeridianAudio.play(name); }
+
+  // ── intro voiceover / music track ────────────────────────────────────
+  // A single ~78s mix (not trimmed/looped) that plays only under the intro
+  // cinematic (never in the live/persistent demo embeds). Autoplay-with-sound
+  // is blocked by browsers without a preceding user gesture, so we try
+  // unmuted first; if that's rejected we fall back to a muted start and
+  // unmute automatically on the very first real interaction with the intro
+  // (see boot()'s pointerdown/keydown/touchstart listener) instead of making
+  // the user hunt for a button.
+  var IntroAudio = (function () {
+    var el = null, fadeRaf = null, userMuted = false, autoplayBlocked = false;
+    try { userMuted = localStorage.getItem('meridian-muted') === '1'; } catch (e) {}
+    function ensure() { if (!el) el = document.getElementById('intro-audio'); return el; }
+    function setVolume(v) { var a = ensure(); if (a) a.volume = Math.max(0, Math.min(1, v)); }
+    function clearFade() { if (fadeRaf) { cancelAnimationFrame(fadeRaf); fadeRaf = null; } }
+    function start() {
+      var a = ensure(); if (!a) return;
+      autoplayBlocked = false;
+      a.muted = userMuted;
+      a.currentTime = 0;
+      clearFade(); setVolume(userMuted ? 0 : 1);
+      var p = a.play();
+      if (p && p.catch) p.catch(function () {
+        if (userMuted) return; // the user's own choice, not a browser block
+        // blocked without a gesture: fall back to a muted autoplay so the
+        // intro still runs, and unmute the moment a real gesture arrives
+        autoplayBlocked = true;
+        a.muted = true;
+        a.play().catch(function () {});
+      });
+    }
+    function fadeOutAndStop(ms) {
+      var a = ensure(); if (!a || a.paused) return;
+      clearFade();
+      var from = a.volume, t0 = null;
+      function step(ts) {
+        if (t0 == null) t0 = ts;
+        var k = Math.min(1, (ts - t0) / ms);
+        a.volume = from * (1 - k);
+        if (k < 1) { fadeRaf = requestAnimationFrame(step); } else { a.pause(); }
+      }
+      fadeRaf = requestAnimationFrame(step);
+    }
+    function isMuted() { return userMuted || autoplayBlocked; }
+    function setMuted(m) {
+      userMuted = !!m;
+      try { localStorage.setItem('meridian-muted', userMuted ? '1' : '0'); } catch (e) {}
+      var a = ensure();
+      if (a) {
+        a.muted = userMuted;
+        if (!userMuted) { autoplayBlocked = false; if (a.paused && !a.ended) a.play().catch(function () {}); }
+      }
+      if (window.MeridianAudio) window.MeridianAudio.setMuted(userMuted);
+      return isMuted();
+    }
+    function unmuteOnGesture() {
+      if (!autoplayBlocked || userMuted) return;
+      autoplayBlocked = false;
+      var a = ensure(); if (a) { a.muted = false; if (a.paused && !a.ended) a.play().catch(function () {}); }
+    }
+    return { start: start, fadeOutAndStop: fadeOutAndStop, isMuted: isMuted, setMuted: setMuted, unmuteOnGesture: unmuteOnGesture };
+  })();
 
   // ── formatting / geometry helpers (ported verbatim) ──────────────────
   function esc(s) {
@@ -1004,6 +1066,7 @@ function createDemo(refs, opts) {
   }
 
   async function runIntro() {
+    IntroAudio.start();
     renderToolbar();
     buildSkeleton();
     buildClock();
@@ -1105,7 +1168,13 @@ function createDemo(refs, opts) {
     mode = 'live';
   }
 
-  return { start: function () { if (opts.autoplay === false) startLive(); else runIntro(); } };
+  return {
+    start: function () { if (opts.autoplay === false) startLive(); else runIntro(); },
+    stopAudio: function () { IntroAudio.fadeOutAndStop(400); },
+    isMuted: IntroAudio.isMuted,
+    setMuted: IntroAudio.setMuted,
+    unmuteOnGesture: IntroAudio.unmuteOnGesture,
+  };
 }
 
 if (typeof window !== 'undefined') window.createDemo = createDemo;
@@ -1151,6 +1220,23 @@ if (typeof window !== 'undefined') window.createDemo = createDemo;
     };
     window.__meridianDemo = createDemo(refs, opts);
     window.__meridianDemo.start();
+
+    // skip requested from the parent page: stop the intro track immediately
+    window.addEventListener('message', function (e) {
+      if (e && e.data && e.data.type === 'meridian-intro-skip' && window.__meridianDemo && window.__meridianDemo.stopAudio) {
+        window.__meridianDemo.stopAudio();
+      }
+    });
+
+    // if the browser blocked unmuted autoplay, the very first real gesture
+    // anywhere on the intro (a click on the video area, a key press) unmutes
+    // it immediately rather than requiring the dedicated mute button
+    if (!live && window.__meridianDemo && window.__meridianDemo.unmuteOnGesture) {
+      var unlock = function () { window.__meridianDemo.unmuteOnGesture(); };
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+        window.addEventListener(ev, unlock, { once: true, passive: true });
+      });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
