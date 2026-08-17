@@ -63,7 +63,7 @@ body[data-theme="paper"]{
 .nav__brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.02em}
 .nav__links{justify-self:end;display:flex;align-items:center;gap:28px;font-size:14px;font-weight:500}
 .nav__link{color:var(--mut);text-decoration:none}
-.nav__link--icon{display:inline-flex;align-items:center;gap:6px}
+.nav__link--icon{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .nav__link:hover{color:var(--ink)}
 .nav__link--mono{font-family:'JetBrains Mono',monospace;font-size:13px}
 .nav__github{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:var(--ink);color:var(--btnink);text-decoration:none;font-size:13.5px;font-weight:600;font-family:'Space Grotesk',sans-serif;transition:filter .2s ease}
@@ -82,13 +82,11 @@ body[data-theme="paper"]{
 @media (max-width:760px){.nav__inner{padding:0 16px;column-gap:10px}.nav__links{gap:8px}
   .nav__brand-name,.btn-ghost,.nav__icon-btn,#btn-download-nav,.nav__link:not(.nav__link--icon){display:none}
   .nav__ph-badge img{height:24px}
-  .nav__github{padding:6px 10px;gap:6px}
-  .nav__link--icon{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:999px;box-sizing:border-box}}
-@media (max-width:560px){.nav__inner{padding:0 12px;column-gap:8px}
-  .nav__ph-badge img{height:20px}
   .nav__github-divider,.nav__github-label,.nav__cta-label{display:none}
-  .nav__github{padding:6px 8px}
-  .nav__link--icon{width:34px;padding:0}}
+  .nav__github{padding:0;width:34px;height:34px;justify-content:center;gap:0}
+  .nav__link--icon{flex:none;width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;gap:0;border:1px solid var(--line);border-radius:999px;box-sizing:border-box}}
+@media (max-width:560px){.nav__inner{padding:0 12px;column-gap:8px}
+  .nav__ph-badge img{height:20px}}
 
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding:64px 24px 6px;position:relative;overflow-x:hidden}
 .hero__glow{position:absolute;top:-180px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(closest-side,color-mix(in oklab,var(--acc) 16%,transparent),transparent);pointer-events:none}
