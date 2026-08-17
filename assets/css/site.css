@@ -79,15 +79,16 @@ body[data-theme="paper"]{
 .nav__icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:none;background:var(--chip);color:var(--acc);cursor:pointer;transition:background .2s ease,color .2s ease}
 .nav__icon-btn:hover{background:var(--acc);color:var(--btnink)}
 @media (max-width:1100px){.nav__ph-pointer{display:none}}
-@media (max-width:760px){.nav__inner{padding:0 16px;column-gap:10px}.nav__links{gap:10px}
+@media (max-width:760px){.nav__inner{padding:0 16px;column-gap:10px}.nav__links{gap:8px}
   .nav__brand-name,.btn-ghost,.nav__icon-btn,#btn-download-nav,.nav__link:not(.nav__link--icon){display:none}
   .nav__ph-badge img{height:24px}
   .nav__github{padding:6px 10px;gap:6px}
-  .nav__link--icon{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid var(--line);border-radius:999px}}
+  .nav__link--icon{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:999px;box-sizing:border-box}}
 @media (max-width:560px){.nav__inner{padding:0 12px;column-gap:8px}
   .nav__ph-badge img{height:20px}
-  .nav__github-divider,.nav__github-label,.nav__book-label{display:none}
-  .nav__github{padding:6px 8px}.nav__link--icon{padding:7px 9px}}
+  .nav__github-divider,.nav__github-label,.nav__cta-label{display:none}
+  .nav__github{padding:6px 8px}
+  .nav__link--icon{width:34px;padding:0}}
 
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding:64px 24px 6px;position:relative;overflow-x:hidden}
 .hero__glow{position:absolute;top:-180px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(closest-side,color-mix(in oklab,var(--acc) 16%,transparent),transparent);pointer-events:none}
