@@ -387,7 +387,11 @@ body[data-theme="paper"]{
 .pvsc__foot{font-size:16px;line-height:1.6;color:var(--mut);max-width:640px;margin:12px auto 0}
 .pvsc__foot b{color:var(--ink)}
 .pvsc__foot--final{margin-top:18px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(16px,1.8vw,20px);color:var(--ink);letter-spacing:-.01em}
-@media(max-width:640px){.privacy-showcase{padding:40px 20px 36px}.pvsc__stage{height:400px;max-width:340px}.pvsc__badge::after{display:none}.pvsc__badge--top{top:0}.pvsc__badge--left{left:50%;top:22px;translate:-50% 0}.pvsc__badge--right{right:auto;left:50%;top:auto;bottom:22px;translate:-50% 0}}
+@media(max-width:640px){.privacy-showcase{padding:40px 20px 36px}
+  .pvsc__stage{display:flex;flex-direction:column;align-items:center;height:auto;max-width:280px;padding-top:150px;gap:10px}
+  .pvsc__glow,.pvsc__logo{top:70px}
+  .pvsc__badge,.pvsc__badge--top,.pvsc__badge--left,.pvsc__badge--right{position:static;translate:none;left:auto;right:auto;top:auto;bottom:auto}
+  .pvsc__badge::after{display:none}}
 .faq-layout{margin-top:64px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px}
 .faq-intro__title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(30px,4vw,46px);letter-spacing:-.03em;line-height:1.1;margin:0}
 .faq-intro__body{font-size:15px;color:var(--mut);margin:16px 0 0;max-width:360px;line-height:1.65}
