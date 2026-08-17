@@ -426,6 +426,8 @@ body[data-theme="paper"]{
 .footlink{color:var(--mut);text-decoration:none;font-size:13.5px}
 .footlink:hover{color:var(--ink)}
 .footer-bottom{border-top:1px solid var(--line);margin-top:40px;padding-top:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut)}
+.footer-badges{margin-top:24px;display:flex;justify-content:center}
+.footer-badges img{height:48px;width:auto}
 
 .modal-overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(10,7,20,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:24px}
 .modal-overlay.is-open{display:flex}
