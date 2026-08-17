@@ -37,7 +37,7 @@ body[data-theme="paper"]{
 .section--flush-bottom{padding-bottom:0}
 .section__inner{max-width:1160px;margin:0 auto;width:100%}
 
-.btn-primary{background:#7C63E0;color:var(--btnink);border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;padding:9px 18px;font-size:14px}
+.btn-primary{background:#5E3FD1;color:var(--btnink);border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;padding:9px 18px;font-size:14px}
 .btn-primary:hover{filter:brightness(1.08)}
 .btn-primary--lg{padding:14px 28px;font-size:15px;border-radius:12px}
 .btn-primary--block{border-radius:12px;padding:14px;font-size:15px;width:100%}
