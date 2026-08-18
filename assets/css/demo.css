@@ -5,6 +5,20 @@ button,input,textarea,select{font-family:inherit}
 a{color:#6D28D9}a:hover{color:#8B5CF6}
 @keyframes ws-blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.84)}}
 
+/* ── standalone top bar (only shown when /demo.html is opened directly, not
+   embedded in the landing hero's iframe) so a visitor exploring the full-size
+   demo in its own tab can get back to the site or start a download ────── */
+.demo-topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:none;align-items:center;justify-content:space-between;
+  height:52px;padding:0 20px;background:rgba(20,14,42,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.08);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif}
+.demo-topbar.is-on{display:flex}
+.demo-topbar__brand{display:inline-flex;align-items:center;gap:8px;color:#fff;text-decoration:none;font-weight:600;font-size:14px}
+.demo-topbar__mark{width:20px;height:20px;object-fit:contain;border-radius:5px}
+.demo-topbar__cta{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;
+  background:#fff;color:#211A44;text-decoration:none;font-weight:600;font-size:13px;transition:opacity .15s ease}
+.demo-topbar__cta:hover{opacity:.88}
+body.has-demo-topbar .stage{top:52px}
+
 /* ── stage (scales the fixed 1240×720 device to fit) ─────────────────── */
 .stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
   background:radial-gradient(130% 120% at 50% 6%,#FBF9FF 0%,#F1ECFB 52%,#E7DFF7 100%)}

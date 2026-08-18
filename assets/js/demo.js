@@ -352,7 +352,7 @@ function createDemo(refs, opts) {
     setTimeout(function () { w.summaryPosting = false; w.posted = true; renderSummary(); render(); }, 1350);
   }
   function copyStandup() {
-    try { if (navigator.clipboard) navigator.clipboard.writeText(STANDUP_TEXT); } catch (e) {}
+    try { if (navigator.clipboard) navigator.clipboard.writeText(STANDUP_TEXT).catch(function () {}); } catch (e) {}
     var card = refs.summary.querySelector('.msum-standup');
     if (card) { card.classList.remove('msum-standup--copied'); void card.offsetWidth; card.classList.add('msum-standup--copied'); }
     var el = refs.summary.querySelector('.msum-standup__copy');
@@ -1187,11 +1187,22 @@ if (typeof window !== 'undefined') window.createDemo = createDemo;
     var s = g('scaler'); if (!s) return;
     var b = document.body;
     var pad = (b && b.classList.contains('cinema-embed') && !b.classList.contains('intro')) ? 40 : 0;
-    var scale = Math.min((window.innerWidth - pad * 2) / 1240, (window.innerHeight - pad * 2) / 720);
+    var topbarH = (b && b.classList.contains('has-demo-topbar')) ? 52 : 0;
+    var scale = Math.min((window.innerWidth - pad * 2) / 1240, (window.innerHeight - topbarH - pad * 2) / 720);
     s.style.transform = 'scale(' + scale + ')';
   }
   function boot() {
     if (!g('scaler')) return; // not on demo.html
+    // Opened directly (not inside the landing hero's iframe): show the
+    // standalone top bar so someone exploring the full-size demo in its own
+    // tab has a way back to the site or into a download. Set before the
+    // first fit() so the initial scale already accounts for its height.
+    try {
+      if (window.self === window.top) {
+        document.body.classList.add('has-demo-topbar');
+        var topbar = g('demo-topbar'); if (topbar) topbar.classList.add('is-on');
+      }
+    } catch (e) {}
     fit();
     window.addEventListener('resize', fit);
 
