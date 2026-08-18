@@ -126,7 +126,7 @@ await test('sends every collected field, with the extras as custom properties', 
   expect(contact.body.properties.phone).toBe('+1 (201) 555-0123');
   expect(contact.body.properties.linkedin).toBe('https://linkedin.com/in/ada');
   expect(contact.body.properties.signup_source).toBe('site-waitlist');
-  expect(contact.body.segments[0]).toBe('seg_waitlist');
+  expect(contact.body.segments[0].id).toBe('seg_waitlist');
 });
 
 await test('a single-word name leaves last_name empty rather than duplicating it', async () => {
@@ -287,7 +287,7 @@ await test('posts to the global contacts endpoint with the segment in the body',
   // Not the old /audiences/{id}/contacts path — segments moved into the body.
   expect(contact.url).toBe('https://api.resend.com/contacts');
   expect(contact.body.email).toBe('ada@example.com');
-  expect(contact.body.segments[0]).toBe('seg_download');
+  expect(contact.body.segments[0].id).toBe('seg_download');
 });
 
 await test('OS and phone ride in properties, never in the name fields', async () => {
@@ -316,7 +316,7 @@ await test('the OS waitlist still routes to its own segment, not the product wai
   stubFetch(ok);
   await subscribe({ email: 'ada@example.com', source: 'waitlist', os: 'linux' });
   restoreFetch();
-  expect(callTo('/contacts').body.segments[0]).toBe('seg_os_waitlist');
+  expect(callTo('/contacts').body.segments[0].id).toBe('seg_os_waitlist');
 });
 
 await test('rejects a malformed email before calling Resend', async () => {
