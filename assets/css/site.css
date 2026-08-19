@@ -81,7 +81,7 @@ body[data-theme="paper"]{
 .nav__icon-btn:hover{background:var(--acc);color:var(--btnink)}
 @media (max-width:1100px){.nav__ph-pointer{display:none}}
 @media (max-width:760px){.nav__inner{padding:0 16px;column-gap:10px}.nav__links{gap:8px}
-  .nav__brand-name,.btn-ghost,.nav__icon-btn,#btn-download-nav,.nav__link:not(.nav__link--icon){display:none}
+  .nav__brand-name,.btn-ghost,.nav__icon-btn,#btn-download-nav{display:none}
   .nav__ph-badge img{max-height:24px}
   .nav__github-divider,.nav__github-label,.nav__cta-label{display:none}
   .nav__github{padding:0;width:34px;height:34px;justify-content:center;gap:0}
