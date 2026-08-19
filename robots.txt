@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /dl
+Disallow: /download
 
 Sitemap: https://meridiona.com/sitemap.xml
