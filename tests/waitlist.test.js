@@ -126,7 +126,23 @@ await test('sends every collected field, with the extras as custom properties', 
   expect(contact.body.properties.phone).toBe('+1 (201) 555-0123');
   expect(contact.body.properties.linkedin).toBe('https://linkedin.com/in/ada');
   expect(contact.body.properties.signup_source).toBe('site-waitlist');
-  expect(contact.body.segments[0]).toBe('seg_waitlist');
+  expect(contact.body.segments[0].id).toBe('seg_waitlist');
+});
+
+// Regression: resendContact() used to send `segments: [segmentId]` — a bare
+// string. Resend's contacts API 500s the whole signup on that shape with
+// "Invalid input: expected object, received string" (confirmed live against
+// production). Each entry must be an `{ id }` object instead.
+await test('segments are sent as {id} objects, not bare strings', async () => {
+  stubFetch(ok);
+  await post(VALID);
+  restoreFetch();
+  const segments = callTo('/contacts').body.segments;
+  expect(Array.isArray(segments)).toBe(true);
+  expect(typeof segments[0]).toBe('object');
+  expect(segments[0] === null).toBe(false);
+  expect(Object.keys(segments[0]).join(',')).toBe('id');
+  expect(segments[0].id).toBe('seg_waitlist');
 });
 
 await test('a single-word name leaves last_name empty rather than duplicating it', async () => {
@@ -287,7 +303,21 @@ await test('posts to the global contacts endpoint with the segment in the body',
   // Not the old /audiences/{id}/contacts path — segments moved into the body.
   expect(contact.url).toBe('https://api.resend.com/contacts');
   expect(contact.body.email).toBe('ada@example.com');
-  expect(contact.body.segments[0]).toBe('seg_download');
+  expect(contact.body.segments[0].id).toBe('seg_download');
+});
+
+// Same regression coverage as /waitlist above, on the other route that shares
+// resendContact() — both broke together when segments were sent as strings.
+await test('segments are sent as {id} objects, not bare strings', async () => {
+  stubFetch(ok);
+  await subscribe({ email: 'ada@example.com', source: 'download', os: 'mac' });
+  restoreFetch();
+  const segments = callTo('/contacts').body.segments;
+  expect(Array.isArray(segments)).toBe(true);
+  expect(typeof segments[0]).toBe('object');
+  expect(segments[0] === null).toBe(false);
+  expect(Object.keys(segments[0]).join(',')).toBe('id');
+  expect(segments[0].id).toBe('seg_download');
 });
 
 await test('OS and phone ride in properties, never in the name fields', async () => {
@@ -316,7 +346,7 @@ await test('the OS waitlist still routes to its own segment, not the product wai
   stubFetch(ok);
   await subscribe({ email: 'ada@example.com', source: 'waitlist', os: 'linux' });
   restoreFetch();
-  expect(callTo('/contacts').body.segments[0]).toBe('seg_os_waitlist');
+  expect(callTo('/contacts').body.segments[0].id).toBe('seg_os_waitlist');
 });
 
 await test('rejects a malformed email before calling Resend', async () => {

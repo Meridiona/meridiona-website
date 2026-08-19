@@ -377,7 +377,10 @@ export async function handleWaitlist(request, env) {
 // been registered yet (retry bare, so the email address is still captured).
 async function resendContact(env, contact, segmentId) {
   const payload = { ...contact };
-  if (segmentId) payload.segments = [segmentId];
+  // Resend's contacts API takes `segments` as an array of objects (each
+  // `{ id }`), not an array of plain IDs — sending a bare string 422s with
+  // "Invalid input: expected object, received string".
+  if (segmentId) payload.segments = [{ id: segmentId }];
 
   let result = await postResendContact(env, payload);
 
