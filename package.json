@@ -6,7 +6,7 @@
   "description": "Meridiona's Cloudflare Workers-hosted website + the auth.meridiona.com Google-SSO relay for the Meridian desktop app.",
   "main": "worker.js",
   "scripts": {
-    "test": "node tests/responsive.test.js && node tests/auth-relay.test.js && node tests/waitlist.test.js"
+    "test": "node tests/responsive.test.js && node tests/auth-relay.test.js && node tests/waitlist.test.js && node tests/app-signin-audience.test.js"
   },
   "repository": {
     "type": "git",
