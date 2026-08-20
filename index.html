@@ -134,10 +134,10 @@
         <svg class="nav__github-star" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.26 6.9 1.01-5 4.87 1.18 6.86L12 17.77l-6.18 3.23 1.18-6.86-5-4.87 6.9-1.01L12 2z"></path></svg>
         <span class="nav__github-label">Star</span>
       </a>
-      <a href="#waitlist" class="nav__link nav__link--icon">
+      <button id="btn-waitlist-nav" type="button" class="nav__link nav__link--icon nav__link--waitlist">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>
         <span class="nav__cta-label">Waitlist</span>
-      </a>
+      </button>
       <a href="https://cal.com/adithya-harish" target="_blank" rel="noopener" class="nav__link nav__link--icon">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
         <span class="nav__cta-label">Book a call</span>
@@ -463,6 +463,14 @@
   </div>
 </div>
 <iframe id="dl-frame" class="dl-frame" title="download" aria-hidden="true"></iframe>
+
+<div id="modal-waitlist" class="modal-overlay modal-overlay--top">
+  <div class="modal-card modal-card--waitlist">
+    <button id="btn-close-waitlist" class="icon-close icon-close--waitlist">✕</button>
+    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
+    <div id="modal-waitlist-body"></div>
+  </div>
+</div>
 
 <div id="modal-connect" class="modal-overlay modal-overlay--top">
   <div class="modal-card modal-card--connect">
