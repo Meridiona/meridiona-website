@@ -596,16 +596,122 @@ async function handleClerkWebhook(request, env, ctx) {
     // Prefer a real first_name if sign-up ever collects one; email+OTP today
     // never does, so this is guessNameFromEmail's fallback in practice.
     const name = evt.data.first_name?.trim() || guessNameFromEmail(email);
-    if (email) ctx.waitUntil(sendWelcomeEmail(env, email, name));
-    else console.error('Clerk user.created with no email on record:', evt.data.id);
+    if (email) {
+      ctx.waitUntil(sendWelcomeEmail(env, email, name));
+      ctx.waitUntil(addAppUserToAudience(env, email));
+    } else console.error('Clerk user.created with no email on record:', evt.data.id);
   } else if (evt.type === 'session.created') {
     const user = evt.data.user;
     const email = primaryEmail(user);
     const isNewUser = !!user && evt.data.created_at - user.created_at < NEW_USER_WINDOW_MS;
     ctx.waitUntil(notifyLogin(env, { email, userId: evt.data.user_id, isNewUser }));
+    // Also on sign-IN, not just sign-up. `user.created` fires once per user
+    // ever, so on its own it would never reach anyone who signed up before this
+    // shipped — which today is every existing tester. Adding here backfills
+    // them on their next sign-in, and the write is idempotent (see
+    // addAppUserToAudience), so the repeat costs one API call and changes
+    // nothing.
+    if (email) ctx.waitUntil(addAppUserToAudience(env, email));
   }
 
   return json({ received: true });
+}
+
+// Adds someone who actually installed and signed into the desktop app to the
+// download audience, so they land in the same list as a website download-form
+// signup instead of existing only in Clerk.
+//
+// # Why the download audience
+// Signing into the app is strictly stronger evidence of a download than filling
+// the form is: the form only records intent, whereas a Clerk user exists only
+// because someone installed the app and completed an OTP. Anyone reading that
+// audience as "people who have Meridian" was previously missing exactly the
+// people who definitely do.
+//
+// # Why no `properties`
+// Contacts are global by email, so this same address may already be a contact
+// from the download form or the product waitlist — carrying its own
+// `signup_source`, `os`, `phone`, `profession`. `resendContact` PATCHes an
+// existing contact, and a PATCH with properties would overwrite that
+// provenance with a thinner version of itself. Audience membership is the whole
+// deliverable here, so sending no properties keeps it purely additive: a new
+// contact is created bare, an existing one only gains a segment.
+//
+// It also avoids the Contact-Properties registration step entirely (see
+// WAITLIST_PROPERTIES) — nothing here can be rejected for an unregistered key.
+//
+// Fire-and-forget via ctx.waitUntil, like every other Resend call on the
+// webhook path: Clerk is waiting on the response, and a failed audience write
+// must never turn into a webhook retry storm or block a welcome email.
+//
+// Exported for tests/app-signin-audience.test.js — the webhook handler around it
+// needs a live Clerk instance to verify a signature, so this is the largest unit
+// the Resend behaviour can be asserted on.
+export async function addAppUserToAudience(env, email) {
+  const segmentId = env.RESEND_AUDIENCE_ID_DOWNLOAD || env.RESEND_AUDIENCE_ID;
+  if (!segmentId) {
+    console.error('No Resend audience configured for app sign-ins; skipping contact write.');
+    return;
+  }
+
+  // Step 1: make sure the contact exists, segmented on creation.
+  //
+  // Deliberately sends NEITHER `unsubscribed` NOR `properties`, unlike
+  // /subscribe and /waitlist:
+  //
+  // - `unsubscribed: false` on a PATCH would clear an opt-out. On those two
+  //   paths the user just submitted a form; here it is an automatic background
+  //   write triggered by signing into an app, expressing no marketing consent
+  //   at all. Quietly undoing an unsubscribe is not a trade worth making.
+  // - `properties` on a PATCH would overwrite provenance. Contacts are global by
+  //   email, so this address may already carry signup_source/os/phone/profession
+  //   from a website form, and a thinner map would erase it.
+  //
+  // Omitting both leaves an existing contact untouched, and a newly created one
+  // is subscribed by default — the right outcome for a genuinely new user. It
+  // also sidesteps Contact-Properties registration (see WAITLIST_PROPERTIES)
+  // entirely, so nothing here can be rejected for an unregistered key.
+  const contact = await resendContact(env, { email }, segmentId);
+  if (!contact.ok) return;
+
+  // Step 2: the segment, explicitly.
+  //
+  // Step 1 alone is NOT enough, and the gap is silent: `resendContact` only
+  // carries `segments` on the CREATE. For an address that is already a contact
+  // it falls through to `patchResendContact`, which destructures `segments` back
+  // out — because Resend's PATCH /contacts endpoint does not accept it (the
+  // documented body is first_name/last_name/unsubscribed/properties only).
+  //
+  // So without this call the feature would work for exactly the users who do
+  // NOT already exist, and do nothing for everyone who downloaded from the
+  // website first — which is most of them. Membership is the whole point, so it
+  // is asserted through the endpoint that actually owns it.
+  await addContactToSegment(env, email, segmentId);
+}
+
+// Puts an existing contact into a segment: the one operation
+// `patchResendContact` structurally cannot do (see the note in
+// addAppUserToAudience).
+//
+// POST /contacts/{id_or_email}/segments/{segment_id} — identifiers travel in the
+// path, so there is no body and no id lookup round-trip. Best-effort: a failure
+// is logged and swallowed, because every caller is on a fire-and-forget webhook
+// path where throwing would risk a Clerk retry of the whole event.
+async function addContactToSegment(env, email, segmentId) {
+  try {
+    const res = await fetch(
+      `https://api.resend.com/contacts/${encodeURIComponent(email)}/segments/${encodeURIComponent(segmentId)}`,
+      { method: 'POST', headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}` } },
+    );
+    // A contact already in the segment is success, not a problem to report.
+    if (!res.ok) {
+      console.error('Resend add-to-segment error:', res.status, JSON.stringify(await res.json().catch(() => ({}))));
+    }
+    return res.ok;
+  } catch (err) {
+    console.error('Resend add-to-segment fetch error:', err);
+    return false;
+  }
 }
 
 // Validates the `port` query param the desktop app passed through the whole
