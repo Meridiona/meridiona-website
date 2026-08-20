@@ -416,6 +416,122 @@ document.addEventListener('DOMContentLoaded', () => {
       renderDl();
     });
 
+    // ── waitlist modal ──
+    // Fields mirror worker.js's handleWaitlist(): name, email, profession
+    // (from a fixed list), professionOther (only when profession is 'other'),
+    // linkedin and comment (both optional), and phone (via the shared
+    // phoneCodeField, also optional).
+    if ($('modal-waitlist')) {
+      const PROFESSIONS = [
+        { value: 'pm', label: 'Product manager' },
+        { value: 'investor', label: 'Investor' },
+        { value: 'dev', label: 'Developer' },
+        { value: 'founder', label: 'Founder' },
+        { value: 'other', label: 'Other' },
+      ];
+      const wl = { name: '', email: '', profession: '', professionOther: '', linkedin: '', comment: '', phoneCode: '+1', phone: '', sent: false };
+      const wlPhone = phoneCodeField('wl', wl);
+      const renderWl = () => {
+        const body = $('modal-waitlist-body');
+        if (wl.sent) {
+          body.innerHTML = '<h3 class="modal-title"><span class="success-check">✓</span> You’re on the list</h3>' +
+            '<p class="modal-subtitle">Thanks — we’ll reach out as soon as there’s a spot for you.</p>';
+          return;
+        }
+        body.innerHTML =
+          '<h3 class="modal-title">Join the waitlist</h3><p class="modal-subtitle">Tell us a bit about you and we’ll be in touch.</p>' +
+          '<form id="wl-form" class="wl-form">' +
+            '<div class="wl-field"><label class="wl-label" for="wl-name">Name</label>' +
+              '<input id="wl-name" class="wl-input" type="text" required autofocus autocomplete="name" placeholder="Ada Lovelace" value="' + wl.name + '"></div>' +
+            '<div class="wl-field"><label class="wl-label" for="wl-email">Email</label>' +
+              '<input id="wl-email" class="wl-input" type="email" required autocomplete="email" placeholder="you@work.com" value="' + wl.email + '">' +
+              '<p id="wl-email-error" class="form-error" style="display:none">Enter a valid email address to continue.</p></div>' +
+            '<div class="wl-field"><label class="wl-label" for="wl-profession">What do you do?</label>' +
+              '<select id="wl-profession" class="wl-select">' +
+                '<option value="" disabled' + (wl.profession ? '' : ' selected') + '>Pick one</option>' +
+                PROFESSIONS.map((p) => '<option value="' + p.value + '"' + (wl.profession === p.value ? ' selected' : '') + '>' + p.label + '</option>').join('') +
+              '</select>' +
+              '<p id="wl-profession-error" class="form-error" style="display:none">Please pick what you do.</p></div>' +
+            (wl.profession === 'other'
+              ? '<div class="wl-field"><label class="wl-label" for="wl-profession-other">What\'s that?</label>' +
+                  '<input id="wl-profession-other" class="wl-input" type="text" placeholder="e.g. Designer" value="' + wl.professionOther + '"></div>'
+              : '') +
+            '<div class="wl-field"><label class="wl-label" for="wl-linkedin">LinkedIn (optional)</label>' +
+              '<input id="wl-linkedin" class="wl-input" type="url" autocomplete="url" placeholder="linkedin.com/in/you" value="' + wl.linkedin + '"></div>' +
+            '<div class="wl-field"><label class="wl-label">Phone (optional)</label>' + wlPhone.html() + '</div>' +
+            '<div class="wl-field"><label class="wl-label" for="wl-comment">Anything else? (optional)</label>' +
+              '<textarea id="wl-comment" class="wl-textarea" maxlength="500" placeholder="What are you hoping to use Meridian for?">' + wl.comment + '</textarea></div>' +
+            '<p id="wl-form-error" class="form-error" style="display:none"></p>' +
+            '<button type="submit" class="btn-primary btn-primary--block">Join the waitlist</button>' +
+          '</form>';
+      };
+      const openWl = () => {
+        wl.name = ''; wl.email = ''; wl.profession = ''; wl.professionOther = ''; wl.linkedin = ''; wl.comment = ''; wl.phoneCode = '+1'; wl.phone = ''; wl.sent = false;
+        renderWl();
+        $('modal-waitlist').classList.add('is-open');
+      };
+      const closeWl = () => $('modal-waitlist').classList.remove('is-open');
+      $('btn-waitlist-nav').addEventListener('click', openWl);
+      $('btn-close-waitlist').addEventListener('click', closeWl);
+      $('modal-waitlist').addEventListener('click', (e) => { if (e.target.id === 'modal-waitlist') closeWl(); });
+      wlPhone.bind($('modal-waitlist-body'));
+      $('modal-waitlist-body').addEventListener('input', (e) => {
+        if (e.target.id === 'wl-email') { e.target.classList.remove('wl-input--error'); const err = $('wl-email-error'); if (err) err.style.display = 'none'; }
+      });
+      $('modal-waitlist-body').addEventListener('change', (e) => {
+        if (e.target.id === 'wl-profession') {
+          wl.profession = e.target.value;
+          e.target.classList.remove('wl-input--error');
+          const err = $('wl-profession-error'); if (err) err.style.display = 'none';
+          renderWl();
+        }
+      });
+      $('modal-waitlist-body').addEventListener('submit', (e) => {
+        if (e.target.id !== 'wl-form') return; e.preventDefault();
+        const name = $('wl-name').value.trim();
+        const email = $('wl-email').value.trim();
+        const profession = $('wl-profession').value;
+        const professionOther = profession === 'other' ? $('wl-profession-other').value.trim() : '';
+        const linkedin = $('wl-linkedin').value.trim();
+        const comment = $('wl-comment').value.trim();
+
+        let ok = true;
+        if (!EMAIL_RE.test(email)) {
+          $('wl-email').classList.add('wl-input--error');
+          $('wl-email-error').style.display = 'block';
+          ok = false;
+        }
+        if (!profession) {
+          $('wl-profession').classList.add('wl-input--error');
+          $('wl-profession-error').style.display = 'block';
+          ok = false;
+        }
+        if (!ok) return;
+
+        wl.name = name; wl.email = email; wl.profession = profession; wl.professionOther = professionOther;
+        wl.linkedin = linkedin; wl.comment = comment; wl.phone = wlPhone.value();
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        fetch('/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, profession, professionOther, linkedin, comment, phone: wl.phone }),
+        }).then((r) => r.json().catch(() => ({}))).then((data) => {
+          if (data && data.success) { wl.sent = true; renderWl(); return; }
+          submitBtn.disabled = false;
+          const err = $('wl-form-error');
+          err.textContent = (data && data.error) || 'Something went wrong. Please try again.';
+          err.style.display = 'block';
+        }).catch(() => {
+          submitBtn.disabled = false;
+          const err = $('wl-form-error');
+          err.textContent = 'Something went wrong. Please try again.';
+          err.style.display = 'block';
+        });
+      });
+    }
+
     // ── connect modal ──
     $('btn-connect').addEventListener('click', () => $('modal-connect').classList.add('is-open'));
     $('btn-close-connect').addEventListener('click', () => $('modal-connect').classList.remove('is-open'));
@@ -423,6 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
     this._esc = (e) => {
       if (e.key !== 'Escape') return;
       closeDl();
+      if ($('modal-waitlist')) $('modal-waitlist').classList.remove('is-open');
       $('modal-connect').classList.remove('is-open');
     };
     document.addEventListener('keydown', this._esc);
