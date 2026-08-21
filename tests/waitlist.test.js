@@ -15,7 +15,7 @@
  * Run with: node tests/waitlist.test.js
  */
 
-import { handleWaitlist, handleSubscribe } from '../worker.js';
+import { handleWaitlist, handleSubscribe, WAITLIST_NOTIFY_TO } from '../worker.js';
 
 // ─── Minimal test harness (mirrors tests/responsive.test.js) ──────────────────
 let passed = 0, failed = 0;
@@ -205,7 +205,11 @@ await test('emails the lead to the team inbox, replying to the signup address', 
   restoreFetch();
   const email = callTo('/emails');
   expect(email.method).toBe('POST');
-  expect(email.body.to[0]).toBe('company@meridiona.com');
+  // Asserted against the constant, not a literal: the recipient moved once
+  // already (company@ got suppressed by Resend for hard bounces), and a
+  // hardcoded address here would have to be edited every time it moves while
+  // proving nothing about what the Worker actually sends.
+  expect(email.body.to[0]).toBe(WAITLIST_NOTIFY_TO);
   expect(email.body.reply_to).toBe('ada@example.com');
   expect(email.body.subject).toContain('Ada Lovelace');
   expect(email.body.text).toContain('linkedin.com/in/ada');
