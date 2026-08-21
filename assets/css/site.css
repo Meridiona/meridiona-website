@@ -80,8 +80,12 @@ body[data-theme="paper"]{
 .chip-btn:hover{border-color:var(--acc);color:var(--acc)}
 .chip-btn--icon{width:34px;height:34px;padding:0;justify-content:center;flex:none}
 .nav__github svg{flex:none}
-.nav__github-divider{width:1px;height:14px;background:var(--line)}
+.nav__github-divider{width:1px;height:14px;background:rgba(255,255,255,.35)}
 .nav__github-star{color:#FFC107}
+/* Same chip-btn shape/size as every other button, but GitHub's own black
+   keeps its brand identity rather than the shared theme-aware background. */
+.nav__github.chip-btn{background:#000;border-color:#000;color:#fff}
+.nav__github.chip-btn:hover{background:#1a1a1a;border-color:#1a1a1a;color:#fff}
 .has-tooltip{position:relative}
 .has-tooltip::after{content:attr(data-tooltip);position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-4px);
   padding:6px 10px;border-radius:7px;background:var(--ink);color:#fff;font-family:'Instrument Sans',sans-serif;font-size:12px;font-weight:500;
