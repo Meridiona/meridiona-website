@@ -71,13 +71,24 @@ const WAITLIST_PROPERTIES = ['profession', 'profession_other', 'phone', 'linkedi
 // The free-text "anything else?" box. Capped well under any property-size limit;
 // the notification email carries the same text, so nothing is lost either way.
 const COMMENT_MAX = 500;
-const WAITLIST_NOTIFY_TO = 'company@meridiona.com';
+// Where internal notifications land. NOT company@meridiona.com: Resend
+// suppressed that address after a run of hard bounces ("This address has a
+// recent history of hard bounces, so sending is temporarily paused"), and a
+// suppression clears on Resend's own schedule and cannot be lifted by hand. So
+// every waitlist and sign-in notification was being accepted by the API and
+// then silently dropped - the POST /emails succeeds, the event is `suppressed`,
+// and nothing reaches a human. Do not point these back at company@ without
+// first confirming that mailbox actually accepts mail.
+const INTERNAL_NOTIFY_TO = 'adithya@meridiona.com';
+// Exported for tests/waitlist.test.js, which asserts the recipient against this
+// constant rather than a literal - see the note there.
+export const WAITLIST_NOTIFY_TO = INTERNAL_NOTIFY_TO;
 // Must be on a domain verified for sending in Resend, or /emails 403s.
 const WAITLIST_NOTIFY_FROM = 'Meridian Waitlist <waitlist@meridiona.com>';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Desktop-app sign-ins, driven by Clerk webhooks (see handleClerkWebhook).
-const LOGIN_NOTIFY_TO = 'company@meridiona.com';
+const LOGIN_NOTIFY_TO = INTERNAL_NOTIFY_TO;
 const LOGIN_NOTIFY_FROM = 'Meridian Sign-ins <notify@meridiona.com>';
 // Sent from company@ rather than a hello@/info@/news@-style prefix — those
 // are known Gmail Promotions-tab triggers, and company@ is also a real inbox
