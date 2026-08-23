@@ -133,6 +133,57 @@ Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangl
 **Changing colors/typography:**
 - Theme colors are CSS custom properties on `body` / `body[data-theme="dusk"]` / `body[data-theme="paper"]` in `assets/css/site.css`. Never hardcode a theme-sensitive color inline — use `var(--acc)`, `var(--card)`, etc. The embedded demo (`assets/css/demo.css`) is a fixed light dashboard mock and intentionally does not use these tokens.
 
+## Public endpoints - hard rule
+
+**Anything publicly reachable that spends money or calls an upstream ships with an
+origin check, a per-IP rate limit, and - if it is not a browser form - a shared
+secret. No exceptions, and it is not optional follow-up work.**
+
+This rule is written in blood. `hf.meridiona.com` was a Cloudflare Worker that
+reverse-proxied huggingface.co so first-run model downloads would cache at the
+edge. It was carefully written: its header carried a `SECURITY:` block reasoning
+about cache-key poisoning and about never letting an `Authorization` header reach
+a shared cache. What it never asked was *who is allowed to call this*. It had no
+auth, no path allowlist, and no rate limit.
+
+Then the MLX stack that used it was deleted, and it sat there with no callers, no
+owner, and a public DNS record. Cloudflare had published its hostname to the
+Certificate Transparency logs the moment it provisioned the TLS certificate, which
+is a public, append-only feed that scanners harvest continuously. Someone found an
+open HuggingFace mirror with a one-year cache TTL and used it:
+
+| | requests/day |
+|---|---|
+| Aug 15 | 17,260 |
+| Aug 22 | 128,887 |
+| Aug 23 | **173,088** |
+
+The free-plan Workers cap is **account-wide**, so this site - which used 5,699
+requests that day - went down with Cloudflare Error 1027 for traffic it did not
+generate. Meridian's own users could not have accounted for any of it; nothing in
+the app ever called that host.
+
+Three habits come out of it:
+
+1. **Assume every hostname you provision is public knowledge immediately.** CT
+   logs mean an unadvertised subdomain is not a secret, ever.
+2. **Delete infrastructure when its caller dies.** The proxy was harmless while
+   the MLX server used it and dangerous the day that was removed. A component with
+   no caller in the repo gets deleted, not left running.
+3. **Alert on what you cannot see.** Traffic 6x'd over six days in plain sight
+   with zero notification policies on the account. The first signal was an outage.
+
+The implementation of this rule for `/subscribe` and `/waitlist` is
+`guardPublicPost` in `worker.js`, covered by `tests/rate-limit.test.js`. Read the
+comment above it before changing the ceilings: it fails open by design, and it
+deliberately stops writing to KV once an IP is over its limit, because the free
+plan allows only 1,000 KV writes a day and a limiter that spends one per hostile
+request is itself a denial of service.
+
+A per-IP KV counter is a damper, not a boundary - KV is eventually consistent and
+a distributed caller walks through it. The hard cap belongs in a zone
+rate-limiting rule in the Cloudflare dashboard.
+
 ## Known Issues & Patterns
 
 ### worker.js's `<title>`/description rewrite
