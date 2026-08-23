@@ -184,9 +184,9 @@ test('nav with Why/FAQ/GitHub/Connect/Download', () => {
 test('hero section with embedded product demo iframe', () => {
   expect(index).toContain('id="top"');
   expect(index).toContain('id="hero-embed-frame"');
-  // Canonical path, not /demo.html — with run_worker_first enabled, Cloudflare's
-  // asset serving 307-redirects .html URLs to their extension-less canonical
-  // path, and an iframe src shouldn't pay for that extra redirect hop.
+  // Canonical path, not /demo.html — Cloudflare's asset serving 307-redirects
+  // .html URLs to their extension-less canonical path, and an iframe src
+  // shouldn't pay for that extra redirect hop.
   expect(index).toContain('src="/demo');
 });
 test('why section present', () => {

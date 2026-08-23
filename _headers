@@ -1,0 +1,36 @@
+# Response headers for files served straight off the static-asset store —
+# i.e. everything that no longer invokes worker.js now that `run_worker_first`
+# is a path allowlist rather than `true` (see wrangler.jsonc).
+#
+# Why this file exists: with run_worker_first:true, every request — all ~25
+# subresources of a landing-page view — was a billable Worker invocation, which
+# blew the 100k/day free-plan request limit. Static assets served without the
+# Worker are free and unlimited, but they also skip withSecurityHeaders() in
+# worker.js, so the same baseline has to be restated here. Rules in _headers
+# apply ONLY to static assets; Worker-generated responses (/dl, /download,
+# /writing/*, /subscribe, /waitlist, auth.meridiona.com) keep getting their
+# headers from withSecurityHeaders(). Keep the two in sync.
+
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  # Not DENY: index.html embeds /demo in a same-origin <iframe>.
+  X-Frame-Options: SAMEORIGIN
+  # Mirrors the strict (no 'unsafe-inline' for script-src) branch of
+  # withSecurityHeaders() — the static pages carry no inline <script>, which
+  # tests/responsive.test.js enforces. 'unsafe-inline' stays on style-src
+  # because the markup uses inline style="..." attributes throughout.
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://us-assets.i.posthog.com https://*.i.posthog.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.i.posthog.com https://*.posthog.com; frame-src 'self' https://github.com https://*.githubusercontent.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'
+
+# Fonts and images are content-stable — they get renamed, not edited in place —
+# so they can be cached hard. CSS/JS deliberately are NOT: this repo has no
+# build step and no content hashing (site.css is always site.css), so a long
+# immutable TTL would strand visitors on stale styles across a deploy. Asset
+# requests are free and unmetered now, so this is purely a performance knob.
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/images/*
+  Cache-Control: public, max-age=604800
