@@ -212,7 +212,9 @@ Contacts are global by email address, so the same person signing up here and via
 
 ### `run_worker_first` is an allowlist, and `_headers` is its other half
 
-`assets.run_worker_first` in `wrangler.jsonc` **must stay a path array — never `true`.** `true` invokes `worker.js` for every request, including all ~25 subresources of one landing-page view (CSS, JS, fonts, client logos, favicons, the `/demo` iframe and its own assets). Each is a billable Worker invocation, and it blew the Workers Free plan's 100,000 requests/day limit, taking the whole site down with 429s. Requests served straight off the static-asset store are free and unlimited.
+`assets.run_worker_first` in `wrangler.jsonc` **must stay a path array — never `true`.** `true` invokes `worker.js` for every request, including all ~25 subresources of one landing-page view (CSS, JS, fonts, client logos, favicons, the `/demo` iframe and its own assets). Each is a billable Worker invocation against the Workers Free plan's 100,000 requests/day limit, which is **account-wide** and shared with every other Worker. Requests served straight off the static-asset store are free and unlimited.
+
+For the record, since the incident that prompted this is easy to misattribute: the 429s on 2026-08-23 were **not** caused by this setting. Measured from the Workers analytics API that day, `meridiona-website` served **5,699** requests and `meridian-hf-proxy` served **173,088** - 96.8% of the account total of 178,787. The site was taken down by a sibling Worker, not by its own assets. What this setting did was leave the site with a ~4,000-page-view ceiling it had no reason to have; removing that is headroom for the day real traffic arrives, not the fix for that outage. See "Public endpoints - hard rule" above for what actually happened.
 
 Only paths that genuinely need Worker logic belong in the array (`/dl`, `/download`, `/subscribe`, `/waitlist`, `/writing`, `/writing/*`, `/auth/*`, `/webhooks/*`). **`/` must stay out** — `worker.js` does nothing for it but fall through to `env.ASSETS.fetch()`, and excluding it is the single biggest saving.
 
