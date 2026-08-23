@@ -133,6 +133,57 @@ Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangl
 **Changing colors/typography:**
 - Theme colors are CSS custom properties on `body` / `body[data-theme="dusk"]` / `body[data-theme="paper"]` in `assets/css/site.css`. Never hardcode a theme-sensitive color inline — use `var(--acc)`, `var(--card)`, etc. The embedded demo (`assets/css/demo.css`) is a fixed light dashboard mock and intentionally does not use these tokens.
 
+## Public endpoints - hard rule
+
+**Anything publicly reachable that spends money or calls an upstream ships with an
+origin check, a per-IP rate limit, and - if it is not a browser form - a shared
+secret. No exceptions, and it is not optional follow-up work.**
+
+This rule is written in blood. `hf.meridiona.com` was a Cloudflare Worker that
+reverse-proxied huggingface.co so first-run model downloads would cache at the
+edge. It was carefully written: its header carried a `SECURITY:` block reasoning
+about cache-key poisoning and about never letting an `Authorization` header reach
+a shared cache. What it never asked was *who is allowed to call this*. It had no
+auth, no path allowlist, and no rate limit.
+
+Then the MLX stack that used it was deleted, and it sat there with no callers, no
+owner, and a public DNS record. Cloudflare had published its hostname to the
+Certificate Transparency logs the moment it provisioned the TLS certificate, which
+is a public, append-only feed that scanners harvest continuously. Someone found an
+open HuggingFace mirror with a one-year cache TTL and used it:
+
+| | requests/day |
+|---|---|
+| Aug 15 | 17,260 |
+| Aug 22 | 128,887 |
+| Aug 23 | **173,088** |
+
+The free-plan Workers cap is **account-wide**, so this site - which used 5,699
+requests that day - went down with Cloudflare Error 1027 for traffic it did not
+generate. Meridian's own users could not have accounted for any of it; nothing in
+the app ever called that host.
+
+Three habits come out of it:
+
+1. **Assume every hostname you provision is public knowledge immediately.** CT
+   logs mean an unadvertised subdomain is not a secret, ever.
+2. **Delete infrastructure when its caller dies.** The proxy was harmless while
+   the MLX server used it and dangerous the day that was removed. A component with
+   no caller in the repo gets deleted, not left running.
+3. **Alert on what you cannot see.** Traffic 6x'd over six days in plain sight
+   with zero notification policies on the account. The first signal was an outage.
+
+The implementation of this rule for `/subscribe` and `/waitlist` is
+`guardPublicPost` in `worker.js`, covered by `tests/rate-limit.test.js`. Read the
+comment above it before changing the ceilings: it fails open by design, and it
+deliberately stops writing to KV once an IP is over its limit, because the free
+plan allows only 1,000 KV writes a day and a limiter that spends one per hostile
+request is itself a denial of service.
+
+A per-IP KV counter is a damper, not a boundary - KV is eventually consistent and
+a distributed caller walks through it. The hard cap belongs in a zone
+rate-limiting rule in the Cloudflare dashboard.
+
 ## Known Issues & Patterns
 
 ### worker.js's `<title>`/description rewrite
@@ -161,7 +212,9 @@ Contacts are global by email address, so the same person signing up here and via
 
 ### `run_worker_first` is an allowlist, and `_headers` is its other half
 
-`assets.run_worker_first` in `wrangler.jsonc` **must stay a path array — never `true`.** `true` invokes `worker.js` for every request, including all ~25 subresources of one landing-page view (CSS, JS, fonts, client logos, favicons, the `/demo` iframe and its own assets). Each is a billable Worker invocation, and it blew the Workers Free plan's 100,000 requests/day limit, taking the whole site down with 429s. Requests served straight off the static-asset store are free and unlimited.
+`assets.run_worker_first` in `wrangler.jsonc` **must stay a path array — never `true`.** `true` invokes `worker.js` for every request, including all ~25 subresources of one landing-page view (CSS, JS, fonts, client logos, favicons, the `/demo` iframe and its own assets). Each is a billable Worker invocation against the Workers Free plan's 100,000 requests/day limit, which is **account-wide** and shared with every other Worker. Requests served straight off the static-asset store are free and unlimited.
+
+For the record, since the incident that prompted this is easy to misattribute: the 429s on 2026-08-23 were **not** caused by this setting. Measured from the Workers analytics API that day, `meridiona-website` served **5,699** requests and `meridian-hf-proxy` served **173,088** - 96.8% of the account total of 178,787. The site was taken down by a sibling Worker, not by its own assets. What this setting did was leave the site with a ~4,000-page-view ceiling it had no reason to have; removing that is headroom for the day real traffic arrives, not the fix for that outage. See "Public endpoints - hard rule" above for what actually happened.
 
 Only paths that genuinely need Worker logic belong in the array (`/dl`, `/download`, `/subscribe`, `/waitlist`, `/writing`, `/writing/*`, `/auth/*`, `/webhooks/*`). **`/` must stay out** — `worker.js` does nothing for it but fall through to `env.ASSETS.fetch()`, and excluding it is the single biggest saving.
 

@@ -202,11 +202,13 @@ async function handle(request, url, env, ctx) {
     }
 
     if (url.pathname === '/subscribe' && request.method === 'POST') {
-      return handleSubscribe(request, env);
+      const blocked = await guardPublicPost(request, env, 'sub', SUBSCRIBE_MAX_PER_HOUR);
+      return blocked || handleSubscribe(request, env);
     }
 
     if (url.pathname === '/waitlist' && request.method === 'POST') {
-      return handleWaitlist(request, env);
+      const blocked = await guardPublicPost(request, env, 'wl', WAITLIST_MAX_PER_HOUR);
+      return blocked || handleWaitlist(request, env);
     }
 
     return env.ASSETS.fetch(request);
@@ -265,6 +267,99 @@ function json(data, status = 200) {
 // shouldn't cost someone their signup.
 function field(value, max) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+// ─── Abuse guards for the unauthenticated POST endpoints ─────────────────────
+//
+// /subscribe and /waitlist take no credential and each one spends money: both
+// call the Resend API, so a flood costs send quota AND meridiona.com's sending
+// reputation. That second cost is the one that bites - company@meridiona.com is
+// already suppressed for hard bounces (see INTERNAL_NOTIFY_TO above), which is
+// what a domain looks like on the way to being flagged outright.
+//
+// Added after an unauthenticated Cloudflare Worker of ours (the hf.meridiona.com
+// HuggingFace proxy) was found by scanners and pushed to 173k requests in a day,
+// exhausting the account-wide free-plan cap and taking this site down with it.
+// These two routes are the same shape: publicly reachable, discoverable, and
+// metered. See CLAUDE.md's "Public endpoints" rule.
+//
+// WHAT THIS IS NOT: a security boundary. Workers KV is eventually consistent, so
+// a caller spread across enough Cloudflare colos can beat the counter, and the
+// counter itself is per-IP so a botnet walks straight through. It stops the
+// realistic cases - one script, one loop, one scraper - and nothing more. The
+// hard cap belongs at the edge, in a zone rate-limiting rule, which lives in the
+// dashboard rather than in this file.
+
+/** Per-IP hourly ceilings. Deliberately generous: a real person retrying a failed
+ *  signup a few times must never see a 429, so these bound damage rather than
+ *  enforce a quota. */
+const SUBSCRIBE_MAX_PER_HOUR = 8;
+const WAITLIST_MAX_PER_HOUR = 4;
+const RATE_WINDOW_SECS = 3600;
+
+/** The caller's IP as Cloudflare sees it. `CF-Connecting-IP` is set by the edge
+ *  and cannot be spoofed by the client (any inbound copy is overwritten), unlike
+ *  X-Forwarded-For. Absent only off-platform (tests), where we skip limiting. */
+function clientIp(request) {
+  return request.headers.get('cf-connecting-ip') || '';
+}
+
+/** Reject a cross-site POST outright. Free, no KV, and it stops naive scripted
+ *  abuse before it can cost anything.
+ *
+ *  Absent `Origin` is ALLOWED on purpose. Browsers send it on same-origin fetch
+ *  POSTs, but privacy extensions and some embedded webviews strip it, and a
+ *  silently-rejected signup is a worse failure than an unthrottled one - the
+ *  rate limiter below still applies either way. Only a PRESENT and WRONG origin
+ *  is treated as hostile. */
+function originAllowed(request) {
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
+  try {
+    const h = new URL(origin).hostname;
+    return h === 'meridiona.com' || h === 'www.meridiona.com' || h === 'localhost' || h === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
+/** Fixed-window per-IP counter in the AUTH_TOKENS namespace (already bound for
+ *  the SSO relay - no new binding, no new config).
+ *
+ *  Returns a 429 Response when the caller is over the ceiling, else null.
+ *
+ *  Two deliberate properties:
+ *  - **Fails open.** Any KV error allows the request. A signup form breaking
+ *    because a counter hiccuped is a self-inflicted outage; the thing being
+ *    defended is a cost, not a secret.
+ *  - **Stops writing once blocked.** Writes are the scarce resource here (the
+ *    free KV plan allows 1,000/day), so an IP costs at most `limit` writes per
+ *    window no matter how hard it hammers - the over-limit path is read-only. */
+async function rateLimit(env, request, bucket, limit) {
+  const ip = clientIp(request);
+  if (!ip || !env.AUTH_TOKENS) return null;
+  const window = Math.floor(Date.now() / 1000 / RATE_WINDOW_SECS);
+  const key = `rl:${bucket}:${window}:${ip}`;
+  try {
+    const count = parseInt((await env.AUTH_TOKENS.get(key)) || '0', 10) || 0;
+    if (count >= limit) {
+      return json({ error: 'Too many requests. Please try again later.' }, 429);
+    }
+    // TTL spans two windows so a key written at the very end of one still
+    // expires on its own rather than lingering as garbage.
+    await env.AUTH_TOKENS.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_SECS * 2 });
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+/** The full guard for one public POST route: origin check, then rate limit.
+ *  Returns a Response to send instead of handling, or null to proceed.
+ *  Exported for tests/rate-limit.test.js. */
+export async function guardPublicPost(request, env, bucket, limit) {
+  if (!originAllowed(request)) return json({ error: 'Forbidden.' }, 403);
+  return rateLimit(env, request, bucket, limit);
 }
 
 // The "ping me about updates" email capture behind the download modal and the
