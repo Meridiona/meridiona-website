@@ -95,6 +95,7 @@ Deploys the whole repo to Cloudflare via the Cloudflare Workers CLI. The `wrangl
 │   ├── index.html            # Essay list, served at /writing
 │   └── <slug>.html           # Individual essays, served at /writing/<slug>
 ├── worker.js               # Cloudflare Worker: Google-SSO relay, /dl, /download, /subscribe, writing-page meta rewriting
+├── _headers                # Response headers for statically-served assets (mirrors worker.js's withSecurityHeaders)
 ├── wrangler.jsonc          # Cloudflare Workers configuration
 ├── favicon.ico / favicon-512.png / apple-touch-icon.png
 ├── robots.txt / sitemap.xml
@@ -157,6 +158,19 @@ Two other things this route depends on:
 - A Resend-**verified sending domain** for `WAITLIST_NOTIFY_FROM`, or the per-signup notification to `WAITLIST_NOTIFY_TO` 403s. The signup still succeeds on the contact write alone; only losing *both* is reported to the user.
 
 Contacts are global by email address, so the same person signing up here and via the download modal is one contact — which is why neither route puts non-name data in the name fields any more.
+
+### `run_worker_first` is an allowlist, and `_headers` is its other half
+
+`assets.run_worker_first` in `wrangler.jsonc` **must stay a path array — never `true`.** `true` invokes `worker.js` for every request, including all ~25 subresources of one landing-page view (CSS, JS, fonts, client logos, favicons, the `/demo` iframe and its own assets). Each is a billable Worker invocation, and it blew the Workers Free plan's 100,000 requests/day limit, taking the whole site down with 429s. Requests served straight off the static-asset store are free and unlimited.
+
+Only paths that genuinely need Worker logic belong in the array (`/dl`, `/download`, `/subscribe`, `/waitlist`, `/writing`, `/writing/*`, `/auth/*`, `/webhooks/*`). **`/` must stay out** — `worker.js` does nothing for it but fall through to `env.ASSETS.fetch()`, and excluding it is the single biggest saving.
+
+The consequence, and the reason `true` was originally set: assets served this way skip `withSecurityHeaders()`. The same baseline (HSTS, CSP, `X-Frame-Options`, nosniff, referrer, permissions) is therefore restated in the **`_headers`** file at the repo root, which applies *only* to statically-served assets — Worker-generated responses still get theirs from `withSecurityHeaders()`. **Change one, change the other.** The `_headers` CSP mirrors the strict branch (no `'unsafe-inline'` in `script-src`), which holds because the static pages carry no inline `<script>` — a property `tests/responsive.test.js` enforces.
+
+Two things to know when adding a route:
+
+- If it needs Worker logic, add it to the array or it will silently serve a static asset (or a 404) instead. Allowlisted paths win even for navigation requests, despite `assets_navigation_prefers_asset_serving` being active at this `compatibility_date` — verified, but re-check with `curl -H 'Sec-Fetch-Mode: navigate'` if you add an HTML-returning route with no matching asset file (`/download` is the existing example).
+- Host-based logic can't live in the array — patterns are path-only. The `www.meridiona.com` → apex 301 in `worker.js` no longer fires for asset paths; a zone-level Cloudflare redirect rule handles it (it executes before Workers). `auth.meridiona.com/` consequently serves the marketing site rather than the Worker's 404, though `/auth/*` and `/webhooks/*` still route correctly.
 
 ### Fluid first, breakpoints where fluid can't reach
 
