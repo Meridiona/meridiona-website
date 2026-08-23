@@ -9,11 +9,36 @@
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
-    // Without this, Cloudflare serves static files (/, /writing/*, /privacy, ...)
-    // straight from the edge and skips fetch() entirely — which was silently
-    // dropping the security headers below on every real page (they only ever
-    // showed up on routes with no matching static file, like /dl and 404s).
-    "run_worker_first": true,
+    // An allowlist, NOT `true`. `true` invokes worker.js for every single
+    // request — all ~25 subresources of one landing-page view (CSS, JS, fonts,
+    // logos, favicons, the /demo iframe and its own assets) — and each one
+    // counts against the Workers free plan's 100k requests/day, which it blew
+    // past. Requests served straight off the static-asset store are free and
+    // unlimited, so only the paths that genuinely need Worker logic are listed:
+    //
+    //   /dl, /download            attribution + interstitial
+    //   /subscribe, /waitlist     Resend POST handlers
+    //   /writing, /writing/*      per-essay <title>/description/nav rewriting
+    //   /auth/*, /webhooks/*      auth.meridiona.com Google-SSO relay + Clerk
+    //
+    // "/" is deliberately absent: worker.js does nothing for it but fall
+    // through to env.ASSETS.fetch(), and it's the single biggest saving.
+    //
+    // Trade-off this buys: assets served this way skip withSecurityHeaders(),
+    // so the same baseline is restated in the `_headers` file at the repo root.
+    // Change one, change the other. The www.meridiona.com -> apex 301 in
+    // worker.js also stops firing (these patterns are path-only, not
+    // host-aware) and is handled by a Cloudflare Single Redirect rule instead.
+    "run_worker_first": [
+      "/dl",
+      "/download",
+      "/subscribe",
+      "/waitlist",
+      "/writing",
+      "/writing/*",
+      "/auth/*",
+      "/webhooks/*"
+    ],
     "not_found_handling": "404-page"
   },
   "compatibility_flags": [
