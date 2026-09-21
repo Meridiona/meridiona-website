@@ -165,6 +165,12 @@ async function handle(request, url, env, ctx) {
       return downloadPage(env, url);
     }
 
+    // The developer route keeps the pre-delivery-intelligence homepage alive
+    // as a stable, self-contained reference for the desktop work journal.
+    if (url.pathname === '/dev' || url.pathname === '/dev/') {
+      return env.ASSETS.fetch(new Request(`${url.origin}/dev/index.html`));
+    }
+
     const isWritingPage = url.pathname === '/writing' || url.pathname.startsWith('/writing/');
     if (isWritingPage && env.ASSETS) {
       try {

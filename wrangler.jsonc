@@ -34,6 +34,8 @@
       "/download",
       "/subscribe",
       "/waitlist",
+      "/dev",
+      "/dev/*",
       "/writing",
       "/writing/*",
       "/auth/*",
