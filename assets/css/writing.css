@@ -13,6 +13,7 @@
 /* ── shared page shell ─────────────────────────────────────────────────── */
 .site{--mut:var(--muted);--card:var(--panel);--chip:var(--panel-2)}
 .site>.site-nav{max-width:1160px;margin:0 auto;padding:0 24px}
+.connect-popover[hidden]{display:none!important}
 .writing-page{padding:140px 24px 0;min-height:100vh}
 .writing-page__inner{max-width:720px;margin:0 auto;width:100%}
 .writing-page__inner--wide{max-width:1160px}

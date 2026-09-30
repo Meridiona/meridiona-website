@@ -314,6 +314,7 @@ test('the Understanding Layer essay does not render retired chrome below its foo
   expect(understandingLayer.includes('id="dl-frame"')).toBeFalsy();
   expect(understandingLayer).toContain('<div id="modal-download" hidden></div>');
   expect(understandingLayer).toContain('<div id="modal-connect" class="connect-popover" hidden>');
+  expect(writingCss).toContain('.connect-popover[hidden]{display:none!important}');
 });
 test('writing pages have no inline <style>/<script> blocks (externalized)', () => {
   for (const p of allWritingPages) {
