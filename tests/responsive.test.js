@@ -316,6 +316,10 @@ test('the Understanding Layer essay does not render retired chrome below its foo
   expect(understandingLayer).toContain('<div id="modal-connect" class="connect-popover" hidden>');
   expect(writingCss).toContain('.connect-popover[hidden]{display:none!important}');
 });
+test('the Understanding Layer backlinks use the shared accent style', () => {
+  expect(understandingLayer.includes('style="color:var(--acc)"')).toBeFalsy();
+  expect(writingCss).toContain('.backlink>span{color:var(--acc)}');
+});
 test('writing pages have no inline <style>/<script> blocks (externalized)', () => {
   for (const p of allWritingPages) {
     expect(p.html).toContain('<link rel="stylesheet" href="/assets/css/site.css">');

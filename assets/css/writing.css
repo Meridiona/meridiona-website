@@ -93,6 +93,7 @@
   display:inline-flex;align-items:center;gap:8px;text-decoration:none;
   font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);
 }
+.backlink>span{color:var(--acc)}
 .backlink:hover{color:var(--acc)}
 
 .article-head{margin-top:28px;padding-bottom:36px;border-bottom:1px solid var(--line)}
