@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Understanding Layer · Meridian</title>
+<meta name="description" content="AI is making execution faster than teams can build understanding. The missing layer is the reasoning behind the software: what changed, why, and what it affects.">
+<link rel="canonical" href="https://meridiona.com/writing/understanding-layer">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Akarsh Hegde">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Meridian">
+<meta property="og:title" content="The Understanding Layer">
+<meta property="og:description" content="AI is making execution faster than teams can build understanding. The missing layer is the reasoning behind the software.">
+<meta property="og:url" content="https://meridiona.com/writing/understanding-layer">
+<meta property="og:image" content="https://meridiona.com/assets/images/writing/understanding-layer.png">
+<meta property="og:image:secure_url" content="https://meridiona.com/assets/images/writing/understanding-layer.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1672">
+<meta property="og:image:height" content="941">
+<meta property="og:image:alt" content="The Understanding Layer between agents, execution, and your system">
+<meta property="article:published_time" content="2026-09-30T00:00:00+05:30">
+<meta property="article:author" content="Akarsh Hegde">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Understanding Layer">
+<meta name="twitter:description" content="AI is making execution faster than teams can build understanding. The missing layer is the reasoning behind the software.">
+<meta name="twitter:image" content="https://meridiona.com/assets/images/writing/understanding-layer.png">
+<meta name="twitter:image:alt" content="The Understanding Layer between agents, execution, and your system">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/writing.css">
+<script src="/assets/js/analytics.js"></script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<div class="site" id="site">
+
+<!--NAV-->
+
+<main id="main-content" role="main" class="writing-page">
+  <div class="writing-page__inner">
+
+    <a href="/writing" class="backlink"><span style="color:var(--acc)">←</span> All writing</a>
+
+    <header class="article-head article-head--manifesto">
+      <div class="eyebrow">AI-native engineering · organizational understanding</div>
+      <h1 class="article-head__title">The Understanding Layer</h1>
+      <p class="article-head__dek">What does it mean to truly understand the software you're building?</p>
+      <div class="article-head__meta">
+        <span>September 30, 2026</span>
+        <span class="article-head__meta-dot">·</span>
+        <span>5 min read</span>
+        <span class="article-head__meta-dot">·</span>
+        <span>Akarsh Hegde</span>
+      </div>
+    </header>
+
+    <figure class="article-hero">
+      <img src="/assets/images/writing/understanding-layer.png" width="1672" height="941" alt="A layered diagram showing the Understanding Layer between your system, execution, and agents" fetchpriority="high">
+    </figure>
+
+    <article class="prose" data-article="manifesto">
+      <p class="prose__lede">It's not knowing what every line of code does.</p>
+      <p>It's being able to answer <strong>why.</strong></p>
+
+      <div class="why-stack" aria-label="Questions that reveal understanding">
+        <p>Why was this built this way?</p>
+        <p>Why did we choose this architecture?</p>
+        <p>Why was this decision made?</p>
+        <p>What alternatives did we consider?</p>
+        <p>What assumptions did we make?</p>
+      </div>
+
+      <p>And when something inevitably breaks, can we trace those decisions backwards, understand the reasoning, and figure out what went wrong?</p>
+
+      <p class="manifesto-line">That is understanding.</p>
+
+      <p>For most of software engineering, understanding was created naturally through execution. You investigated the problem, read the code, thought through the approach, made decisions, implemented it, broke things, debugged them, and eventually shipped.</p>
+
+      <p>You understood the system because you participated in building it.</p>
+
+      <h2><span class="sec-index">§ 01</span>AI coding agents are beginning to break that relationship.</h2>
+
+      <p>Agents increasingly explore the codebase, decide how to approach a problem, write the implementation, debug it, refactor it, and ship the result.</p>
+
+      <p>The output might be completely correct.</p>
+
+      <p>But the execution happened without all of the understanding necessarily passing through the team.</p>
+
+      <p>And as more execution and decision-making moves to agents, the gap grows.</p>
+
+      <blockquote class="thesis-callout">AI is making execution faster than teams can build understanding.</blockquote>
+
+      <h2><span class="sec-index">§ 02</span>This eventually becomes a speed problem.</h2>
+
+      <p>When you understand a system, you can change it confidently. You know what a change affects. You can debug failures by tracing decisions backwards. You understand why certain constraints exist. You can recognize when an old assumption is no longer true.</p>
+
+      <p>Without that understanding, every change requires rediscovery.</p>
+
+      <p>Addy Osmani calls one part of this <a href="https://addyo.substack.com/p/the-80-problem-in-agentic-coding" target="_blank" rel="noopener"><strong>comprehension debt</strong></a> — the growing gap between how much code exists and how much of it humans genuinely understand.</p>
+
+      <p>But I think the problem goes beyond understanding code.</p>
+
+      <p>A software team needs to understand the <strong>reasoning behind the system.</strong></p>
+
+      <div class="reasoning-list">
+        <p>What changed.</p>
+        <p>Why it changed.</p>
+        <p>What decisions were made.</p>
+        <p>What assumptions were introduced.</p>
+        <p>How one person's work affects another's.</p>
+        <p>And increasingly, what decisions their agents are making on their behalf.</p>
+      </div>
+
+      <h2><span class="sec-index">§ 03</span>The bottleneck moves.</h2>
+
+      <p>AI can generate more code.</p>
+      <p>More PRs can get merged.</p>
+      <p>More tasks can get completed.</p>
+
+      <p>But if the team's understanding doesn't increase at the same rate, eventually the bottleneck simply moves from <strong>execution to understanding.</strong></p>
+
+      <h2><span class="sec-index">§ 04</span>AI-native engineering teams need a new layer.</h2>
+
+      <p class="manifesto-line manifesto-line--large">The understanding layer.</p>
+
+      <p>A layer that continuously builds an understanding of the work happening across engineers and their agents — the decisions, reasoning, changes, context, and relationships between them — and gives that understanding back to the team when they need it.</p>
+
+      <p>Not more documentation for engineers to maintain.</p>
+      <p>Not more dashboards showing activity.</p>
+
+      <p class="manifesto-line">Understanding.</p>
+
+      <p>So when an engineer or their agent needs to know <em>why something is the way it is</em>, the organization can answer.</p>
+
+      <p>That's what we're building with <a href="https://meridiona.com"><strong>Meridian</strong></a>.</p>
+
+      <div class="closing-statement">
+        <span class="closing-statement__mark" aria-hidden="true">✦</span>
+        <p><strong>The understanding layer for engineering teams</strong> — keeping everyone and their agents on the same page.</p>
+      </div>
+
+    </article>
+
+    <section class="author-card" aria-label="About the author">
+      <img class="author-card__photo" src="/assets/images/writing/akarsh-hegde.png" width="297" height="320" alt="Akarsh Hegde" loading="lazy">
+      <div class="author-card__body">
+        <div class="author-card__label">Written by</div>
+        <h2 class="author-card__name">Akarsh Hegde</h2>
+        <p class="author-card__bio">Building Meridian, the understanding layer for engineering teams.</p>
+        <div class="author-card__links">
+          <a href="https://www.linkedin.com/in/hegde-akarsh/" target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="https://meridiona.com">Meridian ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="article-foot">
+      <div class="article-foot__tags">
+        <span class="article-foot__tag">AI</span>
+        <span class="article-foot__tag">engineering</span>
+        <span class="article-foot__tag">agents</span>
+        <span class="article-foot__tag">understanding</span>
+      </div>
+      <div class="article-foot__nav">
+        <a href="/writing" class="backlink"><span style="color:var(--acc)">←</span> All writing</a>
+        <a href="/writing/invisible-work" class="article-foot__next">
+          <span class="article-foot__next-label">Read next</span>
+          The timesheet wasn't lying. It was blind. →
+        </a>
+      </div>
+    </footer>
+
+  </div>
+
+  <div class="writing-page__inner writing-page__inner--wide">
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-bottom" style="border-top:none;margin-top:0;padding-top:0">
+        <span>© 2026 Meridian · MIT License</span>
+        <span>made for people who'd rather be coding</span>
+        <a href="/" class="footlink">← back home</a>
+      </div>
+    </footer>
+  </div>
+</main>
+
+<div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <p class="cookie-consent__text">We use privacy-friendly product analytics to see how people use this site. Nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
+  <div class="cookie-consent__actions">
+    <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
+    <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
+  </div>
+</div>
+
+<div id="modal-download" class="modal-overlay modal-overlay--center">
+  <div id="modal-download-card" class="modal-card modal-card--download">
+    <button id="btn-close-download" class="icon-close icon-close--download">✕</button>
+    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
+    <div id="modal-download-body"></div>
+  </div>
+</div>
+
+<div id="modal-connect" class="modal-overlay modal-overlay--top">
+  <div class="modal-card modal-card--connect">
+    <button id="btn-close-connect" class="icon-close icon-close--connect">✕</button>
+    <div class="connect-emoji">👋</div>
+    <h3 class="modal-title modal-title--connect">Let's be friends</h3>
+    <p class="modal-subtitle modal-subtitle--connect">We're a lot more fun over here than in a changelog. Pick your platform:</p>
+    <div class="connect-grid">
+      <a href="mailto:company@meridiona.com" class="connect-icon" title="Email" aria-label="Email"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="m4 6 8 7 8-7"/></svg></a>
+      <a href="https://www.linkedin.com/company/meridiona/" target="_blank" rel="noopener" class="connect-icon" title="LinkedIn" aria-label="LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.44-2.14 2.94v5.66H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0Z"/></svg></a>
+    </div>
+    <div class="connect-footnote">no spam, just diamonds in your feed ✦</div>
+  </div>
+</div>
+
+<iframe id="dl-frame" class="dl-frame" title="download" aria-hidden="true"></iframe>
+</div>
+
+<script src="/assets/js/site.js" defer></script>
+</body>
+</html>

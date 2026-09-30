@@ -11,6 +11,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://meridiona.com/writing/understanding-layer</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://meridiona.com/writing/velocity-visibility</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

@@ -282,6 +282,7 @@ const essayFiles = fs.readdirSync(WRITING_DIR).filter((f) => f.endsWith('.html')
 const essays = essayFiles.map((f) => ({ name: f, html: fs.readFileSync(path.join(WRITING_DIR, f), 'utf-8') }));
 const writingCss = fs.readFileSync(path.join(ROOT, 'assets/css/writing.css'), 'utf-8');
 const allWritingPages = [{ name: 'index.html', html: writingIndex }, ...essays];
+const understandingLayer = fs.readFileSync(path.join(WRITING_DIR, 'understanding-layer.html'), 'utf-8');
 
 test('writing index lists every essay file (and no dead links)', () => {
   for (const f of essayFiles) {
@@ -297,6 +298,15 @@ test('every writing page has viewport meta, single <title>, and single descripti
     expect((p.html.match(/<title>[^<]*<\/title>/g) || []).length).toBe(1);
     expect((p.html.match(/<meta name="description"[^>]*>/g) || []).length).toBe(1);
   }
+});
+test('the Understanding Layer essay has complete LinkedIn and X preview metadata', () => {
+  expect(understandingLayer).toContain('<meta property="og:type" content="article">');
+  expect(understandingLayer).toContain('<meta property="og:image" content="https://meridiona.com/assets/images/writing/understanding-layer.png">');
+  expect(understandingLayer).toContain('<meta property="og:image:width" content="1672">');
+  expect(understandingLayer).toContain('<meta property="og:image:height" content="941">');
+  expect(understandingLayer).toContain('<meta name="twitter:card" content="summary_large_image">');
+  expect(understandingLayer).toContain('<meta name="twitter:image" content="https://meridiona.com/assets/images/writing/understanding-layer.png">');
+  expect(fs.existsSync(path.join(ROOT, 'assets/images/writing/understanding-layer.png'))).toBeTruthy();
 });
 test('writing pages have no inline <style>/<script> blocks (externalized)', () => {
   for (const p of allWritingPages) {
