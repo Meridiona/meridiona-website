@@ -36,7 +36,7 @@
 <link rel="stylesheet" href="/assets/css/writing.css">
 <script src="/assets/js/analytics.js"></script>
 </head>
-<body>
+<body data-theme="dusk">
 <a href="#main-content" class="skip-link">Skip to content</a>
 <div class="site" id="site">
 
@@ -180,47 +180,16 @@
 
   <div class="writing-page__inner writing-page__inner--wide">
     <footer class="site-footer" role="contentinfo">
-      <div class="footer-bottom" style="border-top:none;margin-top:0;padding-top:0">
-        <span>© 2026 Meridian · MIT License</span>
-        <span>made for people who'd rather be coding</span>
-        <a href="/" class="footlink">← back home</a>
-      </div>
+      <a class="brand" href="/" aria-label="Meridian home"><img class="brand-mark" src="/assets/images/meridian-mark.png" alt="" width="25" height="25"><span>meridian</span></a>
+      <span>The understanding layer for engineering teams. <a href="https://github.com/Meridiona/meridian">GitHub repo</a> · <a href="/writing">Writing</a> · <a href="https://cal.com/adithya-harish">Book a call</a> · Open source</span>
+      <span>© 2026 Meridian</span>
     </footer>
   </div>
 </main>
-
-<div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <p class="cookie-consent__text">We use privacy-friendly product analytics to see how people use this site. Nothing is sold or shared with ad networks. <a href="/cookies">Cookie policy</a>.</p>
-  <div class="cookie-consent__actions">
-    <button id="cookie-decline" type="button" class="btn-ghost">Decline</button>
-    <button id="cookie-accept" type="button" class="btn-primary">Accept</button>
-  </div>
 </div>
 
-<div id="modal-download" class="modal-overlay modal-overlay--center">
-  <div id="modal-download-card" class="modal-card modal-card--download">
-    <button id="btn-close-download" class="icon-close icon-close--download">✕</button>
-    <img class="modal-mark" src="/assets/images/meridian-mark.png" alt="Meridian" width="40" height="40" loading="lazy">
-    <div id="modal-download-body"></div>
-  </div>
-</div>
-
-<div id="modal-connect" class="modal-overlay modal-overlay--top">
-  <div class="modal-card modal-card--connect">
-    <button id="btn-close-connect" class="icon-close icon-close--connect">✕</button>
-    <div class="connect-emoji">👋</div>
-    <h3 class="modal-title modal-title--connect">Let's be friends</h3>
-    <p class="modal-subtitle modal-subtitle--connect">We're a lot more fun over here than in a changelog. Pick your platform:</p>
-    <div class="connect-grid">
-      <a href="mailto:company@meridiona.com" class="connect-icon" title="Email" aria-label="Email"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="m4 6 8 7 8-7"/></svg></a>
-      <a href="https://www.linkedin.com/company/meridiona/" target="_blank" rel="noopener" class="connect-icon" title="LinkedIn" aria-label="LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.44-2.14 2.94v5.66H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0Z"/></svg></a>
-    </div>
-    <div class="connect-footnote">no spam, just diamonds in your feed ✦</div>
-  </div>
-</div>
-
-<iframe id="dl-frame" class="dl-frame" title="download" aria-hidden="true"></iframe>
-</div>
+<div id="modal-download" hidden></div>
+<div id="modal-connect" class="connect-popover" hidden><span>Connect with Meridian</span><a href="https://cal.com/adithya-harish" target="_blank" rel="noopener">Book a call ↗</a></div>
 
 <script src="/assets/js/site.js" defer></script>
 </body>

@@ -308,6 +308,13 @@ test('the Understanding Layer essay has complete LinkedIn and X preview metadata
   expect(understandingLayer).toContain('<meta name="twitter:image" content="https://meridiona.com/assets/images/writing/understanding-layer.png">');
   expect(fs.existsSync(path.join(ROOT, 'assets/images/writing/understanding-layer.png'))).toBeTruthy();
 });
+test('the Understanding Layer essay does not render retired chrome below its footer', () => {
+  expect(understandingLayer.includes('id="cookie-consent"')).toBeFalsy();
+  expect(understandingLayer.includes('class="modal-overlay')).toBeFalsy();
+  expect(understandingLayer.includes('id="dl-frame"')).toBeFalsy();
+  expect(understandingLayer).toContain('<div id="modal-download" hidden></div>');
+  expect(understandingLayer).toContain('<div id="modal-connect" class="connect-popover" hidden>');
+});
 test('writing pages have no inline <style>/<script> blocks (externalized)', () => {
   for (const p of allWritingPages) {
     expect(p.html).toContain('<link rel="stylesheet" href="/assets/css/site.css">');
