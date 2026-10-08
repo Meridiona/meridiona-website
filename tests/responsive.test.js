@@ -206,6 +206,7 @@ test('faq section is server-rendered (visible to non-JS crawlers) with JS-driven
 test('footer with product/open-source/company columns', () => {
   expect(index).toContain('Open source');
   expect(index).toContain('GitHub repo');
+  expect(index).toContain('© 2026 MERIDIONA LLP');
 });
 test('download modal with mac/windows/linux picker (rendered by site.js)', () => {
   expect(index).toContain('id="modal-download"');
